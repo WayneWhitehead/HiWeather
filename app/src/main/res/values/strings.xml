@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">HiWeather</string>
+    <string name="action_settings">Settings</string>
+    <string name="splash_screen_logo">splash Screen logo</string>
+    <string name="TempTemp">1°C</string>
+    <string name="low_14_c">Low 1°C</string>
+    <string name="high_28_c">High 1°C</string>
+    <string name="real_feel_22_c">Real Feel: 1°C</string>
+    <string name="cloud_cover">Cloud Cover</string>
+    <string name="humidity_80">Humidity: 1%</string>
+    <string name="dew_point_19_c">Dew Point: 1°C</string>
+    <string name="pressure_1014_mbar">Pressure: 1111 mBar</string>
+    <string name="uv_index_very_high_8">UV Index: None, 1</string>
+    <string name="visibility_10km">Visibility: 1Km</string>
+    <string name="_13">1</string>
+    <string name="winddirectionicon">WindDirectionIcon</string>
+    <string name="km_h">km/h</string>
+    <string name="from_east">From East</string>
+    <string name="_20_chance_of_rain">1% Chance of Rain</string>
+    <string name="_3_day_forecast">3 Day Forecast</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="sunset">Sunset</string>
+    <string name="title_activity_search">SearchActivity</string>
+    <string name="plus">+</string>
+    <string name="today_s_date">Today\'s Date</string>
+    <string name="search">Search</string>
+</resources>
