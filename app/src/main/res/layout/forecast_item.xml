@@ -11,6 +11,7 @@
         app:cardCornerRadius="30dp"
         android:layout_margin="10dp"
         android:backgroundTint="@color/blue"
+        android:theme="@style/Theme.MaterialComponents.DayNight"
         android:minHeight="150dp">
 
         <LinearLayout
@@ -40,10 +41,10 @@
                     android:layout_width="0dp"
                     android:layout_height="100dp"
                     android:layout_gravity="center"
-                    android:tint="@android:color/white"
                     android:contentDescription="@string/cloud_cover"
                     android:layout_marginStart="20dp"
-                    android:src="@drawable/weather"/>
+                    android:src="@drawable/weather"
+                    app:tint="@android:color/white" />
 
                 <LinearLayout
                     android:layout_weight="1"
