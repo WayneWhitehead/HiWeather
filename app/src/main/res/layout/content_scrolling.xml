@@ -12,7 +12,6 @@
     android:animateLayoutChanges="true"
     tools:showIn="@layout/activity_weather">
 
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -59,7 +58,7 @@
                 android:layout_marginHorizontal="10dp"
                 android:layout_marginTop="-30dp"
                 android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
-                android:minHeight="200dp">
+                android:minHeight="150dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -79,6 +78,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:textSize="60sp"
+                            android:text="--C"
                             android:textColor="@color/white" />
 
                         <LinearLayout
@@ -93,6 +93,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
                                 android:textSize="16sp"
+                                android:text="--C"
                                 android:textColor="@color/white" />
                             <TextView
                                 android:id="@+id/HighTemp"
@@ -100,6 +101,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center"
                                 android:textSize="16sp"
+                                android:text="--C"
                                 android:textColor="@color/white" />
                         </LinearLayout>
                     </LinearLayout>
@@ -110,17 +112,52 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textSize="16sp"
-                        android:textColor="@color/white" />
-
-                    <TextView
-                        android:id="@+id/Precipitation"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:textSize="16sp"
+                        android:text="Real Feel --C"
                         android:textColor="@color/white" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="30dp"
+                android:backgroundTint="#212121"
+                android:layout_marginTop="-15dp"
+                android:layout_gravity="center"
+                android:theme="@style/Theme.MaterialComponents.DayNight"
+                android:layout_marginHorizontal="10dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="@string/hourly_forecast"
+                    android:layout_marginHorizontal="75dp"
+                    android:paddingVertical="20dp"
+                    android:textColor="@android:color/white"
+                    android:layout_marginBottom="20dp"
+                    android:textSize="30sp" />
+
+                <ImageView
+                    android:id="@+id/display_forecast"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/down"
+                    app:tint="@color/white"
+                    android:contentDescription="@null" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_hourly_forecast"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:layout_marginTop="-30dp"
+                android:elevation="100dp"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                tools:listitem="@layout/hourly_forecast_item"/>
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -145,11 +182,20 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/Precipitation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:textSize="16sp"
+                            android:text="Precipitation --%"
+                            android:textColor="@color/white" />
+                        <TextView
                             android:id="@+id/Humidity"
                             android:layout_gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/white"
+                            android:text="Humidty --%"
                             android:textSize="16sp" />
                         <TextView
                             android:id="@+id/DewPoint"
@@ -157,6 +203,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/white"
+                            android:text="Dew Point --C"
                             android:textSize="16sp" />
                         <TextView
                             android:id="@+id/Pressure"
@@ -164,6 +211,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/white"
+                            android:text="Pressure ----mBar"
                             android:textSize="16sp" />
                         <TextView
                             android:id="@+id/UVIndex"
@@ -171,6 +219,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/white"
+                            android:text="UV Index -"
                             android:textSize="16sp" />
                         <TextView
                             android:id="@+id/Visibility"
@@ -178,6 +227,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textColor="@android:color/white"
+                            android:text="Visibility ----Km"
                             android:textSize="16sp" />
                     </LinearLayout>
                     <ImageView
@@ -214,6 +264,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="60sp"
+                        android:text="--"
                         android:textColor="@android:color/white" />
 
                     <LinearLayout
@@ -246,6 +297,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="22sp"
                         android:layout_marginHorizontal="5dp"
+                        android:text="--"
                         android:textColor="@android:color/white" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -278,6 +330,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="35sp"
+                            android:text="--:--"
                             android:textColor="@android:color/white" />
                         <TextView
                             android:layout_width="wrap_content"
@@ -299,6 +352,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="35sp"
+                            android:text="--:--"
                             android:textColor="@android:color/white" />
                         <TextView
                             android:layout_width="wrap_content"
@@ -323,7 +377,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="5 Day Forecast"
+                    android:text="@string/DaysForecast"
                     android:layout_marginHorizontal="75dp"
                     android:paddingVertical="20dp"
                     android:textColor="@android:color/white"
@@ -332,13 +386,14 @@
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
+                android:id="@+id/rv_daily_forecast"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:layout_marginTop="-50dp"
                 android:elevation="10dp"
-                tools:listitem="@layout/forecast_item"/>
+                android:orientation="horizontal"
+                tools:listitem="@layout/daily_forecast_item"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

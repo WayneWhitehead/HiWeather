@@ -1,39 +1,21 @@
 package com.hidesign.hiweather.network
 
+import OneCallResponse
 import androidx.lifecycle.ViewModel
-import com.hidesign.hiweather.models.LocationResult
-import com.hidesign.hiweather.models.WeatherCurrent
-import com.hidesign.hiweather.models.WeatherForecast
+import com.hidesign.hiweather.model.AirPollutionResponse
 import retrofit2.Response
 
 class WeatherViewModel : ViewModel() {
-    private val locationKey = "298833"
-    private val apiKey = "aDv8fsGqxTBQ0zmXKfqxLA53uuCnJK4Z"
-    private val alternateApiKey = "khcVaCtxEWMqANYYS6by6Rf5ZWiSda7p"
+    private val apikey = "8f1aae21fcdc65d7bee6147335281369"
 
-    suspend fun getLocation(search: String): Response<LocationResult?>? {
+    suspend fun getOneCallWeather(lat: Double, lon: Double): Response<OneCallResponse?>? {
         val apiClient = getApiClient()
-        return apiClient?.getLocation(apiKey, search)
+        return apiClient?.getOneCall(lat, lon, "minutely", apikey, "metric")
     }
 
-    suspend fun getCurrentConditions(): Response<WeatherCurrent?>? {
+    suspend fun getAirPollution(lat: Double, lon: Double): Response<AirPollutionResponse?>? {
         val apiClient = getApiClient()
-        return apiClient?.getCurrentConditions(locationKey)
-    }
-
-    suspend fun getCurrentConditions(location: String): Response<WeatherCurrent?>? {
-        val apiClient = getApiClient()
-        return apiClient?.getCurrentConditions(location)
-    }
-
-    suspend fun getFiveDayForecast(): Response<WeatherForecast?>? {
-        val apiClient = getApiClient()
-        return apiClient?.getFiveDayForecast(locationKey)
-    }
-
-    suspend fun getFiveDayForecast(location: String): Response<WeatherForecast?>? {
-        val apiClient = getApiClient()
-        return apiClient?.getFiveDayForecast(location)
+        return apiClient?.getAirPollution(lat, lon, apikey)
     }
 
     private fun getApiClient() = ApiClient().apiService

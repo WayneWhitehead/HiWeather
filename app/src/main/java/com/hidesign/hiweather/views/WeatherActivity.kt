@@ -1,32 +1,44 @@
 package com.hidesign.hiweather.views
 
+import OneCallResponse
+import android.app.SearchManager
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuItemCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.adapter.RecyclerViewAdapter
+import com.hidesign.hiweather.adapter.DailyRecylerAdapter
+import com.hidesign.hiweather.adapter.HourlyRecyclerAdapter
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
-import com.hidesign.hiweather.models.*
+import com.hidesign.hiweather.model.Daily
+import com.hidesign.hiweather.model.Hourly
+import com.hidesign.hiweather.model.WeatherIcon
+import com.hidesign.hiweather.model.Wind
 import com.hidesign.hiweather.network.WeatherViewModel
+import com.hidesign.hiweather.util.DateUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import java.math.RoundingMode
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.roundToInt
+import kotlin.streams.toList
 
 class WeatherActivity : AppCompatActivity(), CoroutineScope {
-    private lateinit var weatherCurrent: WeatherCurrentItem
-    private var location: LocationResultItem? = null
-    private var forecast = ArrayList<DailyForecast>()
-
+    private lateinit var weather: OneCallResponse
     private lateinit var weatherViewModel: WeatherViewModel
     private lateinit var binding: ActivityWeatherBinding
     private var uAddress = IntroActivity.uAddress
@@ -48,13 +60,14 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
         binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
 
-        val horizontalLayoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.content.recyclerView.layoutManager = horizontalLayoutManager
-
         val df = SimpleDateFormat("dd-MMMM-yyyy", Locale.getDefault())
         val formattedDate = df.format(Calendar.getInstance().time)
         binding.content.date.text = formattedDate
         weatherViewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
+
+        binding.content.displayForecast.setOnClickListener {
+            setVisibility(binding.content.rvHourlyForecast)
+        }
 
         binding.content.swipeLayout.setOnRefreshListener {
             fetchContent()
@@ -69,81 +82,53 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
     private fun fetchContent(){
         binding.progressIndicator.visibility = View.VISIBLE
         launch {
-            val locationResult = weatherViewModel.getLocation(uAddress.locality)
-            onLocationResult(locationResult)
+            val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress.latitude, uAddress.longitude)
+            onWeatherSuccess(oneCallResponse)
 
-            if (location !=null) {
-                val currentResult = weatherViewModel.getCurrentConditions(location!!.key)
-                val forecastResult = weatherViewModel.getFiveDayForecast(location!!.key)
-                onCurrentResult(currentResult)
-                onForecastResult(forecastResult)
-            } else {
-                val currentResult = weatherViewModel.getCurrentConditions()
-                val forecastResult = weatherViewModel.getFiveDayForecast()
-                onCurrentResult(currentResult)
-                onForecastResult(forecastResult)
-            }
             binding.progressIndicator.visibility = View.GONE
             binding.content.swipeLayout.isRefreshing = false
         }
     }
 
-    private fun onLocationResult(result: Response<LocationResult?>?) {
+    private fun onWeatherSuccess(result: Response<OneCallResponse?>?) {
         if (result?.isSuccessful!!) {
-            location = result.body()!![0]
-        } else {
-            displayErrorDialog(result.code(), result.message())
-            return
-        }
-    }
-
-    private fun onCurrentResult(result: Response<WeatherCurrent?>?) {
-        if (result?.isSuccessful!!) {
-            weatherCurrent = result.body()!![0]
+            weather = result.body()!!
         } else {
             displayErrorDialog(result.code(), result.message())
             return
         }
 
-        binding.content.CurrentTemp.text = MessageFormat.format("{0}°C", weatherCurrent.apparentTemperature.metric.value.toString())
-        binding.content.HighTemp.text = MessageFormat.format("High {0}°C", weatherCurrent.temperatureSummary.past24HourRange.maximum.metric.value.toString())
-        binding.content.LowTemp.text = MessageFormat.format("Low {0}°C", weatherCurrent.temperatureSummary.past24HourRange.minimum.metric.value.toString())
-        binding.content.RealFeelTemp.text = MessageFormat.format("Real Feel {0}°C", weatherCurrent.apparentTemperature.metric.value.toString())
-        binding.content.Precipitation.text = MessageFormat.format("{0}% Chance of Rain", weatherCurrent.precipitationSummary.precipitation.metric.value.toString())
-        binding.content.Humidity.text = MessageFormat.format("Humidity - {0}%", weatherCurrent.relativeHumidity)
-        binding.content.DewPoint.text = MessageFormat.format("Dew Point - {0}°C", weatherCurrent.dewPoint.metric.value.toString())
-        binding.content.Pressure.text = MessageFormat.format("Pressure - {0}mBar", weatherCurrent.pressure.metric.value.toString())
-        binding.content.UVIndex.text = MessageFormat.format("UV Index - {0}, {1}", weatherCurrent.uVIndexText, weatherCurrent.uVIndex)
-        binding.content.Visibility.text = MessageFormat.format("Visibility - {0}Km", weatherCurrent.visibility.metric.value.toString())
-        binding.content.WindSpeed.text = weatherCurrent.wind.speed.metric.value.toString()
-        binding.content.WindDirectionDegrees.rotation = (weatherCurrent.wind.direction.degrees - 270).toFloat()
-        binding.content.WindDirectionText.text = MessageFormat.format("From {0}", weatherCurrent.wind.direction.english)
-        when (weatherCurrent.weatherIcon) {
-            in 1..5 -> {
-                binding.content.skiesImage.setImageResource(R.drawable.sun)
-            }
-            in 6..11 -> {
-                binding.content.skiesImage.setImageResource(R.drawable.overcast)
-            }
-            in 12..18 -> {
-                binding.content.skiesImage.setImageResource(R.drawable.rain)
-            }
-        }
+        binding.content.CurrentTemp.text = MessageFormat.format("{0}°C", weather.current.temp.roundToInt())
+        binding.content.HighTemp.text = MessageFormat.format("High {0}°C", weather.daily[0].temp.max.roundToInt())
+        binding.content.LowTemp.text = MessageFormat.format("Low {0}°C", weather.daily[0].temp.min.roundToInt())
+        binding.content.RealFeelTemp.text = MessageFormat.format("Real Feel {0}°C", weather.current.feelsLike.roundToInt())
+        binding.content.Precipitation.text = MessageFormat.format("{0}% Chance of Rain", weather.daily[0].pop.toBigDecimal())
+        binding.content.Humidity.text = MessageFormat.format("Humidity - {0}%", weather.current.humidity)
+        binding.content.DewPoint.text = MessageFormat.format("Dew Point - {0}°C", weather.current.dewPoint.roundToInt())
+        binding.content.Pressure.text = MessageFormat.format("Pressure - {0}mBar", weather.current.pressure)
+        binding.content.UVIndex.text = MessageFormat.format("UV Index - {0}", weather.current.uvi.roundToInt())
+        binding.content.Visibility.text = MessageFormat.format("Visibility - {0}Km", weather.current.visibility)
+        binding.content.WindSpeed.text = String.format(weather.current.windSpeed.toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString())
+        binding.content.WindDirectionDegrees.rotation = (weather.current.windDeg - 270).toFloat()
+        binding.content.WindDirectionText.text = Wind.getWindDegreeText(weather.current.windDeg)
+        binding.content.skiesImage.setImageResource(WeatherIcon.getIcon(weather.current.weather[0].id))
+
+        val hourlyForecast: ArrayList<Hourly> = ArrayList()
+        hourlyForecast.addAll(result.body()!!.hourly.stream().limit(10).toList())
+        val hourlyAdapter = HourlyRecyclerAdapter(this, hourlyForecast)
+        binding.content.rvHourlyForecast.adapter = hourlyAdapter
+
+        val dailyForecast: ArrayList<Daily> = ArrayList()
+        dailyForecast.addAll(result.body()!!.daily)
+
+        binding.content.Sunrise.text = DateUtils.getDateTime("HH:mm", (result.body()!!.daily[0].sunrise).toLong())
+        binding.content.Sunset.text = DateUtils.getDateTime("HH:mm", (result.body()!!.daily[0].sunset).toLong())
+
+
+        val dailyAdapter = DailyRecylerAdapter(this, dailyForecast)
+        binding.content.rvDailyForecast.adapter = dailyAdapter
     }
 
-    private fun onForecastResult(result: Response<WeatherForecast?>?) {
-        forecast.clear()
-        if (result?.isSuccessful!!) {
-            forecast.addAll(result.body()!!.dailyForecasts)
-            binding.content.Sunrise.text = result.body()!!.dailyForecasts[0].sun.rise.substring(0, 5)
-            binding.content.Sunset.text = result.body()!!.dailyForecasts[0].sun.set.substring(0, 5)
-            val adapter = RecyclerViewAdapter(this, forecast)
-            binding.content.recyclerView.adapter = adapter
-        } else {
-            displayErrorDialog(result.code(), result.message())
-            return
-        }
-    }
 
     private fun displayErrorDialog(code: Int, message: String){
         MaterialAlertDialogBuilder(this, R.style.Theme_MaterialComponents_Dialog_Alert)
@@ -153,6 +138,14 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
                 return@setNeutralButton
             }
             .show()
+    }
+
+    private fun setVisibility(item: RecyclerView) {
+        if (item.isVisible) {
+            item.visibility = View.GONE
+        } else {
+            item.visibility = View.VISIBLE
+        }
     }
 
 }

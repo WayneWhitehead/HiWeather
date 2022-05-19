@@ -11,7 +11,7 @@ class ApiClient {
 
     var apiService: WeatherApi? = null
     private var retrofit: Retrofit? = null
-    private val baseUrl = "http://dataservice.accuweather.com/"
+    private val baseUrl = "https://api.openweathermap.org/data/2.5/"
 
     init {
         val httpClient = OkHttpClient.Builder().apply {
