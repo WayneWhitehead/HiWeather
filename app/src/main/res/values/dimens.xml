@@ -2,4 +2,8 @@
 	<dimen name="app_bar_height">180dp</dimen>
 	<dimen name="fab_margin">16dp</dimen>
 	<dimen name="text_margin">16dp</dimen>
+	<dimen name="activityPadding">16dp</dimen>
+	<dimen name="placeholderImage">90dp</dimen>
+	<dimen name="placeholderTextHeight">16dp</dimen>
+	<dimen name="padding_10">15dp</dimen>
 </resources>
