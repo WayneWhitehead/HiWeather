@@ -30,7 +30,7 @@ class DailyRecylerAdapter internal constructor(context: Context?, weathers: Arra
         holder.date.text = DateUtils.getDayOfWeekText(DateUtils.getDateTime("u", weatherArrayList[position].dt.toLong()))
         holder.high.text = MessageFormat.format("High {0}°C", weatherArrayList[position].temp.max.roundToInt())
         holder.low.text = MessageFormat.format("Low {0}°C", weatherArrayList[position].temp.min.roundToInt())
-        holder.precipitation.text = MessageFormat.format("{0}% Chance of Rain",  weatherArrayList[position].pop)
+        holder.precipitation.text = MessageFormat.format("{0}% Chance of Rain",  weatherArrayList[position].pop * 100)
         holder.icon.setImageResource(WeatherIcon.getIcon(weatherArrayList[position].weather[0].id))
     }
 

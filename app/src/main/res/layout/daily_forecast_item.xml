@@ -27,8 +27,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|top"
                 android:textSize="18sp"
+                android:textStyle="bold"
                 android:textColor="@android:color/white"
-                android:text="Today"/>
+                android:text="@string/today"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -42,7 +43,6 @@
                     android:layout_height="100dp"
                     android:layout_gravity="center"
                     android:contentDescription="@string/cloud_cover"
-                    android:layout_marginStart="20dp"
                     android:src="@drawable/weather"
                     app:tint="@android:color/white" />
 
@@ -58,26 +58,26 @@
                         android:id="@+id/LowTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left"
+                        android:layout_gravity="start"
                         android:textSize="15sp"
-                        android:text="22"
+                        android:text="@null"
                         android:textColor="@android:color/white" />
                     <TextView
                         android:id="@+id/HighTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left"
+                        android:layout_gravity="start"
                         android:textSize="15sp"
-                        android:text="20"
+                        android:text="@null"
                         android:textColor="@android:color/white"/>
                     <TextView
                         android:id="@+id/Precipitation"
                         android:layout_width="wrap_content"
                         android:maxWidth="150dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="left"
+                        android:layout_gravity="start"
                         android:textSize="15sp"
-                        android:text="10%"
+                        android:text="@null"
                         android:textColor="@android:color/white" />
                 </LinearLayout>
             </LinearLayout>
