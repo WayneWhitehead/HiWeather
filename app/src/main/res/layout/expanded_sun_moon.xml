@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:orientation="vertical"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content">
+
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/sunMoonCard"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		app:cardCornerRadius="0dp"
+		android:theme="@style/Theme.MaterialComponents.DayNight">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:orientation="vertical" >
+
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:background="@drawable/gradient"
+				android:paddingVertical="10dp"
+				android:orientation="vertical">
+				<LinearLayout
+					android:id="@+id/sunCard"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center"
+					android:theme="@style/Theme.MaterialComponents.DayNight"
+					android:orientation="horizontal" >
+
+					<LinearLayout
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginHorizontal="20dp"
+						android:gravity="center"
+						android:orientation="vertical">
+
+						<TextView
+							android:id="@+id/Sunrise"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textSize="35sp"
+							android:text="@string/empty_time"
+							android:textColor="@android:color/white" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@android:color/white"
+							android:textSize="18sp"
+							android:text="@string/sunrise"/>
+
+					</LinearLayout>
+					<LinearLayout
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginHorizontal="20dp"
+						android:gravity="center"
+						android:orientation="vertical">
+
+						<TextView
+							android:id="@+id/Sunset"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textSize="35sp"
+							android:text="@string/empty_time"
+							android:textColor="@android:color/white" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@android:color/white"
+							android:textSize="18sp"
+							android:text="@string/sunset"/>
+
+					</LinearLayout>
+				</LinearLayout>
+
+				<TextView
+					android:id="@+id/hoursOfSunlight"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center"
+					android:textColor="@color/white"
+					android:textStyle="bold"
+					android:textSize="28sp"
+					android:text="@null"/>
+
+				<TextView
+					android:id="@+id/description"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:paddingHorizontal="15dp"
+					android:gravity="center"
+					android:textColor="@color/white"
+					android:textSize="18sp"
+					android:text="@null"/>
+				<TextView
+					android:id="@+id/UVIndex"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:paddingHorizontal="15dp"
+					android:gravity="center"
+					android:textColor="@color/white"
+					android:textSize="16sp"
+					android:text="@null"/>
+
+			</LinearLayout>
+			<LinearLayout
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:paddingTop="10dp"
+				android:paddingBottom="30dp"
+				android:background="@drawable/gradient_moon"
+				android:orientation="vertical">
+				<LinearLayout
+					android:id="@+id/moonCard"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center"
+					android:theme="@style/Theme.MaterialComponents.DayNight"
+					android:orientation="horizontal" >
+
+					<LinearLayout
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginHorizontal="20dp"
+						android:gravity="center"
+						android:orientation="vertical">
+
+						<TextView
+							android:id="@+id/Moonrise"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textSize="35sp"
+							android:text="@string/empty_time"
+							android:textColor="@android:color/white" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@android:color/white"
+							android:textSize="18sp"
+							android:text="@string/moonrise"/>
+
+					</LinearLayout>
+					<ImageView
+						android:id="@+id/moon_phase"
+						android:layout_width="50dp"
+						android:layout_height="50dp"
+						android:src="@drawable/full_moon"
+						app:tint="@color/white"
+						android:contentDescription="@null" />
+					<LinearLayout
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_marginHorizontal="20dp"
+						android:gravity="center"
+						android:orientation="vertical">
+
+						<TextView
+							android:id="@+id/Moonset"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textSize="35sp"
+							android:text="@string/empty_time"
+							android:textColor="@android:color/white" />
+						<TextView
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:textColor="@android:color/white"
+							android:textSize="18sp"
+							android:text="@string/moonset"/>
+
+					</LinearLayout>
+				</LinearLayout>
+
+				<TextView
+					android:id="@+id/hoursOfMoonlight"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:gravity="center"
+					android:textColor="@color/white"
+					android:textStyle="bold"
+					android:textSize="28sp"
+					android:text="@null"/>
+			</LinearLayout>
+		</LinearLayout>
+
+	</com.google.android.material.card.MaterialCardView>
+</RelativeLayout>

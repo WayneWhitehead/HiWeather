@@ -15,6 +15,7 @@
         android:minHeight="150dp">
 
         <LinearLayout
+            android:id="@+id/card"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -58,7 +59,7 @@
                         android:id="@+id/LowTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="start"
+                        android:layout_gravity="center"
                         android:textSize="15sp"
                         android:text="@null"
                         android:textColor="@android:color/white" />
@@ -66,17 +67,26 @@
                         android:id="@+id/HighTemp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="start"
+                        android:layout_gravity="center"
                         android:textSize="15sp"
                         android:text="@null"
                         android:textColor="@android:color/white"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:maxWidth="150dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:textSize="15sp"
+                        android:text="@string/precipitation"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white" />
                     <TextView
                         android:id="@+id/Precipitation"
                         android:layout_width="wrap_content"
                         android:maxWidth="150dp"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="start"
-                        android:textSize="15sp"
+                        android:layout_gravity="center"
+                        android:textSize="18sp"
                         android:text="@null"
                         android:textColor="@android:color/white" />
                 </LinearLayout>

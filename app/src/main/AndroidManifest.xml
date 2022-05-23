@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:dist="http://schemas.android.com/apk/distribution"
-	xmlns:tools="http://schemas.android.com/tools"
 	package="com.hidesign.hiweather">
 
 	<dist:module dist:instant="true" />
@@ -17,13 +16,17 @@
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme"
-		tools:ignore="GoogleAppIndexingWarning">
+		android:hardwareAccelerated="true">
+		<meta-data
+			android:name="com.google.android.gms.ads.APPLICATION_ID"
+			android:value="ca-app-pub-1988108128017627~5989097155"/>
 		<activity
 			android:name=".views.WeatherActivity"
 			android:exported="false"
 			android:label="@string/title_activity_weather" />
 		<activity
-			android:name=".views.IntroActivity"
+			android:name=".views.SplashScreenActivity"
+			android:theme="@style/SplashTheme"
 			android:exported="true">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />

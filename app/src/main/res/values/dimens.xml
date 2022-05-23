@@ -3,7 +3,9 @@
 	<dimen name="fab_margin">16dp</dimen>
 	<dimen name="text_margin">16dp</dimen>
 	<dimen name="activityPadding">16dp</dimen>
-	<dimen name="placeholderImage">90dp</dimen>
+	<dimen name="placeholderImage">120dp</dimen>
 	<dimen name="placeholderTextHeight">16dp</dimen>
 	<dimen name="padding_10">15dp</dimen>
+	<dimen name="list_item_spacing">16dp</dimen>
+	<dimen name="list_item_spacing_half">8dp</dimen>
 </resources>

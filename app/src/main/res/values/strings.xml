@@ -28,14 +28,79 @@
 	<string name="DaysForecast">8 Day Forecast</string>
 	<string name="hourly_forecast">Hourly Forecast</string>
 
-	<string name="airQualityInfo" formatted="true">
-		Concentration of CO (Carbon monoxide), μg/m3 \n
-		Concentration of NO (Nitrogen monoxide), μg/m3 \n
-		Concentration of NO2 (Nitrogen dioxide), μg/m3 \n
-		Concentration of O3 (Ozone), μg/m3 \n
-		Concentration of SO2 (Sulphur dioxide), μg/m3 \n
-		Concentration of PM2.5 (Fine particles matter), μg/m3 \n
-		Concentration of PM10 (Coarse particulate matter), μg/m3 \n
-		Concentration of NH3 (Ammonia), μg/m3 \n
+	<string name="airQualityInfo">\n
+		1 Good \n
+		2 Fair \n
+		3 Moderate \n
+		4 Poor \n
+		5 Very Poor
 	</string>
+	<string name="airCo">\n
+		9000-100000µg/m³ for no more than 8 hours \n
+		25000-35000µg/m³ for no more than 1 hour \n
+		90000-100000µg/m³ for no more than 15 minutes \n
+	</string>
+	<string name="airSoTwo">\n
+		24-Hour - 1400 µg/m³ - Not to be exceeded more than once per year \n
+		Annual - 300 µg/m³ - Annual arithmetic average
+	</string>
+	<string name="airPMTwoFive">\n
+		0-12 µg/m³ - Good \n
+		12-35 µg/m³ - Moderate \n
+		35-55 µg/m³ -Unhealthy for Sensitive Groups \n
+		55-150 µg/m³ - Unhealthy \n
+		150-250 µg/m³ - Very Unhealthy \n
+		250-500 µg/m³ - Hazardous \n
+	</string>
+	<string name="airPMTen">\n
+		0-54 µg/m³ - Good \n
+		55-154 µg/m³ - Moderate \n
+		155-254 µg/m³ - Unhealthy for Sensitive Groups \n
+		255-354 µg/m³ - Unhealthy \n
+		355-424 µg/m³ - Very unhealthy \n
+		425-504 µg/m³ - Hazardous
+	</string>
+	<string name="airNHThree">\n
+		25 µg/m³ - Detectable by smell \n
+		30 µg/m³ - Uncomfortable, breathing support required \n
+		50 µg/m³ - maximum exposure limit \n
+		100 µg/m³ - Irritated eyes, throat and mucous membranes. Mild eye, nose, and throat irritation, may develop tolerance in 1-2 weeks with no adverse effects \n
+		140 µg/m³ - Moderate eye irritation, no long-term effect in exposures of less than 2 hours \n
+		400 µg/m³ - Moderate throat irritation. Damage of mucous membranes with more than one hour exposure \n
+		500 µg/m³ - Immediate danger to life limit \n
+	</string>
+	<string name="airNOTwo">\n
+		0-50 µg/m³ - Good \n
+		51-100 µg/m³ - Moderate \n
+		101-150 µg/m³ - Unhealthy for Sensitive Groups \n
+		151-200 µg/m³ - Unhealthy \n
+		201-300 µg/m³ -Very Unhealthy \n
+	</string>
+	<string name="airOThree">\n
+		0-50 µg/m³ - Good \n
+		51-100 µg/m³ - Moderate \n
+		101-150 µg/m³ - Unhealthy for Sensitive Groups \n
+		151-200 µg/m³ - Unhealthy \n
+		201-300 µg/m³ -Very Unhealthy \n
+		301-500 µg/m³ -Hazardous \n
+	</string>
+
+	<string name="precipitation">Precipitation</string>
+	<string name="today">Today</string>
+	<string name="hello_blank_fragment">Hello blank fragment</string>
+	<string name="visibility_0_m">Visibility {0}m</string>
+	<string name="uv_index_0">UV Index {0}</string>
+	<string name="pressure_0_mbar">Pressure {0}mBar</string>
+	<string name="dew_point_0_c">Dew Point {0}°C</string>
+	<string name="humidity_0">Humidity {0}%</string>
+	<string name="precipitation_0">Precipitation {0}%</string>
+	<string name="real_feel_0_c">Real Feel {0}°C</string>
+	<string name="_0_c">{0}°C</string>
+	<string name="low_0_c">Low {0}°C</string>
+	<string name="high_0_c">High {0}°C</string>
+	<string name="moonrise">Moonrise</string>
+	<string name="moonset">Moonset</string>
+	<string name="_0">{0}</string>
+	<string name="empty_time">--:--</string>
+	<string name="air_quality">Air Quality</string>
 </resources>

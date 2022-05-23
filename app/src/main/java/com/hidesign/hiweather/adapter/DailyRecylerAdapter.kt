@@ -12,34 +12,30 @@ import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.WeatherIcon
 import com.hidesign.hiweather.util.DateUtils
 import java.text.MessageFormat
-import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
 class DailyRecylerAdapter internal constructor(context: Context?, weathers: ArrayList<Daily>) : RecyclerView.Adapter<DailyRecylerAdapter.ViewHolder>() {
     private val weatherArrayList: ArrayList<Daily>
     private val mInflater: LayoutInflater
+    var onItemClick: ((Daily) -> Unit)? = null
 
-    // inflates the row layout from xml when needed
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = mInflater.inflate(R.layout.daily_forecast_item, parent, false)
         return ViewHolder(view)
     }
 
-    // binds the data to the view and textview in each row
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.date.text = DateUtils.getDayOfWeekText(DateUtils.getDateTime("u", weatherArrayList[position].dt.toLong()))
         holder.high.text = MessageFormat.format("High {0}°C", weatherArrayList[position].temp.max.roundToInt())
         holder.low.text = MessageFormat.format("Low {0}°C", weatherArrayList[position].temp.min.roundToInt())
-        holder.precipitation.text = MessageFormat.format("{0}% Chance of Rain",  weatherArrayList[position].pop * 100)
+        holder.precipitation.text = MessageFormat.format("{0}%",  weatherArrayList[position].pop * 100)
         holder.icon.setImageResource(WeatherIcon.getIcon(weatherArrayList[position].weather[0].id))
     }
 
-    // total number of rows
     override fun getItemCount(): Int {
         return weatherArrayList.size
     }
 
-    // stores and recycles views as they are scrolled off screen
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var date: TextView
         var high: TextView
@@ -48,6 +44,9 @@ class DailyRecylerAdapter internal constructor(context: Context?, weathers: Arra
         var icon: ImageView
 
         init {
+            itemView.setOnClickListener {
+                onItemClick?.invoke(weatherArrayList[bindingAdapterPosition])
+            }
             date = itemView.findViewById(R.id.date)
             high = itemView.findViewById(R.id.HighTemp)
             low = itemView.findViewById(R.id.LowTemp)
@@ -56,7 +55,6 @@ class DailyRecylerAdapter internal constructor(context: Context?, weathers: Arra
         }
     }
 
-    // data is passed into the constructor
     init {
         mInflater = LayoutInflater.from(context)
         weatherArrayList = weathers

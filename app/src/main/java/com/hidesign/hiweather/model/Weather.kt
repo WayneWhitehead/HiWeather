@@ -65,3 +65,41 @@ object WeatherIcon {
         }
     }
 }
+
+object MoonIcon {
+    fun getIcon(id: Double): Int{
+        return when (id) {
+            in 0.0..0.1 -> {
+                R.drawable.new_moon
+            }
+            in 0.11..0.19 -> {
+                R.drawable.waning_moon
+            }
+            in 0.2..0.3 -> {
+                R.drawable.last_quarter_moon
+            }
+            in 0.31..0.39 -> {
+                R.drawable.waning_moon_2
+            }
+            in 0.4..0.6 -> {
+                R.drawable.full_moon
+            }
+            in 0.61..0.69 -> {
+                R.drawable.waxing_moon_2
+            }
+            in 0.7..0.8 -> {
+                R.drawable.first_quarter_moon
+            }
+            in 0.81..0.89 -> {
+                R.drawable.waxing_moon
+            }
+            in 0.9..1.0 -> {
+                R.drawable.new_moon
+            }
+            else -> {
+
+                R.drawable.full_moon
+            }
+        }
+    }
+}

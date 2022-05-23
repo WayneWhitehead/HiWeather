@@ -1,4 +1,5 @@
 import com.google.gson.annotations.SerializedName
+import com.hidesign.hiweather.model.Alerts
 import com.hidesign.hiweather.model.Current
 import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.Hourly
@@ -17,5 +18,7 @@ data class OneCallResponse(
     @SerializedName("timezone")
     var timezone: String,
     @SerializedName("timezone_offset")
-    var timezoneOffset: Int
+    var timezoneOffset: Int,
+    @SerializedName("alerts")
+    var alerts: List<Alerts>
 )

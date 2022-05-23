@@ -11,15 +11,13 @@ import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.model.WeatherIcon
 import com.hidesign.hiweather.util.DateUtils
-import org.w3c.dom.Text
 import java.text.MessageFormat
-import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
 class HourlyRecyclerAdapter internal constructor(context: Context?, weathers: ArrayList<Hourly>) : RecyclerView.Adapter<HourlyRecyclerAdapter.ViewHolder>() {
     private val weatherArrayList: ArrayList<Hourly>
     private val mInflater: LayoutInflater
-
+    var onItemClick: ((hourly: Hourly, v: View) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = mInflater.inflate(R.layout.hourly_forecast_item, parent, false)
         return ViewHolder(view)
@@ -28,7 +26,7 @@ class HourlyRecyclerAdapter internal constructor(context: Context?, weathers: Ar
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.date.text = DateUtils.getDateTime("HH:00", weatherArrayList[position].dt.toLong())
         holder.temp.text = MessageFormat.format("{0}°C", weatherArrayList[position].temp.roundToInt())
-        holder.precipitation.text = MessageFormat.format("{0}%",  weatherArrayList[position].pop * 100)
+        holder.precipitation.text = MessageFormat.format("{0}%",  (weatherArrayList[position].pop * 100))
         holder.icon.setImageResource(WeatherIcon.getIcon(weatherArrayList[position].weather[0].id))
     }
 
@@ -43,8 +41,11 @@ class HourlyRecyclerAdapter internal constructor(context: Context?, weathers: Ar
         var icon: ImageView
 
         init {
+            itemView.setOnClickListener {
+                onItemClick?.invoke(weatherArrayList[bindingAdapterPosition], itemView)
+            }
             date = itemView.findViewById(R.id.date)
-            temp = itemView.findViewById(R.id.temp)
+            temp = itemView.findViewById(R.id.CurrentTemp)
             precipitation = itemView.findViewById(R.id.Precipitation)
             icon = itemView.findViewById(R.id.skiesImage)
         }

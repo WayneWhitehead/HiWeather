@@ -9,6 +9,13 @@
 	android:animateLayoutChanges="true"
 	tools:context=".views.WeatherActivity">
 
+	<FrameLayout
+		android:id="@+id/frame_container"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:elevation="1000dp"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
 	<com.google.android.material.appbar.AppBarLayout
 		android:id="@+id/app_bar"
 		android:layout_width="match_parent"
@@ -34,14 +41,26 @@
 				app:layout_collapseMode="pin">
 			</com.google.android.material.appbar.MaterialToolbar>
 
-			<com.google.android.material.textfield.TextInputEditText
-				android:id="@+id/city_input"
+			<com.google.android.gms.ads.nativead.NativeAdView
+				android:id="@+id/nativeAd"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="top"/>
+
+			<androidx.cardview.widget.CardView
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_gravity="bottom"
-				app:layout_collapseMode="pin"
-				android:fitsSystemWindows="true"
-				android:textColor="@color/white" />
+				android:backgroundTint="@color/backgroundDark"
+				app:layout_collapseMode="pin">
+				<androidx.fragment.app.FragmentContainerView
+					android:id="@+id/autocomplete_fragment1"
+					android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+					android:layout_width="match_parent"
+					android:layout_gravity="bottom"
+					android:layout_height="wrap_content"/>
+
+			</androidx.cardview.widget.CardView>
 
 		</com.google.android.material.appbar.CollapsingToolbarLayout>
 	</com.google.android.material.appbar.AppBarLayout>

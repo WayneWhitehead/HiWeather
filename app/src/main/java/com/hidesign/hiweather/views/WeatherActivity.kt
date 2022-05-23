@@ -1,23 +1,26 @@
 package com.hidesign.hiweather.views
 
 import OneCallResponse
-import android.app.SearchManager
+import android.location.Address
 import android.os.Bundle
-import android.text.Html
-import android.text.Html.FROM_HTML_MODE_LEGACY
-import android.text.Spanned
 import android.transition.Slide
 import android.transition.TransitionManager
-import android.view.*
-import android.widget.SearchView
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.text.HtmlCompat
-import androidx.core.view.MenuItemCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.ads.*
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.adapter.DailyRecylerAdapter
 import com.hidesign.hiweather.adapter.HourlyRecyclerAdapter
@@ -25,6 +28,8 @@ import com.hidesign.hiweather.databinding.ActivityWeatherBinding
 import com.hidesign.hiweather.model.*
 import com.hidesign.hiweather.network.WeatherViewModel
 import com.hidesign.hiweather.util.DateUtils
+import com.hidesign.hiweather.util.DialogUtil.displayErrorDialog
+import com.hidesign.hiweather.util.DialogUtil.displayInfoDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,48 +41,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
-import kotlin.streams.toList
 
 class WeatherActivity : AppCompatActivity(), CoroutineScope {
     private lateinit var weather: OneCallResponse
     private lateinit var airPollution: AirPollutionResponse
     private lateinit var weatherViewModel: WeatherViewModel
     private lateinit var binding: ActivityWeatherBinding
-    private var uAddress = IntroActivity.uAddress
+    private var uAddress = SplashScreenActivity.uAddress
+    private lateinit var autocompleteSupportFragment1: AutocompleteSupportFragment
 
     private var job: Job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+    override val coroutineContext: CoroutineContext get() = Dispatchers.Main + job
 
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityWeatherBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        binding.cityInput.setText(uAddress.locality + "," + uAddress.countryCode)
-        binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
-        binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
-
-        val df = SimpleDateFormat("dd-MMMM-yyyy", Locale.getDefault())
-        val formattedDate = df.format(Calendar.getInstance().time)
-        binding.content.date.text = formattedDate
-        weatherViewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
-
-        binding.content.displayForecast.setOnClickListener {
-            displayForecast(binding.content.rvHourlyForecast)
-        }
-
-        binding.content.airResponseCard.setOnClickListener {
-            displayInfoDialog(getString(R.string.airQualityInfo))
-        }
-
-        binding.content.swipeLayout.setOnRefreshListener {
-            fetchContent()
-        }
     }
 
     override fun onResume() {
@@ -85,18 +63,103 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         fetchContent()
     }
 
-    private fun fetchContent(){
-        binding.content.airCard.slideVisibility()
-        binding.content.airShimmer.slideVisibility()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityWeatherBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
+        binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
 
-        changeVisibility()
+        val df = SimpleDateFormat("dd MMMM", Locale.getDefault())
+        val formattedDate = df.format(Calendar.getInstance().time)
+        binding.content.date.text = formattedDate
+        weatherViewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
+
+        binding.content.hourlyForecastCard.setOnClickListener {
+            binding.content.rvHourlyForecast.slideVisibility()
+            binding.content.displayForecast.rotation = binding.content.displayForecast.rotation + 180F
+        }
+        binding.content.dailyForecastCard.setOnClickListener {
+            binding.content.rvDailyForecast.slideVisibility(600)
+            binding.content.displayDailyForecast.rotation = binding.content.displayDailyForecast.rotation + 180F
+        }
+        binding.content.swipeLayout.setOnRefreshListener { fetchContent() }
+        autocompleteSupportFragment1 = (supportFragmentManager.findFragmentById(R.id.autocomplete_fragment1) as AutocompleteSupportFragment?)!!
+
+        binding.nativeAd.addView(setupAds("ca-app-pub-1988108128017627/5605953771"))
+        setupPlacesAutoComplete()
+    }
+
+    private fun setupAds(adUnit: String): AdView{
+        MobileAds.initialize(this) { }
+        val adView = AdView(this)
+        adView.adSize = AdSize(AdSize.FULL_WIDTH, AdSize.AUTO_HEIGHT)
+        adView.adUnitId = adUnit
+        adView.adListener = object : AdListener() {
+            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                super.onAdFailedToLoad(loadAdError)
+            }
+        }
+        adView.loadAd(AdRequest.Builder().build())
+        return adView
+    }
+
+    private fun setupPlacesAutoComplete() {
+        val apiKey ="AIzaSyBWt0jO4VUNGhS_HOMdC-1Tjk12BelSaS4"
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, apiKey)
+        }
+
+        autocompleteSupportFragment1.setTypeFilter(TypeFilter.CITIES)
+        autocompleteSupportFragment1.setPlaceFields(
+            listOf(
+                Place.Field.NAME,
+                Place.Field.ADDRESS,
+                Place.Field.LAT_LNG,
+            )
+        )
+        autocompleteSupportFragment1.view?.setOnClickListener {
+            autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)?.setTextColor(getColor(R.color.black))
+        }
+        autocompleteSupportFragment1.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onError(p0: Status) {
+                Toast.makeText(applicationContext,"Some error occurred " + p0.statusMessage, Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onPlaceSelected(place: Place) {
+                val latlng = place.latLng
+
+                val selectedAddress = Address(Locale.getDefault()).apply {
+                    latitude = latlng!!.latitude
+                    longitude = latlng.longitude
+                }
+                if (latlng != null) {
+                    uAddress = selectedAddress
+                }
+                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)?.setTextColor(getColor(R.color.white))
+            }
+        })
+    }
+
+    private fun fetchContent() {
+        if (uAddress == null) {
+            displayErrorDialog(applicationContext, 1, "Search for a city ")
+        }
+
+        setFetchingContent()
 
         launch {
-            val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress.latitude, uAddress.longitude)
-            onWeatherSuccess(oneCallResponse)
-            val airPollutionResponse = weatherViewModel.getAirPollution(uAddress.latitude, uAddress.longitude)
-            onAirPollutionSuccess(airPollutionResponse)
+            if (uAddress != null) {
+                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)?.setText(uAddress!!.locality)
+                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)?.setTextColor(getColor(R.color.white))
+            }
+
+            val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress!!.latitude, uAddress!!.longitude)
+            val airPollutionResponse = weatherViewModel.getAirPollution(uAddress!!.latitude, uAddress!!.longitude)
+
             binding.content.swipeLayout.isRefreshing = false
+            onWeatherSuccess(oneCallResponse)
+            onAirPollutionSuccess(airPollutionResponse)
         }
     }
 
@@ -104,39 +167,49 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         if (result?.isSuccessful!!) {
             weather = result.body()!!
 
-            binding.content.CurrentTemp.text = MessageFormat.format("{0}°C", weather.current.temp.roundToInt())
-            binding.content.HighTemp.text = MessageFormat.format("High {0}°C", weather.daily[0].temp.max.roundToInt())
-            binding.content.LowTemp.text = MessageFormat.format("Low {0}°C", weather.daily[0].temp.min.roundToInt())
-            binding.content.RealFeelTemp.text = MessageFormat.format("Real Feel {0}°C", weather.current.feelsLike.roundToInt())
-            binding.content.Precipitation.text = MessageFormat.format("Chance of Rain - {0}%", weather.daily[0].pop.toBigDecimal())
-            binding.content.Humidity.text = MessageFormat.format("Humidity - {0}%", weather.current.humidity)
-            binding.content.DewPoint.text = MessageFormat.format("Dew Point - {0}°C", weather.current.dewPoint.roundToInt())
-            binding.content.Pressure.text = MessageFormat.format("Pressure - {0}mBar", weather.current.pressure)
-            binding.content.UVIndex.text = MessageFormat.format("UV Index - {0}", weather.current.uvi.roundToInt())
-            binding.content.Visibility.text = MessageFormat.format("Visibility - {0}m", weather.current.visibility)
+            binding.content.CurrentTemp.text = MessageFormat.format(getString(R.string._0_c), weather.current.temp.roundToInt())
+            binding.content.HighTemp.text = MessageFormat.format(getString(R.string.high_0_c), weather.daily[0].temp.max.roundToInt())
+            binding.content.LowTemp.text = MessageFormat.format(getString(R.string.low_0_c), weather.daily[0].temp.min.roundToInt())
+            binding.content.RealFeelTemp.text = MessageFormat.format(getString(R.string.real_feel_0_c), weather.current.feelsLike.roundToInt())
+            binding.content.Precipitation.text = MessageFormat.format(getString(R.string.precipitation_0), weather.daily[0].pop * 100)
+            binding.content.Humidity.text = MessageFormat.format(getString(R.string.humidity_0), weather.current.humidity)
+            binding.content.DewPoint.text = MessageFormat.format(getString(R.string.dew_point_0_c), weather.current.dewPoint.roundToInt())
+            binding.content.Pressure.text = MessageFormat.format(getString(R.string.pressure_0_mbar), weather.current.pressure)
+            binding.content.UVIndex.text = MessageFormat.format(getString(R.string.uv_index_0), weather.current.uvi.roundToInt())
+            binding.content.Visibility.text = MessageFormat.format(getString(R.string.visibility_0_m), weather.current.visibility)
             binding.content.WindSpeed.text = String.format(weather.current.windSpeed.toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString())
             binding.content.WindDirectionDegrees.rotation = (weather.current.windDeg - 270).toFloat()
             binding.content.WindDirectionText.text = Wind.getWindDegreeText(weather.current.windDeg)
             binding.content.skiesImage.setImageResource(WeatherIcon.getIcon(weather.current.weather[0].id))
 
             val hourlyForecast: ArrayList<Hourly> = ArrayList()
-            hourlyForecast.addAll(result.body()!!.hourly.stream().limit(10).toList())
+            for (i in 1..10) {
+                hourlyForecast.add(weather.hourly[i])
+            }
+            binding.content.displayForecast.isEnabled = true
             val hourlyAdapter = HourlyRecyclerAdapter(this, hourlyForecast)
+            hourlyAdapter.onItemClick = { hourly: Hourly, _: View ->
+                ExpandedForecast.newInstance(hourly).show(supportFragmentManager, ExpandedForecast.TAG)
+            }
             binding.content.rvHourlyForecast.adapter = hourlyAdapter
 
             val dailyForecast: ArrayList<Daily> = ArrayList()
-            dailyForecast.addAll(result.body()!!.daily)
-
-            binding.content.Sunrise.text = DateUtils.getDateTime("HH:mm", (result.body()!!.daily[0].sunrise).toLong())
-            binding.content.Sunset.text = DateUtils.getDateTime("HH:mm", (result.body()!!.daily[0].sunset).toLong())
-
-
+            dailyForecast.addAll(weather.daily)
             val dailyAdapter = DailyRecylerAdapter(this, dailyForecast)
+            dailyAdapter.onItemClick = {
+                ExpandedForecast.newInstance(it).show(supportFragmentManager, ExpandedForecast.TAG)
+            }
             binding.content.rvDailyForecast.adapter = dailyAdapter
 
-            changeVisibility()
+            binding.content.sunCard.setOnClickListener {
+                ExpandedSunMoon.newInstance(weather.daily[0], weather.current.weather[0].description, weather.current.uvi).show(supportFragmentManager, ExpandedSunMoon.TAG)
+            }
+            binding.content.Sunrise.text = DateUtils.getDateTime("HH:mm", (weather.daily[0].sunrise).toLong())
+            binding.content.Sunset.text = DateUtils.getDateTime("HH:mm", (weather.daily[0].sunset).toLong())
+
+            setContentFound()
         } else {
-            displayErrorDialog(result.code(), result.message())
+            displayErrorDialog(this, result.code(), result.message())
             return
         }
     }
@@ -146,45 +219,79 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
             airPollution = result.body()!!
 
             binding.content.airQuality.text = airPollution.list[0].main.aqi.toString()
-            binding.content.airCo.text = MessageFormat.format("CO - {0}", airPollution.list[0].components.co.toString())
-            binding.content.airNhThree.text = MessageFormat.format("NH₃ - {0}", airPollution.list[0].components.nh3.toString())
-            binding.content.airNo.text = MessageFormat.format("NO - {0}", airPollution.list[0].components.no.toString())
-            binding.content.airNoTwo.text = MessageFormat.format("NO₂ - {0}", airPollution.list[0].components.no2.toString())
-            binding.content.airOThree.text = MessageFormat.format("O₃ - {0}",  airPollution.list[0].components.o3.toString())
-            binding.content.airPmTen.text = MessageFormat.format("PM₁₀ - {0}", airPollution.list[0].components.pm10.toString())
-            binding.content.airPmTwoFive.text = MessageFormat.format("PM₂₅ - {0}", airPollution.list[0].components.pm25.toString())
-            binding.content.airSoTwo.text = MessageFormat.format("SO₂ - {0}", airPollution.list[0].components.so2.toString())
+            binding.content.airResponseCard.setOnClickListener {
+                displayInfoDialog(this,
+                    "Air Quality - " + airPollution.list[0].main.aqi,
+                    getString(R.string.airQualityInfo))
+            }
+
+            binding.content.airCo.text =
+                MessageFormat.format("CO - {0}", airPollution.list[0].components.co.roundToInt())
+            binding.content.airCo.setOnClickListener {
+                displayInfoDialog(this,
+                    "Carbon monoxide - " + (airPollution.list[0].components.co).roundToInt() + " µg/m³",
+                    getString(R.string.airCo))
+            }
+            binding.content.airNhThree.text =
+                MessageFormat.format("NH₃ - {0}", airPollution.list[0].components.nh3)
+            binding.content.airPmTen.setOnClickListener {
+                displayInfoDialog(this,
+                    "Ammonia - " + (airPollution.list[0].components.nh3) + " µg/m³",
+                    getString(R.string.airNHThree))
+            }
+            binding.content.airNo.text =
+                MessageFormat.format("NO - {0}", airPollution.list[0].components.no)
+            binding.content.airNoTwo.text =
+                MessageFormat.format("NO₂ - {0}", airPollution.list[0].components.no2)
+            binding.content.airNoTwo.setOnClickListener {
+                displayInfoDialog(this,
+                    " Nitrogen Dioxide - " + (airPollution.list[0].components.no2).toBigDecimal()
+                        .setScale(2, RoundingMode.HALF_EVEN) + " µg/m³",
+                    getString(R.string.airNOTwo))
+            }
+            binding.content.airOThree.text =
+                MessageFormat.format("O₃ - {0}", airPollution.list[0].components.o3)
+            binding.content.airOThree.setOnClickListener {
+                displayInfoDialog(this,
+                    " Ozone - " + (airPollution.list[0].components.o3) + " µg/m³",
+                    getString(R.string.airOThree))
+            }
+            binding.content.airPmTen.text =
+                MessageFormat.format("PM₁₀ - {0}", airPollution.list[0].components.pm10)
+            binding.content.airPmTen.setOnClickListener {
+                displayInfoDialog(this,
+                    "Course Particulate Matter - " + (airPollution.list[0].components.pm10) + " µg/m³",
+                    getString(R.string.airPMTen))
+            }
+            binding.content.airPmTwoFive.text = MessageFormat.format("PM₂₅ - {0}",
+                airPollution.list[0].components.pm25.toBigDecimal()
+                    .setScale(2, RoundingMode.HALF_EVEN))
+            binding.content.airPmTwoFive.setOnClickListener {
+                displayInfoDialog(this,
+                    "Fine Particle Matter - " + (airPollution.list[0].components.pm25).toBigDecimal()
+                        .setScale(2, RoundingMode.HALF_EVEN) + " µg/m³",
+                    getString(R.string.airPMTwoFive))
+            }
+            binding.content.airSoTwo.text =
+                MessageFormat.format("SO₂ - {0}", airPollution.list[0].components.so2)
+            binding.content.airSoTwo.setOnClickListener {
+                displayInfoDialog(this,
+                    "Sulfur dioxide - " + (airPollution.list[0].components.so2).toBigDecimal()
+                        .setScale(2, RoundingMode.HALF_EVEN) + " µg/m³",
+                    getString(R.string.airSoTwo))
+            }
 
             binding.content.airShimmer.slideVisibility()
             binding.content.airCard.slideVisibility()
         } else {
-            displayErrorDialog(result.code(), result.message())
-            binding.content.airResponseCard.visibility = View.GONE
+            displayErrorDialog(this, result.code(), result.message())
             return
         }
     }
 
-    private fun displayInfoDialog(message: String){
-        MaterialAlertDialogBuilder(this, R.style.Theme_MaterialComponents_Dialog)
-            .setTitle("Air Quality Information")
-            .setMessage(message)
-            .setPositiveButton("OK") { _, _ ->
-                return@setPositiveButton
-            }
-            .show()
-    }
-
-    private fun displayErrorDialog(code: Int, message: String) {
-        MaterialAlertDialogBuilder(this, R.style.Theme_MaterialComponents_Dialog_Alert)
-            .setTitle("Error $code")
-            .setMessage(message)
-            .setNeutralButton("OK") { _, _ ->
-                return@setNeutralButton
-            }
-            .show()
-    }
-
-    private fun changeVisibility(){
+    private fun setContentFound() {
+        binding.content.dailyForecastCard.isEnabled = true
+        binding.content.hourlyForecastCard.isEnabled = true
         binding.content.currentExtraCard.slideVisibility()
         binding.content.currentExtraShimmer.slideVisibility()
         binding.content.currentCard.slideVisibility()
@@ -193,6 +300,28 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         binding.content.sunShimmer.slideVisibility()
         binding.content.windCard.slideVisibility()
         binding.content.windShimmer.slideVisibility()
+    }
+
+    private fun setFetchingContent(){
+        binding.content.airCard.slideVisibility()
+        binding.content.airShimmer.slideVisibility()
+        binding.content.dailyForecastCard.isEnabled = false
+        binding.content.hourlyForecastCard.isEnabled = false
+        binding.content.currentExtraCard.slideVisibility()
+        binding.content.currentExtraShimmer.slideVisibility()
+        binding.content.currentCard.slideVisibility()
+        binding.content.currentShimmer.slideVisibility()
+        binding.content.sunCard.slideVisibility()
+        binding.content.sunShimmer.slideVisibility()
+        binding.content.windCard.slideVisibility()
+        binding.content.windShimmer.slideVisibility()
+
+        if (binding.content.rvHourlyForecast.isVisible) {
+            binding.content.rvHourlyForecast.slideVisibility()
+        }
+        if (binding.content.rvDailyForecast.isVisible) {
+            binding.content.rvDailyForecast.slideVisibility()
+        }
     }
 
     private fun View.slideVisibility(durationTime: Long = 300) {
@@ -208,15 +337,4 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
             this.visibility = View.VISIBLE
         }
     }
-
-    private fun displayForecast(item: RecyclerView) {
-        if (item.isVisible) {
-            item.visibility = View.GONE
-            binding.content.displayForecast.rotation = 0F
-        } else {
-            item.visibility = View.VISIBLE
-            binding.content.displayForecast.rotation = 180F
-        }
-    }
-
 }

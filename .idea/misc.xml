@@ -3,18 +3,34 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2015" />
+        <entry key="app/src/main/res/drawable/bg_gradient.xml" value="0.278" />
         <entry key="app/src/main/res/drawable/gradient.xml" value="0.2015" />
+        <entry key="app/src/main/res/drawable/gradient_moon.xml" value="0.2005" />
+        <entry key="app/src/main/res/drawable/splash_background.xml" value="0.278" />
         <entry key="app/src/main/res/layout-w1240dp/content_scrolling.xml" value="0.177734375" />
         <entry key="app/src/main/res/layout-w936dp/content_scrolling.xml" value="0.283011583011583" />
         <entry key="app/src/main/res/layout/activity_scrolling.xml" value="0.36770833333333336" />
         <entry key="app/src/main/res/layout/activity_weather.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/content_scrolling.xml" value="0.15897435897435896" />
+        <entry key="app/src/main/res/layout/content_scrolling.xml" value="0.31686358754027927" />
+        <entry key="app/src/main/res/layout/daily_forecast_item.xml" value="0.30928270042194095" />
+        <entry key="app/src/main/res/layout/exapnded_sun_moon.xml" value="0.375" />
+        <entry key="app/src/main/res/layout/expanded_forecast.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/expanded_sun_moon.xml" value="0.31324786324786325" />
         <entry key="app/src/main/res/layout/forecast_item.xml" value="0.3758974358974359" />
-        <entry key="app/src/main/res/layout/hourly_forecast_item.xml" value="0.19270833333333334" />
+        <entry key="app/src/main/res/layout/fragment_expanded_forecast.xml" value="0.15897435897435896" />
+        <entry key="app/src/main/res/layout/fragment_item_list_dialog_list_dialog.xml" value="0.2978902953586498" />
+        <entry key="app/src/main/res/layout/fragment_item_list_dialog_list_dialog_item.xml" value="0.30928270042194095" />
+        <entry key="app/src/main/res/layout/hourly_forecast_item.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/layout_item_places.xml" value="0.30928270042194095" />
         <entry key="app/src/main/res/layout/placeholder_card.xml" value="0.1581196581196581" />
+        <entry key="app/src/main/res/layout/placeholder_card_air.xml" value="0.15897435897435896" />
+        <entry key="app/src/main/res/layout/placeholder_card_current.xml" value="0.15904232578024796" />
+        <entry key="app/src/main/res/layout/placeholder_card_sun.xml" value="0.15897435897435896" />
         <entry key="app/src/main/res/layout/splash_activity.xml" value="0.3758974358974359" />
         <entry key="app/src/main/res/menu/menu_scrolling.xml" value="0.19375" />
         <entry key="app/src/main/res/menu/menu_weather.xml" value="0.19375" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.278" />
       </map>
     </option>
   </component>
