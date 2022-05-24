@@ -1,3 +1,5 @@
+package com.hidesign.hiweather.model
+
 import com.google.gson.annotations.SerializedName
 import com.hidesign.hiweather.model.Alerts
 import com.hidesign.hiweather.model.Current

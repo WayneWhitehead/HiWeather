@@ -1,21 +1,26 @@
 package com.hidesign.hiweather.network
 
-import OneCallResponse
+import com.hidesign.hiweather.model.OneCallResponse
 import androidx.lifecycle.ViewModel
 import com.hidesign.hiweather.model.AirPollutionResponse
+import com.hidesign.hiweather.model.HistoricalWeather
 import retrofit2.Response
 
 class WeatherViewModel : ViewModel() {
-    private val apikey = "8f1aae21fcdc65d7bee6147335281369"
 
-    suspend fun getOneCallWeather(lat: Double, lon: Double): Response<OneCallResponse?>? {
+    suspend fun getOneCallWeather(lat: Double, lon: Double, key: String): Response<OneCallResponse?>? {
         val apiClient = getApiClient()
-        return apiClient?.getOneCall(lat, lon, "minutely", apikey, "metric")
+        return apiClient?.getOneCall(lat, lon, "minutely", key, "metric")
     }
 
-    suspend fun getAirPollution(lat: Double, lon: Double): Response<AirPollutionResponse?>? {
+    suspend fun getHistoricalWeather(lat: Double, lon: Double, dt: Long, key: String): Response<HistoricalWeather?>? {
         val apiClient = getApiClient()
-        return apiClient?.getAirPollution(lat, lon, apikey)
+        return apiClient?.getOneCallHistory(lat, lon, dt, key)
+    }
+
+    suspend fun getAirPollution(lat: Double, lon: Double, key: String): Response<AirPollutionResponse?>? {
+        val apiClient = getApiClient()
+        return apiClient?.getAirPollution(lat, lon, key)
     }
 
     private fun getApiClient() = ApiClient().apiService

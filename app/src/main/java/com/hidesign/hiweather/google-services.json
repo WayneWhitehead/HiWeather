@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "974016929096",
+    "firebase_url": "https://hiweather-db7f3.firebaseio.com",
+    "project_id": "hiweather-db7f3",
+    "storage_bucket": "hiweather-db7f3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:974016929096:android:f0c15371b41f7bdc8ea77d",
+        "android_client_info": {
+          "package_name": "com.hidesign.hiweather"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "974016929096-lkdl38ljh0a8r6bksgi72t9ott1igji6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hidesign.hiweather",
+            "certificate_hash": "cdb4e8d050252d8ea4d341543f9d3a007b7272c5"
+          }
+        },
+        {
+          "client_id": "974016929096-rjkfncfbv14647ldn3m59tumrc6o8h0p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWt0jO4VUNGhS_HOMdC-1Tjk12BelSaS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "974016929096-rjkfncfbv14647ldn3m59tumrc6o8h0p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-1988108128017627~5989097155"
+    }
+  ],
+  "configuration_version": "1"
+}

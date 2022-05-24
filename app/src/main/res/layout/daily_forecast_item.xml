@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="30dp"
         android:layout_margin="10dp"
-        android:backgroundTint="@color/blue"
+        android:backgroundTint="@color/forecast_card"
         android:theme="@style/Theme.MaterialComponents.DayNight"
         android:minHeight="150dp">
 
@@ -29,7 +29,7 @@
                 android:layout_gravity="center|top"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/white"
+                android:textColor="@color/forecast_card_content"
                 android:text="@string/today"/>
 
             <LinearLayout
@@ -45,7 +45,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="@string/cloud_cover"
                     android:src="@drawable/weather"
-                    app:tint="@android:color/white" />
+                    app:tint="@color/forecast_card_content" />
 
                 <LinearLayout
                     android:layout_weight="1"
@@ -62,7 +62,7 @@
                         android:layout_gravity="center"
                         android:textSize="15sp"
                         android:text="@null"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@color/forecast_card_content" />
                     <TextView
                         android:id="@+id/HighTemp"
                         android:layout_width="wrap_content"
@@ -70,7 +70,7 @@
                         android:layout_gravity="center"
                         android:textSize="15sp"
                         android:text="@null"
-                        android:textColor="@android:color/white"/>
+                        android:textColor="@color/forecast_card_content"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:maxWidth="150dp"
@@ -79,7 +79,7 @@
                         android:textSize="15sp"
                         android:text="@string/precipitation"
                         android:textStyle="bold"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@color/forecast_card_content" />
                     <TextView
                         android:id="@+id/Precipitation"
                         android:layout_width="wrap_content"
@@ -88,7 +88,7 @@
                         android:layout_gravity="center"
                         android:textSize="18sp"
                         android:text="@null"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@color/forecast_card_content" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>

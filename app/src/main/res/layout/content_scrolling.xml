@@ -64,7 +64,10 @@
                     style="@style/shimmerFrame"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
-                    shimmer:duration="800">
+                    shimmer:duration="800"
+                    app:shimmer_base_color="#000000"
+                    app:shimmer_colored="true"
+                    app:shimmer_highlight_color="#000000">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -139,18 +142,18 @@
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/hourlyForecastCard"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#2B2B2B"
+                android:layout_marginHorizontal="20dp"
                 style="@style/WeatherCards"
                 android:animateLayoutChanges="true"
                 app:cardElevation="10dp">
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:gravity="center"
                     android:text="@string/hourly_forecast"
-                    android:layout_marginHorizontal="75dp"
                     android:paddingVertical="20dp"
                     android:textColor="@android:color/white"
                     android:layout_marginBottom="20dp"
@@ -160,8 +163,8 @@
                     android:id="@+id/display_forecast"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:layout_marginTop="20dp"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="40dp"
+                    android:layout_marginBottom="20dp"
                     android:layout_gravity="center"
                     android:src="@drawable/down"
                     app:tint="@color/white"
@@ -182,9 +185,9 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
+                android:layout_marginHorizontal="10dp"
                 style="@style/WeatherCards"
-                android:backgroundTint="@color/colorPrimary"
+                android:backgroundTint="#FF6666"
                 app:cardElevation="20dp">
 
                 <com.facebook.shimmer.ShimmerFrameLayout
@@ -193,7 +196,10 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="top"
                     style="@style/shimmerFrame"
-                    shimmer:duration="800">
+                    shimmer:duration="800"
+                    app:shimmer_base_color="#A30000"
+                    app:shimmer_colored="true"
+                    app:shimmer_highlight_color="#A30000">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -221,7 +227,7 @@
                         android:contentDescription="@string/cloud_cover"
                         android:layout_marginEnd="30dp"
                         android:src="@drawable/weather"
-                        app:tint="@android:color/white" />
+                        app:tint="@android:color/black" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -236,13 +242,13 @@
                             android:layout_gravity="center"
                             android:textSize="16sp"
                             android:text="@string/precipitation_0"
-                            android:textColor="@color/white" />
+                            android:textColor="@color/black" />
                         <TextView
                             android:id="@+id/Humidity"
                             android:layout_gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
+                            android:textColor="@android:color/black"
                             android:text="@string/humidity_0"
                             android:textSize="16sp" />
                         <TextView
@@ -250,7 +256,7 @@
                             android:layout_gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
+                            android:textColor="@android:color/black"
                             android:text="@string/dew_point_0_c"
                             android:textSize="16sp" />
                         <TextView
@@ -258,7 +264,7 @@
                             android:layout_gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
+                            android:textColor="@android:color/black"
                             android:text="@string/pressure_0_mbar"
                             android:textSize="16sp" />
                         <TextView
@@ -266,7 +272,7 @@
                             android:layout_gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
+                            android:textColor="@android:color/black"
                             android:text="@string/uv_index_0"
                             android:textSize="16sp" />
                         <TextView
@@ -274,7 +280,7 @@
                             android:layout_gravity="center"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
+                            android:textColor="@android:color/black"
                             android:text="@string/visibility_0_m"
                             android:textSize="16sp" />
                     </LinearLayout>
@@ -286,8 +292,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardElevation="30dp"
-                android:layout_marginHorizontal="30dp"
-                android:backgroundTint="@color/greenCard"
+                android:layout_marginHorizontal="10dp"
+                android:backgroundTint="@color/green_card"
                 style="@style/WeatherCards">
 
                 <com.facebook.shimmer.ShimmerFrameLayout
@@ -296,7 +302,10 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="top"
                     style="@style/shimmerFrame"
-                    shimmer:duration="800">
+                    shimmer:duration="800"
+                    app:shimmer_base_color="#138100"
+                    app:shimmer_colored="true"
+                    app:shimmer_highlight_color="#138100">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -330,14 +339,14 @@
                             android:textSize="60sp"
                             android:text="@null"
                             android:layout_gravity="center"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/black" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="18sp"
                             android:text="@string/air_quality"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/black" />
                     </LinearLayout>
 
                     <com.google.android.material.chip.ChipGroup
@@ -406,7 +415,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/blue"
+                android:backgroundTint="#DAFFFB"
                 app:cardElevation="40dp"
                 android:layout_marginHorizontal="40dp"
                 style="@style/WeatherCards">
@@ -416,7 +425,10 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="top"
                     style="@style/shimmerFrame"
-                    shimmer:duration="800">
+                    shimmer:duration="800"
+                    app:shimmer_base_color="@color/windCardItems"
+                    app:shimmer_colored="true"
+                    app:shimmer_highlight_color="@color/windCardItems">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -427,6 +439,17 @@
 
                 </com.facebook.shimmer.ShimmerFrameLayout>
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#7EC4F2F4"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:src="@drawable/airwaves"
+                    app:tint="#4BCADA" />
+
                 <LinearLayout
                     android:id="@+id/windCard"
                     android:layout_width="match_parent"
@@ -434,6 +457,7 @@
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:layout_marginBottom="10dp"
+                    android:elevation="3dp"
                     android:layout_margin="20dp">
 
                     <TextView
@@ -442,7 +466,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="60sp"
                         android:text="@null"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@color/windCardItems" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -460,11 +484,11 @@
                             android:layout_margin="5dp"
                             android:src="@drawable/direction"
                             android:contentDescription="@string/winddirectionicon"
-                            app:tint="@android:color/white" />
+                            app:tint="@color/windCardItems" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/windCardItems"
                             android:textSize="18sp"
                             android:text="@string/km_h"/>
                     </LinearLayout>
@@ -476,7 +500,7 @@
                         android:textSize="22sp"
                         android:layout_marginHorizontal="5dp"
                         android:text="@null"
-                        android:textColor="@android:color/white" />
+                        android:textColor="@color/windCardItems" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -494,7 +518,10 @@
                     android:layout_height="match_parent"
                     style="@style/shimmerFrame"
                     android:elevation="100dp"
-                    shimmer:duration="800">
+                    shimmer:duration="800"
+                    app:shimmer_base_color="#BEFF0033"
+                    app:shimmer_colored="true"
+                    app:shimmer_highlight_color="#BEFF0033">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -514,10 +541,10 @@
                 <LinearLayout
                     android:id="@+id/sunCard"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:gravity="center"
-                    android:theme="@style/Theme.MaterialComponents.DayNight"
-                    android:orientation="horizontal" >
+                    android:orientation="horizontal"
+                    android:theme="@style/Theme.MaterialComponents.DayNight">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -530,17 +557,19 @@
                             android:id="@+id/Sunrise"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="35sp"
                             android:text="@string/empty_time"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/black"
+                            android:textSize="35sp" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
-                            android:textSize="18sp"
-                            android:text="@string/sunrise"/>
+                            android:text="@string/sunrise"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp" />
 
                     </LinearLayout>
+
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -552,45 +581,45 @@
                             android:id="@+id/Sunset"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="35sp"
                             android:text="@string/empty_time"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/black"
+                            android:textSize="35sp" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@android:color/white"
-                            android:textSize="18sp"
-                            android:text="@string/sunset"/>
+                            android:text="@string/sunset"
+                            android:textColor="@android:color/black"
+                            android:textSize="18sp" />
 
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/dailyForecastCard"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="#2B2B2B"
+                android:layout_marginHorizontal="20dp"
                 style="@style/WeatherCards"
                 android:animateLayoutChanges="true"
-                android:layout_marginTop="30dp"
                 app:cardElevation="10dp">
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
+                    android:gravity="center"
                     android:text="@string/DaysForecast"
-                    android:layout_marginHorizontal="75dp"
                     android:paddingVertical="20dp"
                     android:textColor="@android:color/white"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="20dp"
                     android:textSize="30sp" />
 
                 <ImageView
                     android:id="@+id/display_daily_forecast"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:layout_marginTop="35dp"
-                    android:layout_marginBottom="15dp"
+                    android:layout_marginTop="40dp"
+                    android:layout_marginBottom="20dp"
                     android:layout_gravity="center"
                     android:src="@drawable/down"
                     app:tint="@color/white"

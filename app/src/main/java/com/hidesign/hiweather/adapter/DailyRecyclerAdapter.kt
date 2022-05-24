@@ -14,7 +14,7 @@ import com.hidesign.hiweather.util.DateUtils
 import java.text.MessageFormat
 import kotlin.math.roundToInt
 
-class DailyRecylerAdapter internal constructor(context: Context?, weathers: ArrayList<Daily>) : RecyclerView.Adapter<DailyRecylerAdapter.ViewHolder>() {
+class DailyRecyclerAdapter internal constructor(context: Context?, weathers: ArrayList<Daily>) : RecyclerView.Adapter<DailyRecyclerAdapter.ViewHolder>() {
     private val weatherArrayList: ArrayList<Daily>
     private val mInflater: LayoutInflater
     var onItemClick: ((Daily) -> Unit)? = null

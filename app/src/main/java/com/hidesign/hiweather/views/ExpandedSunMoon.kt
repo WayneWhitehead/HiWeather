@@ -9,7 +9,6 @@ import com.hidesign.hiweather.databinding.ExpandedSunMoonBinding
 import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.MoonIcon
 import com.hidesign.hiweather.util.DateUtils
-import java.util.*
 import kotlin.math.roundToInt
 
 class ExpandedSunMoon : BottomSheetDialogFragment() {

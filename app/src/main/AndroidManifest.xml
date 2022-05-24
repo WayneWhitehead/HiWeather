@@ -4,22 +4,21 @@
 	package="com.hidesign.hiweather">
 
 	<dist:module dist:instant="true" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.INTERNET" />
 
 	<application
 		android:allowBackup="true"
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
-		android:networkSecurityConfig="@xml/network_security_config"
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme"
-		android:hardwareAccelerated="true">
-		<meta-data
-			android:name="com.google.android.gms.ads.APPLICATION_ID"
-			android:value="ca-app-pub-1988108128017627~5989097155"/>
+		android:hardwareAccelerated="true"
+		android:networkSecurityConfig="@xml/network_security_config">
+		<uses-library android:name="org.apache.http.legacy" android:required="false"/>
 		<activity
 			android:name=".views.WeatherActivity"
 			android:exported="false"
@@ -33,6 +32,16 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
+
+		<meta-data
+			android:name="com.google.android.gms.ads.APPLICATION_ID"
+			android:value="ca-app-pub-1988108128017627~5989097155"/>
+		<meta-data
+			android:name = "placesKey"
+			android:value = "${PLACES_KEY}"/>
+		<meta-data
+			android:name = "weatherKey"
+			android:value = "${OPENWEATHER_KEY}"/>
 	</application>
 
 </manifest>

@@ -17,9 +17,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.util.LocationUtil
 import com.hidesign.hiweather.util.LocationUtil.getAddress
-import java.util.*
 
 @SuppressLint("CustomSplashScreen")
 class SplashScreenActivity : AppCompatActivity() {
@@ -62,6 +60,7 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private val location: Unit
+        @SuppressLint("MissingPermission")
         get() {
             if (ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED

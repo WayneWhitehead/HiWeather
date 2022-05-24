@@ -10,7 +10,7 @@
 		android:id="@+id/thumbnail"
 		android:layout_width="100dp"
 		android:layout_height="100dp"
-		android:layout_marginHorizontal="20dp"
+		android:layout_marginEnd="20dp"
 		android:background="@color/background"
 		android:padding="20dp" />
 

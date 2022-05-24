@@ -11,7 +11,7 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		app:cardCornerRadius="0dp"
-		android:backgroundTint="@color/expandedForecastCard"
+		android:backgroundTint="@color/expanded_forecast_card"
 		android:theme="@style/Theme.MaterialComponents.DayNight">
 
 		<RelativeLayout
@@ -44,7 +44,7 @@
 						android:contentDescription="@string/cloud_cover"
 						android:src="@drawable/weather"
 						android:padding="5dp"
-						app:tint="@color/expandedForecastCard" />
+						app:tint="@color/expanded_forecast_card" />
 
 					<LinearLayout
 						android:layout_width="wrap_content"
@@ -59,7 +59,7 @@
 							android:paddingStart="15dp"
 							android:paddingEnd="15dp"
 							android:text="@string/today"
-							android:textColor="@color/expandedForecastCard"
+							android:textColor="@color/expanded_forecast_card"
 							android:textSize="28sp"
 							android:textStyle="bold" />
 					</LinearLayout>

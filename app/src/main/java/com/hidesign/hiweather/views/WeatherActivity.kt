@@ -1,6 +1,8 @@
 package com.hidesign.hiweather.views
 
-import OneCallResponse
+import android.annotation.SuppressLint
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.location.Address
 import android.os.Bundle
 import android.transition.Slide
@@ -12,7 +14,9 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearSnapHelper
 import com.google.android.gms.ads.*
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
@@ -21,8 +25,12 @@ import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.adapter.DailyRecylerAdapter
+import com.hidesign.hiweather.adapter.DailyRecyclerAdapter
 import com.hidesign.hiweather.adapter.HourlyRecyclerAdapter
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
 import com.hidesign.hiweather.model.*
@@ -42,12 +50,14 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
-class WeatherActivity : AppCompatActivity(), CoroutineScope {
+class WeatherActivity : AppCompatActivity(), CoroutineScope, LifecycleObserver {
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var weather: OneCallResponse
     private lateinit var airPollution: AirPollutionResponse
     private lateinit var weatherViewModel: WeatherViewModel
     private lateinit var binding: ActivityWeatherBinding
-    private var uAddress = SplashScreenActivity.uAddress
+    private var isFetching = false
+    private var uAddress: Address? = SplashScreenActivity.uAddress
     private lateinit var autocompleteSupportFragment1: AutocompleteSupportFragment
 
     private var job: Job = Job()
@@ -58,8 +68,8 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         job.cancel()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         fetchContent()
     }
 
@@ -67,34 +77,40 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         super.onCreate(savedInstanceState)
         binding = ActivityWeatherBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
-        binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
+
+        firebaseAnalytics = Firebase.analytics
+        weatherViewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
 
         val df = SimpleDateFormat("dd MMMM", Locale.getDefault())
         val formattedDate = df.format(Calendar.getInstance().time)
         binding.content.date.text = formattedDate
-        weatherViewModel = ViewModelProvider(this).get(WeatherViewModel::class.java)
+        binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
+        binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
 
+        LinearSnapHelper().attachToRecyclerView(binding.content.rvHourlyForecast)
+        LinearSnapHelper().attachToRecyclerView(binding.content.rvDailyForecast)
         binding.content.hourlyForecastCard.setOnClickListener {
             binding.content.rvHourlyForecast.slideVisibility()
             binding.content.displayForecast.rotation = binding.content.displayForecast.rotation + 180F
         }
         binding.content.dailyForecastCard.setOnClickListener {
-            binding.content.rvDailyForecast.slideVisibility(600)
+            binding.content.rvDailyForecast.slideVisibility()
             binding.content.displayDailyForecast.rotation = binding.content.displayDailyForecast.rotation + 180F
         }
         binding.content.swipeLayout.setOnRefreshListener { fetchContent() }
         autocompleteSupportFragment1 = (supportFragmentManager.findFragmentById(R.id.autocomplete_fragment1) as AutocompleteSupportFragment?)!!
 
-        binding.nativeAd.addView(setupAds("ca-app-pub-1988108128017627/5605953771"))
+        binding.nativeAd.addView(setupAds())
         setupPlacesAutoComplete()
+        setFetchingContent()
     }
 
-    private fun setupAds(adUnit: String): AdView{
+    @SuppressLint("MissingPermission")
+    private fun setupAds(): AdView{
         MobileAds.initialize(this) { }
         val adView = AdView(this)
         adView.adSize = AdSize(AdSize.FULL_WIDTH, AdSize.AUTO_HEIGHT)
-        adView.adUnitId = adUnit
+        adView.adUnitId = "ca-app-pub-1988108128017627/5605953771"
         adView.adListener = object : AdListener() {
             override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                 super.onAdFailedToLoad(loadAdError)
@@ -105,7 +121,10 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun setupPlacesAutoComplete() {
-        val apiKey ="AIzaSyBWt0jO4VUNGhS_HOMdC-1Tjk12BelSaS4"
+        val ai: ApplicationInfo = applicationContext.packageManager
+            .getApplicationInfo(applicationContext.packageName, PackageManager.GET_META_DATA)
+        val value = ai.metaData["placesKey"]
+        val apiKey = value.toString()
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, apiKey)
         }
@@ -135,6 +154,7 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
                 }
                 if (latlng != null) {
                     uAddress = selectedAddress
+                    fetchContent()
                 }
                 autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)?.setTextColor(getColor(R.color.white))
             }
@@ -143,7 +163,10 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
 
     private fun fetchContent() {
         if (uAddress == null) {
-            displayErrorDialog(applicationContext, 1, "Search for a city ")
+            autocompleteSupportFragment1.setHint("Please Enter a City")
+            Toast.makeText(applicationContext,"Please Enter a City in the search bar above ", Toast.LENGTH_SHORT).show()
+            binding.autocompleteFragment1.performClick()
+            return
         }
 
         setFetchingContent()
@@ -154,8 +177,13 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
                 autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)?.setTextColor(getColor(R.color.white))
             }
 
-            val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress!!.latitude, uAddress!!.longitude)
-            val airPollutionResponse = weatherViewModel.getAirPollution(uAddress!!.latitude, uAddress!!.longitude)
+            val ai: ApplicationInfo = applicationContext.packageManager
+                .getApplicationInfo(applicationContext.packageName, PackageManager.GET_META_DATA)
+            val value = ai.metaData["weatherKey"]
+            val apiKey = value.toString()
+
+            val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress!!.latitude, uAddress!!.longitude, apiKey)
+            val airPollutionResponse = weatherViewModel.getAirPollution(uAddress!!.latitude, uAddress!!.longitude, apiKey)
 
             binding.content.swipeLayout.isRefreshing = false
             onWeatherSuccess(oneCallResponse)
@@ -189,19 +217,45 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
             binding.content.displayForecast.isEnabled = true
             val hourlyAdapter = HourlyRecyclerAdapter(this, hourlyForecast)
             hourlyAdapter.onItemClick = { hourly: Hourly, _: View ->
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+                    param(FirebaseAnalytics.Event.SCREEN_VIEW, "ExpandedForecastCard")
+                }
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
+                    param(FirebaseAnalytics.Param.ITEM_ID, hourly.dt.toString())
+                    param(FirebaseAnalytics.Param.ITEM_NAME, ExpandedForecast.TAG)
+                    param(FirebaseAnalytics.Param.ITEM_CATEGORY, "Hourly")
+                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "Forecast")
+                }
                 ExpandedForecast.newInstance(hourly).show(supportFragmentManager, ExpandedForecast.TAG)
             }
             binding.content.rvHourlyForecast.adapter = hourlyAdapter
 
             val dailyForecast: ArrayList<Daily> = ArrayList()
             dailyForecast.addAll(weather.daily)
-            val dailyAdapter = DailyRecylerAdapter(this, dailyForecast)
+            val dailyAdapter = DailyRecyclerAdapter(this, dailyForecast)
             dailyAdapter.onItemClick = {
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+                    param(FirebaseAnalytics.Event.SCREEN_VIEW, "ExpandedForecastCard")
+                }
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
+                    param(FirebaseAnalytics.Param.ITEM_ID, it.dt.toString())
+                    param(FirebaseAnalytics.Param.ITEM_NAME, ExpandedForecast.TAG)
+                    param(FirebaseAnalytics.Param.ITEM_CATEGORY, "Daily")
+                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "Forecast")
+                }
                 ExpandedForecast.newInstance(it).show(supportFragmentManager, ExpandedForecast.TAG)
             }
             binding.content.rvDailyForecast.adapter = dailyAdapter
 
             binding.content.sunCard.setOnClickListener {
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+                    param(FirebaseAnalytics.Event.SCREEN_VIEW, "Sun&MoonExpandedCard")
+                }
+                firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM) {
+                    param(FirebaseAnalytics.Param.ITEM_ID, weather.current.dt.toString())
+                    param(FirebaseAnalytics.Param.ITEM_NAME, ExpandedSunMoon.TAG)
+                    param(FirebaseAnalytics.Param.CONTENT_TYPE, "SunCard")
+                }
                 ExpandedSunMoon.newInstance(weather.daily[0], weather.current.weather[0].description, weather.current.uvi).show(supportFragmentManager, ExpandedSunMoon.TAG)
             }
             binding.content.Sunrise.text = DateUtils.getDateTime("HH:mm", (weather.daily[0].sunrise).toLong())
@@ -290,6 +344,9 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun setContentFound() {
+        if (!isFetching) {
+            return
+        }
         binding.content.dailyForecastCard.isEnabled = true
         binding.content.hourlyForecastCard.isEnabled = true
         binding.content.currentExtraCard.slideVisibility()
@@ -300,9 +357,14 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         binding.content.sunShimmer.slideVisibility()
         binding.content.windCard.slideVisibility()
         binding.content.windShimmer.slideVisibility()
+
+        isFetching = false
     }
 
     private fun setFetchingContent(){
+        if (isFetching) {
+            return
+        }
         binding.content.airCard.slideVisibility()
         binding.content.airShimmer.slideVisibility()
         binding.content.dailyForecastCard.isEnabled = false
@@ -322,6 +384,8 @@ class WeatherActivity : AppCompatActivity(), CoroutineScope {
         if (binding.content.rvDailyForecast.isVisible) {
             binding.content.rvDailyForecast.slideVisibility()
         }
+
+        isFetching = true
     }
 
     private fun View.slideVisibility(durationTime: Long = 300) {
