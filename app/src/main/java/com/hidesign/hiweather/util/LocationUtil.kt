@@ -9,7 +9,7 @@ import java.util.*
 
 object LocationUtil {
 
-    fun getAddress(context: Context, latitude: Double, longitude: Double): Address {
+    fun getAddress(context: Context, latitude: Double, longitude: Double): Address? {
         var addresses: List<Address>? = null
         val geocoder = Geocoder(context, Locale.getDefault())
         try {
@@ -18,9 +18,9 @@ object LocationUtil {
             e.printStackTrace()
             Log.e("Tag", "Error getting Street Address: ")
         }
-        if (addresses == null) {
-            return Address(Locale.getDefault())
+        if (addresses != null) {
+            return addresses[0]
         }
-        return addresses[0]
+        return null
     }
 }
