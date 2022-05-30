@@ -9,13 +9,18 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Hourly
-import com.hidesign.hiweather.model.WeatherIcon
 import com.hidesign.hiweather.util.DateUtils
+import com.hidesign.hiweather.util.WeatherUtils.getWeatherIcon
 import java.text.MessageFormat
 import kotlin.math.roundToInt
 
-class HourlyRecyclerAdapter internal constructor(context: Context?, weathers: ArrayList<Hourly>) : RecyclerView.Adapter<HourlyRecyclerAdapter.ViewHolder>() {
+class HourlyRecyclerAdapter internal constructor(
+    context: Context?,
+    weathers: ArrayList<Hourly>,
+    tz: String,
+) : RecyclerView.Adapter<HourlyRecyclerAdapter.ViewHolder>() {
     private val weatherArrayList: ArrayList<Hourly>
+    private var timezone: String = ""
     private val mInflater: LayoutInflater
     var onItemClick: ((hourly: Hourly, v: View) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -24,10 +29,12 @@ class HourlyRecyclerAdapter internal constructor(context: Context?, weathers: Ar
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.date.text = DateUtils.getDateTime("HH:00", weatherArrayList[position].dt.toLong())
-        holder.temp.text = MessageFormat.format("{0}°C", weatherArrayList[position].temp.roundToInt())
+        holder.date.text =
+            DateUtils.getDateTime("HH:00", weatherArrayList[position].dt.toLong(), timezone)
+        holder.temp.text =
+            MessageFormat.format("{0}°C", weatherArrayList[position].temp.roundToInt())
         holder.precipitation.text = MessageFormat.format("{0}%",  (weatherArrayList[position].pop * 100))
-        holder.icon.setImageResource(WeatherIcon.getIcon(weatherArrayList[position].weather[0].id))
+        holder.icon.setImageResource(getWeatherIcon(weatherArrayList[position].weather[0].id))
     }
 
     override fun getItemCount(): Int {
@@ -54,5 +61,6 @@ class HourlyRecyclerAdapter internal constructor(context: Context?, weathers: Ar
     init {
         mInflater = LayoutInflater.from(context)
         weatherArrayList = weathers
+        timezone = tz
     }
 }

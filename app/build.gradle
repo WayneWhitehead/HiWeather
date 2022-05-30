@@ -23,64 +23,105 @@ android {
     }
 
     compileSdkVersion 32
-    buildToolsVersion '30.0.3'
+    buildToolsVersion '32.1.0-rc1'
+
+    signingConfigs {
+        release {
+            storeFile = file("src/hiweather")
+            storePassword = "Qwerty@+-123"
+            keyAlias = "HiWeather"
+            keyPassword = "Qwerty@+-123"
+            firebaseAppDistribution {
+                artifactType="AAB"
+                releaseNotesFile="/path/to/releasenotes.txt"
+            }
+        }
+    }
 
     defaultConfig {
         applicationId "com.hidesign.hiweather"
         minSdkVersion 26
         targetSdkVersion 32
-        versionCode 6
-        versionName "0.1.0"
+        versionCode 12
+        versionName "0.1.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    flavorDimensions 'tier'
+    productFlavors {
+        paid {
+            dimension 'tier'
+            firebaseAppDistribution {
+                artifactType="AAB"
+                releaseNotes=""
+            }
+        }
+        free {
+            dimension 'tier'
+            matchingFallbacks = ['demo', 'trial']
+            firebaseAppDistribution {
+                artifactType="AAB"
+                releaseNotes="Release notes for free version"
+            }
+        }
     }
     buildTypes {
         getByName("release") {
             signingConfig = signingConfigs.getByName("release")
-            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            crunchPngs false
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
         }
         getByName("debug") {
+            versionNameSuffix '.debug'
             signingConfig = signingConfigs.getByName("release")
             ext.enableCrashlytics = false
         }
     }
-    dependencies {
-        implementation fileTree(dir: 'libs', include: ['*.jar'])
-        implementation 'androidx.appcompat:appcompat:1.4.1'
-        implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
-        implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-        implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-        implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-        implementation 'androidx.recyclerview:recyclerview:1.2.1'
-        testImplementation 'junit:junit:4.13.2'
-        androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-        androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-        //Network Dependencies
-        implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-        implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-        implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.1"
-        implementation "com.squareup.okhttp3:okhttp:5.0.0-alpha.1"
-        implementation "com.squareup.okhttp3:okhttp-urlconnection:5.0.0-alpha.1"
-
-        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21"
-        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
-        implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
-        implementation "androidx.core:core-ktx:1.7.0"
-
-        implementation 'com.facebook.shimmer:shimmer:0.5.0@aar'
-
-        implementation 'com.google.android.libraries.places:places:2.6.0'
-        implementation 'com.google.android.gms:play-services-location:19.0.1'
-        implementation 'com.google.android.material:material:1.6.0'
-        implementation 'com.google.android.gms:play-services-ads:20.6.0'
-        implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.10'
-        implementation 'com.google.firebase:firebase-analytics-ktx:21.0.0'
-        implementation 'com.google.firebase:firebase-perf-ktx:20.0.6'
-    }
     repositories {
         mavenCentral()
     }
+    ndkVersion '24.0.8215888'
 
+}
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    //Network Dependencies
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.1"
+    implementation "com.squareup.okhttp3:okhttp:5.0.0-alpha.1"
+    implementation "com.squareup.okhttp3:okhttp-urlconnection:5.0.0-alpha.1"
+
+    //Kotlin Dependencies
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.21"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
+    implementation "androidx.core:core-ktx:1.7.0"
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
+
+    implementation 'com.facebook.shimmer:shimmer:0.5.0@aar'
+    implementation 'com.github.Jay-Goo:RangeSeekBar:v3.0.0'
+
+    implementation 'com.google.android.libraries.places:places:2.6.0'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.android.material:material:1.6.0'
+    implementation 'com.google.android.gms:play-services-ads:20.6.0'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.10'
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.0.0'
+    implementation 'com.google.firebase:firebase-perf-ktx:20.0.6'
 }

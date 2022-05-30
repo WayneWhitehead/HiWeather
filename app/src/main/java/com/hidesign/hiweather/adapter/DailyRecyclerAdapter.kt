@@ -9,13 +9,18 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Daily
-import com.hidesign.hiweather.model.WeatherIcon
 import com.hidesign.hiweather.util.DateUtils
+import com.hidesign.hiweather.util.WeatherUtils.getWeatherIcon
 import java.text.MessageFormat
 import kotlin.math.roundToInt
 
-class DailyRecyclerAdapter internal constructor(context: Context?, weathers: ArrayList<Daily>) : RecyclerView.Adapter<DailyRecyclerAdapter.ViewHolder>() {
+class DailyRecyclerAdapter internal constructor(
+    context: Context?,
+    weathers: ArrayList<Daily>,
+    tz: String,
+) : RecyclerView.Adapter<DailyRecyclerAdapter.ViewHolder>() {
     private val weatherArrayList: ArrayList<Daily>
+    private var timezone: String = ""
     private val mInflater: LayoutInflater
     var onItemClick: ((Daily) -> Unit)? = null
 
@@ -25,11 +30,14 @@ class DailyRecyclerAdapter internal constructor(context: Context?, weathers: Arr
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.date.text = DateUtils.getDayOfWeekText(DateUtils.getDateTime("u", weatherArrayList[position].dt.toLong()))
-        holder.high.text = MessageFormat.format("High {0}°C", weatherArrayList[position].temp.max.roundToInt())
+        holder.date.text = DateUtils.getDayOfWeekText(DateUtils.getDateTime("u",
+            weatherArrayList[position].dt.toLong(),
+            timezone))
+        holder.high.text =
+            MessageFormat.format("High {0}°C", weatherArrayList[position].temp.max.roundToInt())
         holder.low.text = MessageFormat.format("Low {0}°C", weatherArrayList[position].temp.min.roundToInt())
         holder.precipitation.text = MessageFormat.format("{0}%",  weatherArrayList[position].pop * 100)
-        holder.icon.setImageResource(WeatherIcon.getIcon(weatherArrayList[position].weather[0].id))
+        holder.icon.setImageResource(getWeatherIcon(weatherArrayList[position].weather[0].id))
     }
 
     override fun getItemCount(): Int {
@@ -58,5 +66,6 @@ class DailyRecyclerAdapter internal constructor(context: Context?, weathers: Arr
     init {
         mInflater = LayoutInflater.from(context)
         weatherArrayList = weathers
+        timezone = tz
     }
 }

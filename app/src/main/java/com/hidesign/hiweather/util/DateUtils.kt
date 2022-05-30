@@ -17,13 +17,19 @@ object DateUtils {
         if (differenceInHours < 0) {
             differenceInHours *= -1
         }
-        return "$differenceInHours HOURS & $differenceInMinutes minutes"
+        return "$differenceInHours HOURS & $differenceInMinutes MINUTES"
     }
 
-    fun getDateTime(pattern: String, timeInt: Long): String {
+    fun getDateTime(pattern: String, timeInt: Long, timezone: String): String {
+//        val time = if (offset > 0) {
+//            (timeInt + offset).toInt()
+//        } else {
+//            (timeInt - offset).toInt()
+//        }
         val date = Date(timeInt * 1000L)
         val sdf = SimpleDateFormat(pattern, Locale.getDefault())
-        sdf.timeZone = TimeZone.getDefault()
+        val tz = TimeZone.getTimeZone(timezone)
+        sdf.timeZone = tz
         return sdf.format(date)
     }
 
