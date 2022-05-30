@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:ads="http://schemas.android.com/apk/res-auto"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="@color/backgroundDark"
+	tools:context=".views.EmptyView"
+	tools:viewBindingIgnore="true">
+
+	<TextView
+		style="@style/TextAppearance.AppCompat.Subhead"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:layout_marginHorizontal="20dp"
+		android:layout_marginBottom="100dp"
+		android:gravity="center"
+		android:text="@string/please_enter_an_address_in_the_search_bar_above"
+		android:textColor="@color/white"
+		app:drawableTint="@color/white"
+		app:drawableTopCompat="@drawable/pin" />
+
+	<com.google.android.gms.ads.AdView
+		android:id="@+id/emptyViewAd"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom"
+		ads:adSize="BANNER"
+		ads:adUnitId="ca-app-pub-1988108128017627/4633391685" />
+
+</FrameLayout>

@@ -1,12 +1,6 @@
 package com.hidesign.hiweather.util
 
 import android.content.Context
-import android.content.Context.WINDOW_SERVICE
-import android.graphics.PixelFormat
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.WindowManager
-import androidx.core.content.ContextCompat.getSystemService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hidesign.hiweather.R
 

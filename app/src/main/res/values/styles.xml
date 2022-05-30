@@ -1,14 +1,16 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowContentTransitions">true</item>
-        <item name="android:statusBarColor">@color/backgroundDark</item>
-        <item name="colorSurface">@color/colorPrimary</item>
-        <item name="colorOnSurface">@color/white</item>
-        <item name="colorOnPrimary">@color/white</item>
+	    <item name="colorPrimary">@color/colorPrimary</item>
+	    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+	    <item name="colorAccent">@color/colorAccent</item>
+	    <item name="android:windowContentTransitions">true</item>
+	    <item name="android:statusBarColor">@color/backgroundDark</item>
+	    <item name="colorSurface">@color/colorPrimary</item>
+	    <item name="colorOnSurface">@color/white</item>
+	    <item name="colorOnPrimary">@color/white</item>
+	    <item name="android:fragmentExitTransition">@transition/exit_transition</item>
+	    <item name="android:fragmentEnterTransition">@transition/exit_transition</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

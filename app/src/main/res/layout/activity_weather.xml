@@ -5,22 +5,13 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:fitsSystemWindows="true"
 	android:animateLayoutChanges="true"
 	tools:context=".views.WeatherActivity">
-
-	<FrameLayout
-		android:id="@+id/frame_container"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:elevation="1000dp"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 	<com.google.android.material.appbar.AppBarLayout
 		android:id="@+id/app_bar"
 		android:layout_width="match_parent"
 		android:layout_height="@dimen/app_bar_height"
-		android:fitsSystemWindows="true"
 		android:backgroundTint="@color/backgroundDark"
 		android:background="@color/backgroundDark"
 		android:theme="@style/AppTheme.AppBarOverlay">
@@ -29,7 +20,6 @@
 			android:id="@+id/toolbar_layout"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:fitsSystemWindows="true"
 			app:contentScrim="@color/backgroundDark"
 			app:layout_scrollFlags="scroll|exitUntilCollapsed"
 			app:toolbarId="@+id/toolbar">
@@ -38,14 +28,23 @@
 				android:id="@+id/toolbar"
 				android:layout_width="match_parent"
 				android:layout_height="?attr/actionBarSize"
-				app:layout_collapseMode="pin">
-			</com.google.android.material.appbar.MaterialToolbar>
+				app:layout_collapseMode="pin"></com.google.android.material.appbar.MaterialToolbar>
 
 			<com.google.android.gms.ads.nativead.NativeAdView
 				android:id="@+id/nativeAd"
 				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_gravity="top"/>
+				android:layout_height="130dp"
+				android:layout_gravity="top" />
+
+			<com.google.android.material.progressindicator.LinearProgressIndicator
+				android:id="@+id/linear_progress"
+				android:layout_width="match_parent"
+				android:layout_height="3dp"
+				android:layout_gravity="bottom"
+				android:elevation="1000dp"
+				android:indeterminate="true"
+				android:visibility="visible"
+				app:indicatorColor="@color/colorPrimaryLight" />
 
 			<androidx.cardview.widget.CardView
 				android:layout_width="match_parent"
@@ -53,20 +52,48 @@
 				android:layout_gravity="bottom"
 				android:backgroundTint="@color/backgroundDark"
 				app:layout_collapseMode="pin">
-				<androidx.fragment.app.FragmentContainerView
-					android:id="@+id/autocomplete_fragment1"
-					android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-					android:layout_width="match_parent"
-					android:layout_gravity="bottom"
-					android:layout_height="wrap_content"/>
 
+				<androidx.constraintlayout.widget.ConstraintLayout
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content">
+
+					<com.google.android.material.button.MaterialButton
+						android:id="@+id/precisionLocation"
+						android:layout_width="40dp"
+						android:layout_height="40dp"
+						android:background="#00FFFFFF"
+						android:insetTop="0dp"
+						android:padding="5dp"
+						app:icon="@drawable/precision"
+						app:iconGravity="top"
+						app:iconSize="35dp"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintEnd_toEndOf="parent"
+						app:layout_constraintTop_toTopOf="parent"
+						app:tint="@color/white" />
+
+					<androidx.fragment.app.FragmentContainerView
+						android:id="@+id/autocomplete_fragment1"
+						android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+						android:layout_width="match_parent"
+						android:layout_height="wrap_content"
+						android:layout_gravity="bottom"
+						android:layout_marginRight="50dp"
+						app:layout_constraintBottom_toBottomOf="parent"
+						app:layout_constraintEnd_toStartOf="@id/precisionLocation"
+						app:layout_constraintStart_toStartOf="parent"
+						app:layout_constraintTop_toTopOf="parent" />
+				</androidx.constraintlayout.widget.ConstraintLayout>
 			</androidx.cardview.widget.CardView>
 
 		</com.google.android.material.appbar.CollapsingToolbarLayout>
 	</com.google.android.material.appbar.AppBarLayout>
 
-	<include
-		android:id="@+id/content"
-		layout="@layout/content_scrolling" />
+	<FrameLayout
+		android:id="@+id/contentFrame"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/backgroundDark"
+		app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

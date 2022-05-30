@@ -23,7 +23,7 @@
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:background="@drawable/gradient"
+				android:background="@drawable/gradient_sun"
 				android:paddingVertical="10dp"
 				android:orientation="vertical">
 				<LinearLayout
@@ -47,11 +47,11 @@
 							android:layout_height="wrap_content"
 							android:textSize="35sp"
 							android:text="@string/empty_time"
-							android:textColor="@android:color/white" />
+							android:textColor="@android:color/black" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@android:color/white"
+							android:textColor="@android:color/black"
 							android:textSize="18sp"
 							android:text="@string/sunrise"/>
 
@@ -69,11 +69,11 @@
 							android:layout_height="wrap_content"
 							android:textSize="35sp"
 							android:text="@string/empty_time"
-							android:textColor="@android:color/white" />
+							android:textColor="@android:color/black" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@android:color/white"
+							android:textColor="@android:color/black"
 							android:textSize="18sp"
 							android:text="@string/sunset"/>
 
@@ -85,7 +85,7 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center"
-					android:textColor="@color/white"
+					android:textColor="@color/black"
 					android:textStyle="bold"
 					android:textSize="28sp"
 					android:text="@null"/>
@@ -96,7 +96,7 @@
 					android:layout_height="wrap_content"
 					android:paddingHorizontal="15dp"
 					android:gravity="center"
-					android:textColor="@color/white"
+					android:textColor="@color/black"
 					android:textSize="18sp"
 					android:text="@null"/>
 				<TextView
@@ -105,11 +105,17 @@
 					android:layout_height="wrap_content"
 					android:paddingHorizontal="15dp"
 					android:gravity="center"
-					android:textColor="@color/white"
+					android:textColor="@color/black"
 					android:textSize="16sp"
-					android:text="@null"/>
+					android:text="@null" />
 
 			</LinearLayout>
+
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="2dp"
+				android:background="@color/white" />
+
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -117,6 +123,7 @@
 				android:paddingBottom="30dp"
 				android:background="@drawable/gradient_moon"
 				android:orientation="vertical">
+
 				<LinearLayout
 					android:id="@+id/moonCard"
 					android:layout_width="match_parent"

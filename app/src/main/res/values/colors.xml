@@ -5,19 +5,27 @@
     <color name="colorPrimaryLight">#ff6659</color>
     <color name="colorAccent">#5E161A</color>
     <color name="colorAccentDark">#1b1b1b</color>
-    <color name="colorAccentLight">#6d6d6d</color>
-    <color name="colorSurface">@color/colorPrimary</color>
+	<color name="colorAccentLight">#6d6d6d</color>
+	<color name="colorSurface">@color/colorPrimary</color>
 
-<!--    Cards-->
-    <color name="green_card">#8FDD93</color>
-    <color name="forecast_card">#A4DAF3</color>
-    <color name="forecast_card_content">#000000</color>
-    <color name="expanded_forecast_card">#05325A</color>
-    <color name="windCardItems">#031B43</color>
+	<!--    Cards-->
+	<color name="green_card">#8FDD93</color>
+	<color name="forecast_card">#A4DAF3</color>
+	<color name="forecast_card_content">#000000</color>
+	<color name="expanded_forecast_card">#05325A</color>
+	<color name="windCardItems">#031B43</color>
 
-    <color name="white">#FFFFFF</color>
-    <color name="black">#000000</color>
-    <color name="backgroundDark">#000</color>
-    <color name="background">#dddddd</color>
+	<!--    Air Quality Colors-->
+	<color name="airIndex1">#0A9101</color>
+	<color name="airIndex2">#5A9101</color>
+	<color name="airIndex3">#916D01</color>
+	<color name="airIndex4">#912F01</color>
+	<color name="airIndex5">#CC0000</color>
+	<color name="airIndex6">#5A0000</color>
+
+	<color name="white">#FFFFFF</color>
+	<color name="black">#000000</color>
+	<color name="backgroundDark">#000</color>
+	<color name="background">#dddddd</color>
 </resources>
 
