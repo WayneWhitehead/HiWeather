@@ -3,6 +3,8 @@ package com.hidesign.hiweather.util
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
@@ -17,6 +19,7 @@ import kotlinx.coroutines.CompletableDeferred
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
+
 
 object LocationUtil {
     private lateinit var locationRequest: LocationRequest
@@ -50,6 +53,12 @@ object LocationUtil {
         val userAddress = CompletableDeferred<Address?>()
         fusedLocationProviderClient.lastLocation.addOnSuccessListener(activity) { location: Location? ->
             if (location != null) {
+                val mPrefs: SharedPreferences =
+                    activity.getSharedPreferences(Constants.userPreferences, MODE_PRIVATE)
+                val prefsEditor: SharedPreferences.Editor = mPrefs.edit()
+                prefsEditor.putFloat("userLatitude", location.latitude.toFloat())
+                prefsEditor.putFloat("userLongitude", location.longitude.toFloat())
+                prefsEditor.apply()
                 userAddress.complete(getAddress(activity, location.latitude, location.longitude))
             }
         }

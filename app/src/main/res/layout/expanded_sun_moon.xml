@@ -24,8 +24,9 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:background="@drawable/gradient_sun"
-				android:paddingVertical="10dp"
+				android:paddingVertical="20dp"
 				android:orientation="vertical">
+
 				<LinearLayout
 					android:id="@+id/sunCard"
 					android:layout_width="match_parent"
@@ -46,6 +47,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:textSize="35sp"
+							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textColor="@android:color/black" />
 						<TextView
@@ -68,6 +70,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:textSize="35sp"
+							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textColor="@android:color/black" />
 						<TextView
@@ -119,7 +122,7 @@
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:paddingTop="10dp"
+				android:paddingTop="20dp"
 				android:paddingBottom="30dp"
 				android:background="@drawable/gradient_moon"
 				android:orientation="vertical">
@@ -144,6 +147,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:textSize="35sp"
+							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textColor="@android:color/white" />
 						<TextView
@@ -173,6 +177,7 @@
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:textSize="35sp"
+							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textColor="@android:color/white" />
 						<TextView
@@ -193,8 +198,14 @@
 					android:textColor="@color/white"
 					android:textStyle="bold"
 					android:textSize="28sp"
-					android:text="@null"/>
+					android:text="@null" />
 			</LinearLayout>
+
+			<com.google.android.gms.ads.nativead.NativeAdView
+				android:id="@+id/nativeAd"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="top" />
 		</LinearLayout>
 
 	</com.google.android.material.card.MaterialCardView>

@@ -28,7 +28,7 @@
 				android:id="@+id/toolbar"
 				android:layout_width="match_parent"
 				android:layout_height="?attr/actionBarSize"
-				app:layout_collapseMode="pin"></com.google.android.material.appbar.MaterialToolbar>
+				app:layout_collapseMode="pin" />
 
 			<com.google.android.gms.ads.nativead.NativeAdView
 				android:id="@+id/nativeAd"
@@ -59,11 +59,10 @@
 
 					<com.google.android.material.button.MaterialButton
 						android:id="@+id/precisionLocation"
-						android:layout_width="40dp"
-						android:layout_height="40dp"
+						android:layout_width="50dp"
+						android:layout_height="50dp"
 						android:background="#00FFFFFF"
 						android:insetTop="0dp"
-						android:padding="5dp"
 						app:icon="@drawable/precision"
 						app:iconGravity="top"
 						app:iconSize="35dp"

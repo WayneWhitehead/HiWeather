@@ -17,7 +17,6 @@
 		<RelativeLayout
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:paddingBottom="20dp"
 			android:gravity="center">
 
 			<com.google.android.material.card.MaterialCardView
@@ -29,7 +28,7 @@
 				android:layout_gravity="center"
 				style="@style/CardView.Light"
 				android:orientation="horizontal"
-				android:layout_marginTop="15dp">
+				android:layout_marginTop="20dp">
 
 				<LinearLayout
 					android:layout_width="wrap_content"
@@ -37,6 +36,7 @@
 					android:paddingHorizontal="20dp"
 					android:orientation="horizontal"
 					tools:ignore="UseCompoundDrawables">
+
 					<ImageView
 						android:id="@+id/skiesImage"
 						android:layout_width="90dp"
@@ -71,6 +71,7 @@
 				android:layout_height="wrap_content"
 				android:layout_below="@id/image"
 				android:baselineAligned="false"
+				android:layout_marginBottom="20dp"
 				android:orientation="horizontal">
 
 				<LinearLayout
@@ -136,50 +137,62 @@
 					android:layout_height="wrap_content"
 					android:layout_gravity="center"
 					android:layout_weight="1"
+					android:layout_marginTop="15dp"
 					android:gravity="center"
 					android:orientation="vertical">
 
-					<LinearLayout
-						android:id="@+id/currentCard"
+					<androidx.cardview.widget.CardView
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
-						android:layout_gravity="center"
-						android:orientation="vertical">
+						android:backgroundTint="#012240"
+						android:elevation="5dp"
+						app:cardCornerRadius="30dp">
 
-						<TextView
-							android:id="@+id/CurrentTemp"
+						<LinearLayout
+							android:id="@+id/currentCard"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_gravity="center"
-							android:text="@string/_0_c"
-							android:textColor="@color/white"
-							android:textSize="40sp" />
+							android:orientation="vertical"
+							android:padding="10dp">
 
-						<TextView
-							android:id="@+id/LowTemp"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:layout_gravity="center"
-							android:text="@string/low_0_c"
-							android:textColor="@android:color/white"
-							android:textSize="16sp" />
-						<TextView
-							android:id="@+id/HighTemp"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:layout_gravity="center" android:text="@string/high_0_c"
-							android:textColor="@android:color/white"
-							android:textSize="16sp" />
+							<TextView
+								android:id="@+id/CurrentTemp"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_gravity="center"
+								android:text="@string/_0_c"
+								android:textColor="@color/white"
+								android:textSize="40sp" />
 
-						<TextView
-							android:id="@+id/RealFeelTemp"
-							android:layout_width="wrap_content"
-							android:layout_height="wrap_content"
-							android:layout_gravity="center"
-							android:text="@string/real_feel_0_c"
-							android:textColor="@android:color/white"
-							android:textSize="16sp" />
-					</LinearLayout>
+							<TextView
+								android:id="@+id/LowTemp"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_gravity="center"
+								android:text="@string/low_0_c"
+								android:textColor="@color/white"
+								android:textSize="16sp" />
+
+							<TextView
+								android:id="@+id/HighTemp"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_gravity="center"
+								android:text="@string/high_0_c"
+								android:textColor="@color/white"
+								android:textSize="16sp" />
+
+							<TextView
+								android:id="@+id/RealFeelTemp"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_gravity="center"
+								android:text="@string/real_feel_0_c"
+								android:textColor="@color/white"
+								android:textSize="16sp" />
+						</LinearLayout>
+					</androidx.cardview.widget.CardView>
 
 					<LinearLayout
 						android:id="@+id/windCard"
@@ -233,6 +246,13 @@
 					</LinearLayout>
 				</LinearLayout>
 			</LinearLayout>
+
+			<com.google.android.gms.ads.nativead.NativeAdView
+				android:id="@+id/nativeAd"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_below="@id/currentInfo"
+				android:layout_gravity="top" />
 		</RelativeLayout>
 	</com.google.android.material.card.MaterialCardView>
 </RelativeLayout>

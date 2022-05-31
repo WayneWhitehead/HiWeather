@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.gms.ads.AdView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -25,9 +26,20 @@ class ExpandedForecast : BottomSheetDialogFragment() {
     private var weatherDaily: Daily? = null
     private var weatherHourly: Hourly? = null
     private var timezone: String = ""
+    private lateinit var ads: AdView
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
         binding = ExpandedForecastBinding.inflate(inflater)
+        binding.nativeAd.addView(ads)
+        return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
         firebaseAnalytics = Firebase.analytics
         if (weatherHourly != null) {
             binding.HighTemp.visibility = View.GONE
@@ -37,7 +49,8 @@ class ExpandedForecast : BottomSheetDialogFragment() {
                 DateUtils.getDateTime("HH:00", weatherHourly?.dt?.toLong()!!, timezone)
             binding.CurrentTemp.text =
                 MessageFormat.format(getString(R.string._0_c), weatherHourly?.temp?.roundToInt())
-            binding.RealFeelTemp.text = MessageFormat.format(getString(R.string.real_feel_0_c), weatherHourly?.feelsLike?.roundToInt())
+            binding.RealFeelTemp.text = MessageFormat.format(getString(R.string.real_feel_0_c),
+                weatherHourly?.feelsLike?.roundToInt())
             binding.Precipitation.text = MessageFormat.format(getString(R.string.precipitation_0), (weatherHourly?.pop!! * 100))
             binding.Humidity.text = MessageFormat.format(getString(R.string.humidity_0), weatherHourly?.humidity)
             binding.DewPoint.text = MessageFormat.format(getString(R.string.dew_point_0_c), weatherHourly?.dewPoint?.roundToInt())
@@ -75,7 +88,7 @@ class ExpandedForecast : BottomSheetDialogFragment() {
 
             binding.skiesImage.setImageResource(getWeatherIcon(weatherDaily?.weather!![0].id))
         }
-        return binding.root
+
     }
 
     override fun onResume() {
@@ -90,19 +103,21 @@ class ExpandedForecast : BottomSheetDialogFragment() {
         const val TAG = "Forecast BottomSheet"
 
         @JvmStatic
-        fun newInstance(daily: Daily, tz: String) =
+        fun newInstance(daily: Daily, tz: String, ad: AdView) =
             ExpandedForecast().apply {
                 arguments = Bundle().apply {
                     weatherDaily = daily
                     timezone = tz
+                    ads = ad
                 }
             }
 
-        fun newInstance(hourly: Hourly, tz: String) =
+        fun newInstance(hourly: Hourly, tz: String, ad: AdView) =
             ExpandedForecast().apply {
                 arguments = Bundle().apply {
                     weatherHourly = hourly
                     timezone = tz
+                    ads = ad
                 }
             }
     }

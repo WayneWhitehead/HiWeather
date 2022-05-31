@@ -1,7 +1,6 @@
 package com.hidesign.hiweather.views
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -14,7 +13,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
-import com.google.android.gms.ads.*
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -27,6 +25,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
+import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.LocationUtil
 import com.hidesign.hiweather.views.SplashScreenActivity.Companion.uAddress
 import kotlinx.coroutines.CoroutineScope
@@ -67,7 +66,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
         binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
 
-        binding.nativeAd.addView(setupAds())
+        binding.nativeAd.addView(AdUtil.setupAds(this, AdUtil.appBarAdmobID))
         setupPlacesAutoComplete()
 
         if (uAddress == null) {
@@ -136,21 +135,6 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                 binding.linearProgress.visibility = View.INVISIBLE
             }
         }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun setupAds(): AdView {
-        MobileAds.initialize(this)
-        val adView = AdView(this)
-        adView.adSize = AdSize(AdSize.FULL_WIDTH, AdSize.AUTO_HEIGHT)
-        adView.adUnitId = "ca-app-pub-1988108128017627/5605953771"
-        adView.adListener = object : AdListener() {
-            override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                super.onAdFailedToLoad(loadAdError)
-            }
-        }
-        adView.loadAd(AdRequest.Builder().build())
-        return adView
     }
 
     private fun setupPlacesAutoComplete() {

@@ -1,6 +1,7 @@
 package com.hidesign.hiweather.views
 
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -22,21 +23,13 @@ class AirItemFragment : BottomSheetDialogFragment() {
     private var title = ""
     private lateinit var components: Components
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        binding = FragmentAirItemBinding.inflate(inflater, container, false)
-
+    override fun onStart() {
+        super.onStart()
         binding.airPicker.minValue = 0
         binding.airPicker.maxValue = resources.getStringArray(R.array.airTitles).size - 1
         binding.airPicker.displayedValues = resources.getStringArray(R.array.airTitles)
-        binding.airPicker.textColor = Color.WHITE
-
-        binding.airPicker.setOnValueChangedListener { _, _, newVal ->
-            updateValues(resources.getStringArray(R.array.airTitles)[newVal])
-            setAirItemValues()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            binding.airPicker.selectionDividerHeight = 0
         }
 
         for ((pos, item) in resources.getStringArray(R.array.airTitles).withIndex()) {
@@ -45,11 +38,19 @@ class AirItemFragment : BottomSheetDialogFragment() {
             }
         }
         setAirItemValues()
-        return binding.root
+        binding.airPicker.setOnValueChangedListener { _, _, newVal ->
+            updateValues(resources.getStringArray(R.array.airTitles)[newVal])
+            setAirItemValues()
+        }
     }
 
-    private fun createMap() {
-
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        binding = FragmentAirItemBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     private fun updateValues(item: String) {
@@ -90,6 +91,8 @@ class AirItemFragment : BottomSheetDialogFragment() {
     private fun setAirItemValues() {
         binding.progress.setRange(airValues[0].toFloat(), airValues[airValues.size - 1].toFloat())
         binding.progress.setProgress(currentValue)
+        binding.progress.leftSeekBar.thumbHeight = 20
+        binding.progress.leftSeekBar.thumbWidth = 20
         binding.progress.setIndicatorText(WeatherUtils.getValueQualityText(airStrings,
             airValues,
             currentValue))

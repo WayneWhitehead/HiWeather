@@ -7,36 +7,14 @@
 	android:background="#000000"
 	android:padding="15dp">
 
-	<NumberPicker
-		android:id="@+id/air_picker"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:elevation="100dp"
-		android:selectionDividerHeight="0dp"
-		android:showDividers="none"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
-
-	<com.google.android.material.textview.MaterialTextView
-		android:id="@+id/airValue"
-		style="@style/TextAppearance.AppCompat.Headline"
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_marginTop="55dp"
-		android:gravity="start"
-		android:textColor="@color/white"
-		app:layout_constraintBottom_toBottomOf="@id/air_picker"
-		app:layout_constraintEnd_toEndOf="@id/air_picker"
-		app:layout_constraintStart_toStartOf="@id/air_picker"
-		app:layout_constraintTop_toTopOf="@id/air_picker" />
-
 	<com.jaygoo.widget.VerticalRangeSeekBar
 		android:id="@+id/progress"
+		android:clickable="false"
+		android:contextClickable="false"
 		android:layout_width="match_parent"
 		android:layout_height="400dp"
 		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintStart_toStartOf="parent"
+		android:elevation="0dp"
 		app:layout_constraintTop_toTopOf="parent"
 		app:rsb_gravity="bottom"
 		app:rsb_indicator_background_color="@color/white"
@@ -58,6 +36,40 @@
 		app:rsb_step_width="2dp"
 		app:rsb_tick_mark_layout_gravity="bottom"
 		app:rsb_tick_mark_mode="number"
+		app:layout_constraintEnd_toEndOf="parent"
 		app:rsb_tick_mark_text_margin="5dp" />
+
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="400dp"
+		android:clickable="true"
+		android:elevation="100dp"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<com.google.android.material.textview.MaterialTextView
+		android:id="@+id/airValue"
+		style="@style/TextAppearance.AppCompat.Headline"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:layout_marginTop="55dp"
+		android:gravity="start"
+		android:textColor="@color/white"
+		android:textSize="20sp"
+		app:layout_constraintBottom_toBottomOf="@id/air_picker"
+		app:layout_constraintEnd_toEndOf="@id/air_picker"
+		app:layout_constraintStart_toStartOf="@id/air_picker"
+		app:layout_constraintTop_toTopOf="@id/air_picker" />
+
+	<NumberPicker
+		android:id="@+id/air_picker"
+		android:layout_width="wrap_content"
+		android:layout_height="400dp"
+		android:divider="@color/black"
+		android:elevation="100dp"
+		android:theme="@style/AppTheme.Picker"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

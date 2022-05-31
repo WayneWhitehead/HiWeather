@@ -1,5 +1,7 @@
 package com.hidesign.hiweather.views
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.location.Address
@@ -10,6 +12,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -20,6 +23,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
+import com.hidesign.hiweather.WeatherWidget
 import com.hidesign.hiweather.adapter.DailyRecyclerAdapter
 import com.hidesign.hiweather.adapter.HourlyRecyclerAdapter
 import com.hidesign.hiweather.databinding.FragmentWeatherBinding
@@ -28,6 +32,7 @@ import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.model.OneCallResponse
 import com.hidesign.hiweather.network.WeatherViewModel
+import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.DialogUtil
 import com.hidesign.hiweather.util.WeatherUtils
@@ -71,15 +76,21 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         savedInstanceState: Bundle?,
     ): View {
         binding = FragmentWeatherBinding.inflate(layoutInflater)
-        weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
-        firebaseAnalytics = Firebase.analytics
 
         val df = SimpleDateFormat("dd MMMM", Locale.getDefault())
         val formattedDate = df.format(Calendar.getInstance().time)
         binding.date.text = formattedDate
 
-        LinearSnapHelper().attachToRecyclerView(binding.rvHourlyForecast)
-        LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
+        return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
+        firebaseAnalytics = Firebase.analytics
+        fetchContent()
+
+        binding.swipeLayout.setOnRefreshListener { fetchContent() }
         binding.hourlyForecastCard.setOnClickListener {
             binding.rvHourlyForecast.slideVisibility()
             binding.displayForecast.rotation =
@@ -90,14 +101,8 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.displayDailyForecast.rotation =
                 binding.displayDailyForecast.rotation + 180F
         }
-        binding.swipeLayout.setOnRefreshListener { fetchContent() }
-
-        return binding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
-        fetchContent()
+        LinearSnapHelper().attachToRecyclerView(binding.rvHourlyForecast)
+        LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
     }
 
     override fun onResume() {
@@ -143,6 +148,11 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.swipeLayout.isRefreshing = false
             onWeatherSuccess(oneCallResponse)
             onAirPollutionSuccess(airPollutionResponse)
+
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val remoteViews = RemoteViews(requireContext().packageName, R.layout.weather_widget)
+            appWidgetManager.updateAppWidget(ComponentName(requireContext().packageName,
+                WeatherWidget::class.java.name), remoteViews)
         }
     }
 
@@ -184,7 +194,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             val hourlyAdapter =
                 HourlyRecyclerAdapter(requireContext(), hourlyForecast, weather.timezone)
             hourlyAdapter.onItemClick = { hourly: Hourly, _: View ->
-                ExpandedForecast.newInstance(hourly, weather.timezone)
+                ExpandedForecast.newInstance(hourly,
+                    weather.timezone,
+                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetAdmobID))
                     .show(childFragmentManager, ExpandedForecast.TAG)
             }
             binding.rvHourlyForecast.adapter = hourlyAdapter
@@ -194,7 +206,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             val dailyAdapter =
                 DailyRecyclerAdapter(requireContext(), dailyForecast, weather.timezone)
             dailyAdapter.onItemClick = {
-                ExpandedForecast.newInstance(it, weather.timezone)
+                ExpandedForecast.newInstance(it,
+                    weather.timezone,
+                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetAdmobID))
                     .show(childFragmentManager, ExpandedForecast.TAG)
             }
             binding.rvDailyForecast.adapter = dailyAdapter
@@ -203,7 +217,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
                 ExpandedSunMoon.newInstance(weather.daily[0],
                     weather.current.weather[0].description,
                     weather.timezone,
-                    weather.current.uvi).show(childFragmentManager, ExpandedSunMoon.TAG)
+                    weather.current.uvi,
+                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetAdmobID))
+                    .show(childFragmentManager, ExpandedSunMoon.TAG)
             }
             binding.Sunrise.text = DateUtils.getDateTime("HH:mm",
                 (weather.daily[0].sunrise).toLong(),
@@ -277,6 +293,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             }
 
             binding.airShimmer.slideVisibility()
+            binding.airShimmer.stopShimmer()
             binding.airCard.slideVisibility()
         } else {
             DialogUtil.displayErrorDialog(requireContext(), result.code(), result.message())
@@ -346,15 +363,16 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.hourlyForecastCard.isEnabled = true
         binding.currentCard.slideVisibility()
         binding.currentShimmer.slideVisibility()
-        Thread.sleep(200)
+        binding.currentShimmer.stopShimmer()
         binding.currentExtraCard.slideVisibility()
         binding.currentExtraShimmer.slideVisibility()
-        Thread.sleep(200)
+        binding.currentExtraShimmer.stopShimmer()
         binding.windCard.slideVisibility()
         binding.windShimmer.slideVisibility()
-        Thread.sleep(200)
+        binding.windShimmer.stopShimmer()
         binding.sunCard.slideVisibility()
         binding.sunShimmer.slideVisibility()
+        binding.sunShimmer.stopShimmer()
 
         isFetching = false
         val activity = requireActivity() as WeatherActivity
@@ -370,19 +388,20 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
         binding.currentCard.slideVisibility()
         binding.currentShimmer.slideVisibility()
-        Thread.sleep(200)
+        binding.currentShimmer.startShimmer()
         binding.hourlyForecastCard.isEnabled = false
         binding.currentExtraCard.slideVisibility()
         binding.currentExtraShimmer.slideVisibility()
-        Thread.sleep(200)
+        binding.currentExtraShimmer.startShimmer()
         binding.airCard.slideVisibility()
         binding.airShimmer.slideVisibility()
-        Thread.sleep(200)
+        binding.airShimmer.startShimmer()
         binding.windCard.slideVisibility()
         binding.windShimmer.slideVisibility()
-        Thread.sleep(200)
+        binding.windShimmer.startShimmer()
         binding.sunCard.slideVisibility()
         binding.sunShimmer.slideVisibility()
+        binding.sunShimmer.startShimmer()
         binding.dailyForecastCard.isEnabled = false
 
         if (binding.rvHourlyForecast.isVisible) {

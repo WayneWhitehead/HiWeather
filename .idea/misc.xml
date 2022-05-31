@@ -36,6 +36,7 @@
         <entry key="app/src/main/res/layout/placeholder_card_sun.xml" value="0.15897435897435896" />
         <entry key="app/src/main/res/layout/splash_activity.xml" value="0.3758974358974359" />
         <entry key="app/src/main/res/layout/weather_fragment.xml" value="0.31338178708849934" />
+        <entry key="app/src/main/res/layout/weather_widget.xml" value="0.375" />
         <entry key="app/src/main/res/menu/menu_scrolling.xml" value="0.19375" />
         <entry key="app/src/main/res/menu/menu_weather.xml" value="0.19375" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.278" />
