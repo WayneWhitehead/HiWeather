@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<style name="AppTheme.Picker" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+		<item name="android:textColorPrimary">@android:color/white</item>
+		<item name="android:dividerHeight">0dp</item>
+		<item name="android:selectionDividerHeight">0dp</item>
+	</style>
+</resources>

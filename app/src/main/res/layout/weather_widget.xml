@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+
+	<RelativeLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="#CE000000"
+		android:gravity="center">
+
+		<LinearLayout
+			android:id="@+id/currentInfo"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginBottom="20dp"
+			android:baselineAligned="false"
+			android:gravity="center"
+			android:orientation="horizontal">
+
+			<ImageView
+				android:id="@+id/skiesImage"
+				android:layout_width="90dp"
+				android:layout_height="90dp"
+				android:layout_gravity="center"
+				android:contentDescription="@string/cloud_cover"
+				android:foregroundTint="@color/white"
+				android:padding="5dp"
+				android:src="@drawable/weather"
+				app:tint="@color/white" />
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:layout_margin="10dp"
+				android:orientation="vertical">
+
+				<TextView
+					android:id="@+id/CurrentTemp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:text="21°C"
+					android:textColor="@color/white"
+					android:textSize="40sp" />
+
+				<TextView
+					android:id="@+id/LowTemp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:text="Low 20°C"
+					android:textColor="@color/white"
+					android:textSize="16sp" />
+
+				<TextView
+					android:id="@+id/HighTemp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:text="High 22°C"
+					android:textColor="@color/white"
+					android:textSize="16sp" />
+
+				<TextView
+					android:id="@+id/RealFeelTemp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:text="Real Feel 21°C"
+					android:textColor="@color/white"
+					android:textSize="16sp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/windCard"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_below="@id/currentInfo"
+				android:layout_margin="10dp"
+				android:gravity="center"
+				android:orientation="horizontal">
+
+				<TextView
+					android:id="@+id/WindSpeed"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="13"
+					android:textColor="@android:color/white"
+					android:textSize="60sp" />
+
+				<LinearLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginHorizontal="5dp"
+					android:orientation="vertical"
+					tools:ignore="UseCompoundDrawables">
+
+					<ImageView
+						android:id="@+id/WindDirectionDegrees"
+						android:layout_width="20dp"
+						android:layout_height="20dp"
+						android:layout_gravity="center"
+						android:layout_margin="5dp"
+						android:contentDescription="@string/winddirectionicon"
+						android:rotation="-90"
+						android:src="@drawable/direction"
+						app:tint="@android:color/white" />
+
+					<TextView
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/km_h"
+						android:textColor="@android:color/white"
+						android:textSize="18sp" />
+				</LinearLayout>
+
+				<TextView
+					android:id="@+id/WindDirectionText"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginHorizontal="5dp"
+					android:text="N"
+					android:textColor="@android:color/white"
+					android:textSize="22sp" />
+			</LinearLayout>
+		</LinearLayout>
+
+
+	</RelativeLayout>
+
+</RelativeLayout>

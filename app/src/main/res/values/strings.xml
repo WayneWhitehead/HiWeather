@@ -149,4 +149,7 @@
 	<string name="empty_time">--:--</string>
 	<string name="air_quality">Air Quality</string>
 	<string name="please_enter_an_address_in_the_search_bar_above">Please Enter an Address in the Search Bar Above</string>
+	<string name="appwidget_text">EXAMPLE</string>
+	<string name="add_widget">Add widget</string>
+	<string name="app_widget_description">This is an app widget description</string>
 </resources>
