@@ -66,7 +66,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
         binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
 
-        binding.nativeAd.addView(AdUtil.setupAds(this, AdUtil.appBarAdmobID))
+        binding.nativeAd.addView(AdUtil.setupAds(this, AdUtil.appBarId))
         setupPlacesAutoComplete()
 
         if (uAddress == null) {

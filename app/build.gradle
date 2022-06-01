@@ -42,8 +42,8 @@ android {
         applicationId "com.hidesign.hiweather"
         minSdkVersion 26
         targetSdkVersion 32
-        versionCode 16
-        versionName "0.1.22"
+        versionCode 17
+        versionName "0.1.23"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -120,8 +120,8 @@ dependencies {
     implementation 'com.google.android.libraries.places:places:2.6.0'
     implementation 'com.google.android.gms:play-services-location:19.0.1'
     implementation 'com.google.android.material:material:1.6.0'
-    implementation 'com.google.android.gms:play-services-ads:20.6.0'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.10'
+    implementation 'com.google.android.gms:play-services-ads:21.0.0'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.11'
     implementation 'com.google.firebase:firebase-analytics-ktx:21.0.0'
-    implementation 'com.google.firebase:firebase-perf-ktx:20.0.6'
+    implementation 'com.google.firebase:firebase-perf-ktx:20.1.0'
 }

@@ -23,7 +23,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.WeatherWidget
 import com.hidesign.hiweather.adapter.DailyRecyclerAdapter
 import com.hidesign.hiweather.adapter.HourlyRecyclerAdapter
 import com.hidesign.hiweather.databinding.FragmentWeatherBinding
@@ -81,14 +80,8 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         val formattedDate = df.format(Calendar.getInstance().time)
         binding.date.text = formattedDate
 
-        return binding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
-        weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
-        firebaseAnalytics = Firebase.analytics
-        fetchContent()
+        LinearSnapHelper().attachToRecyclerView(binding.rvHourlyForecast)
+        LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
 
         binding.swipeLayout.setOnRefreshListener { fetchContent() }
         binding.hourlyForecastCard.setOnClickListener {
@@ -101,8 +94,14 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.displayDailyForecast.rotation =
                 binding.displayDailyForecast.rotation + 180F
         }
-        LinearSnapHelper().attachToRecyclerView(binding.rvHourlyForecast)
-        LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
+        return binding.root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
+        firebaseAnalytics = Firebase.analytics
+        fetchContent()
     }
 
     override fun onResume() {
@@ -196,7 +195,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             hourlyAdapter.onItemClick = { hourly: Hourly, _: View ->
                 ExpandedForecast.newInstance(hourly,
                     weather.timezone,
-                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetAdmobID))
+                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetId))
                     .show(childFragmentManager, ExpandedForecast.TAG)
             }
             binding.rvHourlyForecast.adapter = hourlyAdapter
@@ -208,7 +207,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             dailyAdapter.onItemClick = {
                 ExpandedForecast.newInstance(it,
                     weather.timezone,
-                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetAdmobID))
+                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetId))
                     .show(childFragmentManager, ExpandedForecast.TAG)
             }
             binding.rvDailyForecast.adapter = dailyAdapter
@@ -218,7 +217,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
                     weather.current.weather[0].description,
                     weather.timezone,
                     weather.current.uvi,
-                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetAdmobID))
+                    AdUtil.setupAds(requireContext(), AdUtil.bottomSheetId))
                     .show(childFragmentManager, ExpandedSunMoon.TAG)
             }
             binding.Sunrise.text = DateUtils.getDateTime("HH:mm",

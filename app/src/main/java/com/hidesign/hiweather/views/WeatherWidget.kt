@@ -1,4 +1,4 @@
-package com.hidesign.hiweather
+package com.hidesign.hiweather.views
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -12,11 +12,11 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.network.WeatherViewModel
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.WeatherUtils
-import com.hidesign.hiweather.views.WeatherActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -55,6 +55,33 @@ class WeatherWidget : AppWidgetProvider(), CoroutineScope, LifecycleObserver, Vi
         }
     }
 
+    private fun updateAppWidget(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        weatherDaily: Daily,
+    ) {
+        val views = RemoteViews(context.packageName, R.layout.weather_widget)
+
+        views.setTextViewText(R.id.CurrentTemp, weatherDaily.temp.day.toString() + "°C")
+        views.setTextViewText(R.id.RealFeelTemp, weatherDaily.feelsLike.toString() + "°C")
+        views.setTextViewText(R.id.LowTemp, weatherDaily.temp.min.toString() + "°C")
+        views.setTextViewText(R.id.HighTemp, weatherDaily.temp.max.toString() + "°C")
+
+        views.setTextViewText(R.id.WindSpeed, weatherDaily.windSpeed.toString())
+        views.setTextViewText(R.id.WindSpeed, WeatherUtils.getWindDegreeText(weatherDaily.windDeg))
+        views.setImageViewResource(R.id.skiesImage,
+            WeatherUtils.getWeatherIcon(weatherDaily.clouds))
+        views.setOnClickPendingIntent(R.id.currentInfo,
+            PendingIntent.getActivity(context, 0, Intent(context,
+                WeatherActivity::class.java), 0))
+
+        //binding.WindDirectionDegrees.rotation = ((weatherDaily!!.windDeg - 270).toFloat())
+
+        // Instruct the widget manager to update the widget
+        appWidgetManager.updateAppWidget(appWidgetId, views)
+    }
+
     override fun onEnabled(context: Context) {
         // Enter relevant functionality for when the first widget is created
     }
@@ -66,30 +93,4 @@ class WeatherWidget : AppWidgetProvider(), CoroutineScope, LifecycleObserver, Vi
     override fun getViewModelStore(): ViewModelStore {
         return ViewModelStore()
     }
-}
-
-internal fun updateAppWidget(
-    context: Context,
-    appWidgetManager: AppWidgetManager,
-    appWidgetId: Int,
-    weatherDaily: Daily,
-) {
-    val views = RemoteViews(context.packageName, R.layout.weather_widget)
-
-    views.setTextViewText(R.id.CurrentTemp, weatherDaily.temp.day.toString() + "°C")
-    views.setTextViewText(R.id.RealFeelTemp, weatherDaily.feelsLike.toString() + "°C")
-    views.setTextViewText(R.id.LowTemp, weatherDaily.temp.min.toString() + "°C")
-    views.setTextViewText(R.id.HighTemp, weatherDaily.temp.max.toString() + "°C")
-
-    views.setTextViewText(R.id.WindSpeed, weatherDaily.windSpeed.toString())
-    views.setTextViewText(R.id.WindSpeed, WeatherUtils.getWindDegreeText(weatherDaily.windDeg))
-    views.setImageViewResource(R.id.skiesImage, WeatherUtils.getWeatherIcon(weatherDaily.clouds))
-    views.setOnClickPendingIntent(R.id.currentInfo,
-        PendingIntent.getActivity(context, 0, Intent(context,
-            WeatherActivity::class.java), 0))
-
-    //binding.WindDirectionDegrees.rotation = ((weatherDaily!!.windDeg - 270).toFloat())
-
-    // Instruct the widget manager to update the widget
-    appWidgetManager.updateAppWidget(appWidgetId, views)
 }

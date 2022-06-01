@@ -19,7 +19,7 @@
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme">
 		<receiver
-			android:name=".WeatherWidget"
+			android:name=".views.WeatherWidget"
 			android:exported="false">
 			<intent-filter>
 				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
