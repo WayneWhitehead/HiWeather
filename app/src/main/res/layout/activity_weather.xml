@@ -1,98 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:animateLayoutChanges="true"
+	app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
 	tools:context=".views.WeatherActivity">
 
-	<com.google.android.material.appbar.AppBarLayout
-		android:id="@+id/app_bar"
+	<com.google.android.gms.ads.AdView
+		android:id="@+id/adView"
 		android:layout_width="match_parent"
-		android:layout_height="@dimen/app_bar_height"
-		android:backgroundTint="@color/backgroundDark"
-		android:background="@color/backgroundDark"
-		android:theme="@style/AppTheme.AppBarOverlay">
-
-		<com.google.android.material.appbar.CollapsingToolbarLayout
-			android:id="@+id/toolbar_layout"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			app:contentScrim="@color/backgroundDark"
-			app:layout_scrollFlags="scroll|exitUntilCollapsed"
-			app:toolbarId="@+id/toolbar">
-
-			<com.google.android.material.appbar.MaterialToolbar
-				android:id="@+id/toolbar"
-				android:layout_width="match_parent"
-				android:layout_height="?attr/actionBarSize"
-				app:layout_collapseMode="pin" />
-
-			<com.google.android.gms.ads.nativead.NativeAdView
-				android:id="@+id/nativeAd"
-				android:layout_width="match_parent"
-				android:layout_height="130dp"
-				android:layout_gravity="top" />
-
-			<com.google.android.material.progressindicator.LinearProgressIndicator
-				android:id="@+id/linear_progress"
-				android:layout_width="match_parent"
-				android:layout_height="3dp"
-				android:layout_gravity="bottom"
-				android:elevation="1000dp"
-				android:indeterminate="true"
-				android:visibility="visible"
-				app:indicatorColor="@color/colorPrimaryLight" />
-
-			<androidx.cardview.widget.CardView
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_gravity="bottom"
-				android:backgroundTint="@color/backgroundDark"
-				app:layout_collapseMode="pin">
-
-				<androidx.constraintlayout.widget.ConstraintLayout
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content">
-
-					<com.google.android.material.button.MaterialButton
-						android:id="@+id/precisionLocation"
-						android:layout_width="50dp"
-						android:layout_height="50dp"
-						android:background="#00FFFFFF"
-						android:insetTop="0dp"
-						app:icon="@drawable/precision"
-						app:iconGravity="top"
-						app:iconSize="35dp"
-						app:layout_constraintBottom_toBottomOf="parent"
-						app:layout_constraintEnd_toEndOf="parent"
-						app:layout_constraintTop_toTopOf="parent"
-						app:tint="@color/white" />
-
-					<androidx.fragment.app.FragmentContainerView
-						android:id="@+id/autocomplete_fragment1"
-						android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-						android:layout_width="match_parent"
-						android:layout_height="wrap_content"
-						android:layout_gravity="bottom"
-						android:layout_marginRight="50dp"
-						app:layout_constraintBottom_toBottomOf="parent"
-						app:layout_constraintEnd_toStartOf="@id/precisionLocation"
-						app:layout_constraintStart_toStartOf="parent"
-						app:layout_constraintTop_toTopOf="parent" />
-				</androidx.constraintlayout.widget.ConstraintLayout>
-			</androidx.cardview.widget.CardView>
-
-		</com.google.android.material.appbar.CollapsingToolbarLayout>
-	</com.google.android.material.appbar.AppBarLayout>
+		android:layout_height="wrap_content" />
 
 	<FrameLayout
 		android:id="@+id/contentFrame"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@color/backgroundDark"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+		android:background="@color/backgroundDark" />
 
+	<com.google.android.material.floatingactionbutton.FloatingActionButton
+		android:id="@+id/searchFAB"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:contentDescription="@null"
+		android:elevation="5dp"
+		android:tint="@color/white"
+		app:backgroundTint="#151515"
+		app:layout_anchor="@id/bottomAppBar"
+		app:layout_behavior="com.google.android.material.floatingactionbutton.FloatingActionButton$Behavior"
+		app:srcCompat="@drawable/quantum_ic_search_grey600_24" />
+
+	<androidx.fragment.app.FragmentContainerView
+		android:id="@+id/autocomplete_fragment"
+		android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom"
+		android:elevation="6dp"
+		android:visibility="invisible" />
+
+	<com.google.android.material.progressindicator.LinearProgressIndicator
+		android:id="@+id/linear_progress"
+		android:layout_width="match_parent"
+		android:layout_height="3dp"
+		android:layout_gravity="bottom"
+		android:elevation="4dp"
+		android:indeterminate="true"
+		android:visibility="visible"
+		app:indicatorColor="@color/colorPrimaryLight"
+		app:layout_anchor="@id/bottomAppBar" />
+
+	<com.google.android.material.bottomappbar.BottomAppBar
+		android:id="@+id/bottomAppBar"
+		style="@style/Widget.MaterialComponents.BottomAppBar.PrimarySurface"
+		android:layout_width="match_parent"
+		android:layout_height="55dp"
+		android:layout_gravity="bottom"
+		android:backgroundTint="#151515"
+		app:fabAlignmentMode="end"
+		app:hideOnScroll="true"
+		app:menu="@menu/menu_weather">
+
+		<com.google.android.material.appbar.MaterialToolbar
+			android:id="@+id/toolbar"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_marginLeft="50dp"
+			app:title="Search for a City"
+			app:titleCentered="true"
+			app:titleTextColor="@color/white" />
+
+	</com.google.android.material.bottomappbar.BottomAppBar>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

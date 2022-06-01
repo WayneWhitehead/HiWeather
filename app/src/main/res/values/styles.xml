@@ -9,6 +9,7 @@
 		<item name="colorSurface">@color/colorPrimary</item>
 		<item name="colorOnSurface">@color/white</item>
 		<item name="colorOnPrimary">@color/white</item>
+		<item name="colorControlNormal">@color/white</item>
 		<item name="android:fragmentExitTransition">@transition/exit_transition</item>
 		<item name="android:fragmentEnterTransition">@transition/exit_transition</item>
 	</style>

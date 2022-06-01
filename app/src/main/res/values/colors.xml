@@ -14,6 +14,7 @@
 	<color name="forecast_card_content">#000000</color>
 	<color name="expanded_forecast_card">#05325A</color>
 	<color name="windCardItems">#031B43</color>
+	<color name="currentEXtraCard">#FF6666</color>
 
 	<!--    Air Quality Colors-->
 	<color name="airIndex1">#0A9101</color>

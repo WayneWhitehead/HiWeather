@@ -3,7 +3,6 @@ package com.hidesign.hiweather.views
 import android.Manifest
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.location.Address
 import android.os.Bundle
 import android.util.Log
@@ -19,7 +18,6 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
-import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -39,7 +37,7 @@ import kotlin.coroutines.CoroutineContext
 class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     lateinit var binding: ActivityWeatherBinding
-    private lateinit var autocompleteSupportFragment1: AutocompleteSupportFragment
+    private lateinit var autocompleteSupportFragment: AutocompleteSupportFragment
 
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + job
@@ -61,12 +59,8 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         setContentView(binding.root)
         firebaseAnalytics = Firebase.analytics
 
-        autocompleteSupportFragment1 =
-            (supportFragmentManager.findFragmentById(R.id.autocomplete_fragment1) as AutocompleteSupportFragment?)!!
-        binding.toolbarLayout.titleCollapseMode = CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_SCALE
-        binding.toolbarLayout.setContentScrimColor(getColor(R.color.colorAccentLight))
-
-        binding.nativeAd.addView(AdUtil.setupAds(this, AdUtil.appBarId))
+        autocompleteSupportFragment =
+            (supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment?)!!
         setupPlacesAutoComplete()
 
         if (uAddress == null) {
@@ -80,10 +74,25 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                 .replace(binding.contentFrame.id, WeatherFragment.newInstance(uAddress!!))
                 .commit()
         }
-        binding.precisionLocation.setOnClickListener {
-            mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        binding.bottomAppBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.action_location -> {
+                    mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    true
+                }
+                else -> false
+            }
         }
+        binding.searchFAB.setOnClickListener {
+            binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input)
+                .performClick()
+        }
+        (binding.toolbar as View).setOnClickListener {
+            binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input)
+                .performClick()
+        }
+        binding.adView.addView(AdUtil.setupAds(this, AdUtil.appBarId))
     }
 
     override fun onResume() {
@@ -102,6 +111,8 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private fun checkLocation() {
         if (LocationUtil.verifyPermissions(this)) {
             getLocation()
+        } else {
+            binding.linearProgress.visibility = View.INVISIBLE
         }
     }
 
@@ -110,24 +121,22 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         launch {
             val address = LocationUtil.getLocation(activity)
             if (address != null) {
-                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                    ?.setText(address.locality)
-                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                    ?.setTextColor(Color.WHITE)
+                binding.toolbar.title = address.locality
+                binding.bottomAppBar.performShow()
                 supportFragmentManager
                     .beginTransaction()
                     .replace(binding.contentFrame.id, WeatherFragment.newInstance(address))
                     .commit()
             } else if (uAddress != null) {
-                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                    ?.setText(uAddress!!.locality)
-                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                    ?.setTextColor(Color.WHITE)
+                binding.toolbar.title = uAddress!!.locality
+                binding.bottomAppBar.performShow()
                 supportFragmentManager
                     .beginTransaction()
                     .replace(binding.contentFrame.id, WeatherFragment.newInstance(uAddress!!))
                     .commit()
             } else {
+                binding.toolbar.title = "Enter an Address"
+                binding.bottomAppBar.performShow()
                 supportFragmentManager
                     .beginTransaction()
                     .replace(binding.contentFrame.id, EmptyView.newInstance())
@@ -146,23 +155,22 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
             Places.initialize(applicationContext, apiKey)
         }
 
-        autocompleteSupportFragment1.setTypeFilter(TypeFilter.CITIES)
-        autocompleteSupportFragment1.setPlaceFields(
+        autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES)
+        autocompleteSupportFragment.setPlaceFields(
             listOf(
                 Place.Field.NAME,
                 Place.Field.ADDRESS,
                 Place.Field.LAT_LNG,
             )
         )
-        autocompleteSupportFragment1.view?.setOnClickListener {
-            autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                ?.setTextColor(getColor(R.color.black))
-        }
-        autocompleteSupportFragment1.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+
+        autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onError(p0: Status) {
                 Toast.makeText(applicationContext,
                     "Some error occurred " + p0.statusMessage,
                     Toast.LENGTH_SHORT).show()
+                binding.toolbar.title = "Enter an Address"
+                binding.bottomAppBar.performShow()
             }
 
             override fun onPlaceSelected(place: Place) {
@@ -173,14 +181,14 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                     longitude = latlng.longitude
                 }
                 if (latlng != null) {
+                    binding.toolbar.title = place.address
+                    binding.bottomAppBar.performShow()
                     supportFragmentManager
                         .beginTransaction()
                         .replace(binding.contentFrame.id,
                             WeatherFragment.newInstance(selectedAddress))
                         .commit()
                 }
-                autocompleteSupportFragment1.view?.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                    ?.setTextColor(getColor(R.color.white))
             }
         })
     }

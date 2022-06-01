@@ -13,14 +13,11 @@ import com.hidesign.hiweather.databinding.ExpandedSunMoonBinding
 import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtils.getMoonIcon
-import kotlin.math.roundToInt
 
 class ExpandedSunMoon : BottomSheetDialogFragment() {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var binding: ExpandedSunMoonBinding
     private lateinit var weatherDaily: Daily
-    private var description = ""
-    private var uvIndex = ""
     private var timeZone = ""
     private lateinit var ads: AdView
 
@@ -34,10 +31,6 @@ class ExpandedSunMoon : BottomSheetDialogFragment() {
             DateUtils.getDateTime("HH:mm", (weatherDaily.sunset).toLong(), timeZone)
         binding.hoursOfSunlight.text =
             DateUtils.getHours(weatherDaily.sunrise.toLong(), weatherDaily.sunset.toLong())
-        binding.description.text = description.replaceFirstChar { it.titlecase() }
-
-        val uvIndex = "UV Index - $uvIndex"
-        binding.UVIndex.text = uvIndex
 
         binding.Moonrise.text =
             DateUtils.getDateTime("HH:mm", (weatherDaily.moonrise).toLong(), timeZone)
@@ -63,13 +56,11 @@ class ExpandedSunMoon : BottomSheetDialogFragment() {
         const val TAG = "Sun & Moon BottomSheet"
 
         @JvmStatic
-        fun newInstance(daily: Daily, desc: String, tz: String, uvi: Double, ad: AdView) =
+        fun newInstance(daily: Daily, tz: String, ad: AdView) =
             ExpandedSunMoon().apply {
                 arguments = Bundle().apply {
                     weatherDaily = daily
-                    description = desc
                     timeZone = tz
-                    uvIndex = uvi.roundToInt().toString()
                     ads = ad
                 }
             }

@@ -49,15 +49,6 @@ import kotlin.math.roundToInt
 
 class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
-    companion object {
-        const val TAG = "Weather Fragment"
-        fun newInstance(selectedAddress: Address): WeatherFragment {
-            val fragment = WeatherFragment()
-            fragment.uAddress = selectedAddress
-            return fragment
-        }
-    }
-
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private var uAddress: Address? = SplashScreenActivity.uAddress
     private lateinit var binding: FragmentWeatherBinding
@@ -75,10 +66,6 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         savedInstanceState: Bundle?,
     ): View {
         binding = FragmentWeatherBinding.inflate(layoutInflater)
-
-        val df = SimpleDateFormat("dd MMMM", Locale.getDefault())
-        val formattedDate = df.format(Calendar.getInstance().time)
-        binding.date.text = formattedDate
 
         LinearSnapHelper().attachToRecyclerView(binding.rvHourlyForecast)
         LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
@@ -125,6 +112,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             return
         }
 
+        val df = SimpleDateFormat("d MMMM HH:mm", Locale.getDefault())
+        val formattedDate = df.format(Calendar.getInstance().time)
+        binding.date.text = formattedDate
         setFetchingContent()
 
         launch {
@@ -213,10 +203,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.rvDailyForecast.adapter = dailyAdapter
 
             binding.sunCard.setOnClickListener {
-                ExpandedSunMoon.newInstance(weather.daily[0],
-                    weather.current.weather[0].description,
+                ExpandedSunMoon.newInstance(
+                    weather.daily[0],
                     weather.timezone,
-                    weather.current.uvi,
                     AdUtil.setupAds(requireContext(), AdUtil.bottomSheetId))
                     .show(childFragmentManager, ExpandedSunMoon.TAG)
             }
@@ -426,6 +415,15 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             this.visibility = View.GONE
         } else {
             this.visibility = View.VISIBLE
+        }
+    }
+
+    companion object {
+        const val TAG = "Weather Fragment"
+        fun newInstance(selectedAddress: Address): WeatherFragment {
+            val fragment = WeatherFragment()
+            fragment.uAddress = selectedAddress
+            return fragment
         }
     }
 }

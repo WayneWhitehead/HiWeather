@@ -90,27 +90,8 @@
 					android:gravity="center"
 					android:textColor="@color/black"
 					android:textStyle="bold"
-					android:textSize="28sp"
+					android:textSize="26sp"
 					android:text="@null"/>
-
-				<TextView
-					android:id="@+id/description"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:paddingHorizontal="15dp"
-					android:gravity="center"
-					android:textColor="@color/black"
-					android:textSize="18sp"
-					android:text="@null"/>
-				<TextView
-					android:id="@+id/UVIndex"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:paddingHorizontal="15dp"
-					android:gravity="center"
-					android:textColor="@color/black"
-					android:textSize="16sp"
-					android:text="@null" />
 
 			</LinearLayout>
 
@@ -197,7 +178,7 @@
 					android:gravity="center"
 					android:textColor="@color/white"
 					android:textStyle="bold"
-					android:textSize="28sp"
+					android:textSize="26sp"
 					android:text="@null" />
 			</LinearLayout>
 
