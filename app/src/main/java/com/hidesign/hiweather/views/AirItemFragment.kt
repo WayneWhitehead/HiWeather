@@ -11,6 +11,8 @@ import com.hidesign.hiweather.R
 import com.hidesign.hiweather.databinding.FragmentAirItemBinding
 import com.hidesign.hiweather.model.Components
 import com.hidesign.hiweather.util.WeatherUtils
+import com.hookedonplay.decoviewlib.charts.SeriesItem
+import com.hookedonplay.decoviewlib.events.DecoEvent
 import java.text.MessageFormat
 
 
@@ -88,19 +90,60 @@ class AirItemFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setAirItemValues() {
-        binding.progress.setRange(airValues[0].toFloat(), airValues[airValues.size - 1].toFloat())
-        binding.progress.setProgress(currentValue)
-        binding.progress.leftSeekBar.thumbHeight = 20
-        binding.progress.leftSeekBar.thumbWidth = 20
-        binding.progress.setIndicatorText(WeatherUtils.getValueQualityText(airStrings,
-            airValues,
-            currentValue))
-        binding.progress.tickMarkTextArray = airValues.map { it.toString() }.toTypedArray()
-        binding.progress.steps = airValues[airValues.size - 1] / 50
-        binding.progress.progressColor = Color.TRANSPARENT
+    override fun getTheme(): Int {
+        return R.style.AppTheme_BottomSheet
+    }
 
-        binding.airValue.text = MessageFormat.format("{0}µg/m³", currentValue)
+    private fun setAirItemValues() {
+        binding.progress.deleteAll()
+        binding.progress.configureAngles(280, 0)
+
+        val width = 90F
+        val initial = SeriesItem.Builder(Color.BLACK)
+            .setRange(0F,
+                airValues[airValues.size - 1].toFloat() * 2,
+                airValues[airValues.size - 1].toFloat() * 2)
+            .setLineWidth(width)
+            .build()
+        binding.progress.addSeries(initial)
+
+        val ta = resources.obtainTypedArray(R.array.colors)
+        val colors = IntArray(ta.length())
+        for (i in 0 until ta.length()) {
+            colors[i] = ta.getColor(i, 0)
+        }
+        ta.recycle()
+
+        val activeItem = WeatherUtils.getCurrentActiveSeriesItem(airValues, currentValue)
+        for ((pos, item) in airValues.withIndex().reversed()) {
+            val seriesItem = SeriesItem.Builder(colors[pos])
+                .setRange(0F, airValues[airValues.size - 1].toFloat(), item.toFloat())
+                .setShadowSize(15F)
+                .setLineWidth(width)
+                .build()
+
+            if (activeItem != -1 && activeItem == pos) {
+                binding.airText.text = airStrings[pos]
+                binding.airText.setTextColor(colors[pos])
+                binding.airValue.text = MessageFormat.format("{0}µg/m³", currentValue)
+                binding.airValue.setTextColor(colors[pos])
+            }
+            binding.progress.addSeries(seriesItem)
+        }
+        val current = SeriesItem.Builder(Color.BLACK)
+            .setRange(0F, airValues[airValues.size - 1].toFloat(), 0F)
+            .setLineWidth(45F)
+            .setInitialVisibility(false)
+            .setShadowSize(20F)
+            .build()
+        binding.progress.addSeries(current)
+        binding.progress.addEvent(DecoEvent.Builder(currentValue)
+            .setIndex(airValues.size + 1)
+            .setDelay(500)
+            .setColor(Color.BLACK)
+            .setDuration(500)
+            .setDisplayText(MessageFormat.format("{0}µg/m³", currentValue))
+            .build())
     }
 
     companion object {

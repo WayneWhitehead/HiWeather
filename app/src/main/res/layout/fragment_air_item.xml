@@ -2,74 +2,52 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
+	android:layout_height="400dp"
 	android:animateLayoutChanges="true"
-	android:background="#000000"
 	android:padding="15dp">
 
-	<com.jaygoo.widget.VerticalRangeSeekBar
+	<com.hookedonplay.decoviewlib.DecoView
+		android:layout_width="match_parent"
 		android:id="@+id/progress"
-		android:clickable="false"
-		android:contextClickable="false"
-		android:layout_width="match_parent"
-		android:layout_height="400dp"
+		android:layout_height="match_parent"
 		app:layout_constraintBottom_toBottomOf="parent"
-		android:elevation="0dp"
-		app:layout_constraintTop_toTopOf="parent"
-		app:rsb_gravity="bottom"
-		app:rsb_indicator_background_color="@color/white"
-		app:rsb_indicator_padding_bottom="10dp"
-		app:rsb_indicator_padding_left="10dp"
-		app:rsb_indicator_padding_right="10dp"
-		app:rsb_indicator_padding_top="10dp"
-		app:rsb_indicator_radius="10dp"
-		app:rsb_indicator_show_mode="alwaysShow"
-		app:rsb_indicator_text_color="@color/black"
-		app:rsb_indicator_text_size="14sp"
-		app:rsb_mode="single"
-		app:rsb_orientation="left"
-		app:rsb_progress_drawable_default="@drawable/gradient_air_slider"
-		app:rsb_progress_height="30dp"
-		app:rsb_step_auto_bonding="false"
-		app:rsb_step_color="@color/white"
-		app:rsb_step_height="20dp"
-		app:rsb_step_width="2dp"
-		app:rsb_tick_mark_layout_gravity="bottom"
-		app:rsb_tick_mark_mode="number"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:rsb_tick_mark_text_margin="5dp" />
+		app:layout_constraintTop_toTopOf="parent" />
 
-	<View
+	<com.google.android.material.textview.MaterialTextView
+		android:id="@+id/airText"
+		style="@style/TextAppearance.AppCompat.Headline"
+		android:layout_width="250dp"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="55dp"
+		android:gravity="center"
+		android:textColor="@color/white"
+		android:textSize="18sp"
+		app:layout_constraintBottom_toBottomOf="@id/air_picker"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintTop_toTopOf="@id/air_picker" />
+
+	<NumberPicker
+		android:id="@+id/air_picker"
 		android:layout_width="match_parent"
-		android:layout_height="400dp"
-		android:clickable="true"
+		android:layout_height="300dp"
+		android:divider="@color/black"
 		android:elevation="100dp"
+		android:theme="@style/AppTheme.Picker"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintTop_toTopOf="parent" />
 
 	<com.google.android.material.textview.MaterialTextView
 		android:id="@+id/airValue"
 		style="@style/TextAppearance.AppCompat.Headline"
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
+		android:layout_width="250dp"
+		android:layout_height="wrap_content"
 		android:layout_marginTop="55dp"
-		android:gravity="start"
 		android:textColor="@color/white"
-		android:textSize="20sp"
+		android:gravity="center"
+		android:textSize="18sp"
 		app:layout_constraintBottom_toBottomOf="@id/air_picker"
-		app:layout_constraintEnd_toEndOf="@id/air_picker"
-		app:layout_constraintStart_toStartOf="@id/air_picker"
-		app:layout_constraintTop_toTopOf="@id/air_picker" />
-
-	<NumberPicker
-		android:id="@+id/air_picker"
-		android:layout_width="wrap_content"
-		android:layout_height="400dp"
-		android:divider="@color/black"
-		android:elevation="100dp"
-		android:theme="@style/AppTheme.Picker"
-		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent" />
-
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintTop_toTopOf="@id/air_picker" />
 </androidx.constraintlayout.widget.ConstraintLayout>

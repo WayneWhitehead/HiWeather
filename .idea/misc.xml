@@ -13,7 +13,7 @@
         <entry key="app/src/main/res/layout-w1240dp/content_scrolling.xml" value="0.177734375" />
         <entry key="app/src/main/res/layout-w936dp/content_scrolling.xml" value="0.283011583011583" />
         <entry key="app/src/main/res/layout/activity_scrolling.xml" value="0.36770833333333336" />
-        <entry key="app/src/main/res/layout/activity_weather.xml" value="0.3772819472616633" />
+        <entry key="app/src/main/res/layout/activity_weather.xml" value="0.25" />
         <entry key="app/src/main/res/layout/content_scrolling.xml" value="0.31686358754027927" />
         <entry key="app/src/main/res/layout/daily_forecast_item.xml" value="0.30928270042194095" />
         <entry key="app/src/main/res/layout/exapnded_sun_moon.xml" value="0.375" />

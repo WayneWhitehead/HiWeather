@@ -17,12 +17,21 @@
 	<color name="currentEXtraCard">#FF6666</color>
 
 	<!--    Air Quality Colors-->
-	<color name="airIndex1">#0A9101</color>
-	<color name="airIndex2">#5A9101</color>
-	<color name="airIndex3">#916D01</color>
-	<color name="airIndex4">#912F01</color>
-	<color name="airIndex5">#CC0000</color>
-	<color name="airIndex6">#5A0000</color>
+	<color name="airIndex1">#12D805</color>
+	<color name="airIndex2">#80C80B</color>
+	<color name="airIndex3">#FFC925</color>
+	<color name="airIndex4">#E36A29</color>
+	<color name="airIndex5">#C53838</color>
+	<color name="airIndex6">#AF0F0F</color>
+	<array name="colors">
+		<item>#21F113</item>
+		<item>#8ECA49</item>
+		<item>#FFC925</item>
+		<item>#E36A29</item>
+		<item>#C53838</item>
+		<item>#AF0F0F</item>
+		<item>#272727</item>
+	</array>
 
 	<color name="white">#FFFFFF</color>
 	<color name="black">#000000</color>

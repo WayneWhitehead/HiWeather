@@ -104,6 +104,35 @@ object WeatherUtils {
         }
     }
 
+    fun getCurrentActiveSeriesItem(valueArray: IntArray, current: Float): Int {
+        return when (current) {
+            in 0F..valueArray[0].toFloat() -> {
+                0
+            }
+            in valueArray[0].toFloat()..valueArray[1].toFloat() -> {
+                1
+            }
+            in valueArray[1].toFloat()..valueArray[2].toFloat() -> {
+                2
+            }
+            in valueArray[2].toFloat()..valueArray[3].toFloat() -> {
+                3
+            }
+            in valueArray[3].toFloat()..valueArray[4].toFloat() -> {
+                4
+            }
+            in valueArray[4].toFloat()..valueArray[5].toFloat() -> {
+                5
+            }
+            in valueArray[5].toFloat()..valueArray[6].toFloat() -> {
+                6
+            }
+            else -> {
+                -1
+            }
+        }
+    }
+
     fun getAirQualityText(index: Int): String {
         return when (index) {
             1 -> "Good"

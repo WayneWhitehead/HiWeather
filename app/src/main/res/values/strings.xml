@@ -53,7 +53,6 @@
 		<item>Hazardous</item>
 	</string-array>
 	<integer-array name="airPMTwoFiveValues">
-		<item>0</item>
 		<item>12</item>
 		<item>35</item>
 		<item>55</item>
@@ -70,7 +69,6 @@
 		<item>Hazardous</item>
 	</string-array>
 	<integer-array name="airPMTenValues">
-		<item>0</item>
 		<item>55</item>
 		<item>155</item>
 		<item>255</item>
@@ -88,7 +86,6 @@
 		<item>Immediate danger to life limit</item>
 	</string-array>
 	<integer-array name="airNHThreeValues">
-		<item>0</item>
 		<item>25</item>
 		<item>30</item>
 		<item>50</item>
@@ -105,7 +102,6 @@
 		<item>Very Unhealthy</item>
 	</string-array>
 	<integer-array name="airNOTwoValues">
-		<item>0</item>
 		<item>50</item>
 		<item>100</item>
 		<item>150</item>
@@ -121,7 +117,6 @@
 		<item>Hazardous</item>
 	</string-array>
 	<integer-array name="airOThreeValues">
-		<item>0</item>
 		<item>50</item>
 		<item>100</item>
 		<item>150</item>
