@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
@@ -22,10 +21,10 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
+import com.hidesign.hiweather.adapter.ViewPagerAdapter
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.LocationUtil
-import com.hidesign.hiweather.views.SplashScreenActivity.Companion.uAddress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -42,7 +41,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + job
 
-    private val mPermissionResult = registerForActivityResult(RequestPermission()) { result ->
+    val mPermissionResult = registerForActivityResult(RequestPermission()) { result ->
         if (result) {
             binding.linearProgress.visibility = View.VISIBLE
             checkLocation()
@@ -63,17 +62,6 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
             (supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment?)!!
         setupPlacesAutoComplete()
 
-        if (uAddress == null) {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(binding.contentFrame.id, EmptyView.newInstance())
-                .commit()
-        } else {
-            supportFragmentManager
-                .beginTransaction()
-                .replace(binding.contentFrame.id, WeatherFragment.newInstance(uAddress!!))
-                .commit()
-        }
         binding.bottomAppBar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_location -> {
@@ -92,7 +80,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
             binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input)
                 .performClick()
         }
-        binding.adView.addView(AdUtil.setupAds(this, AdUtil.appBarId))
+        binding.AdView.addView(AdUtil.setupAds(this, AdUtil.appBarId))
     }
 
     override fun onResume() {
@@ -105,6 +93,10 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
 
     override fun onStart() {
         super.onStart()
+        val adapter = ViewPagerAdapter(this)
+        binding.vpContent.adapter = adapter
+        binding.vpContent.currentItem = 0
+        binding.vpContent.isUserInputEnabled = false
         checkLocation()
     }
 
@@ -112,6 +104,8 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         if (LocationUtil.verifyPermissions(this)) {
             getLocation()
         } else {
+            mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
             binding.linearProgress.visibility = View.INVISIBLE
         }
     }
@@ -121,26 +115,20 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         launch {
             val address = LocationUtil.getLocation(activity)
             if (address != null) {
-                binding.toolbar.title = address.locality
+                uAddress = address
+                binding.toolbar.title = address.locality ?: ""
                 binding.bottomAppBar.performShow()
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(binding.contentFrame.id, WeatherFragment.newInstance(address))
-                    .commit()
-            } else if (uAddress != null) {
-                binding.toolbar.title = uAddress!!.locality
-                binding.bottomAppBar.performShow()
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(binding.contentFrame.id, WeatherFragment.newInstance(uAddress!!))
-                    .commit()
+                binding.vpContent.setCurrentItem(1, true)
+                val list = supportFragmentManager.fragments
+                list.size
+                if (supportFragmentManager.fragments.size > 3) {
+                    val fragment = supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
+                    fragment.fetchContent()
+                }
             } else {
                 binding.toolbar.title = "Enter an Address"
                 binding.bottomAppBar.performShow()
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(binding.contentFrame.id, EmptyView.newInstance())
-                    .commit()
+                binding.vpContent.setCurrentItem(1, true)
                 binding.linearProgress.visibility = View.INVISIBLE
             }
         }
@@ -166,28 +154,26 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
 
         autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onError(p0: Status) {
-                Toast.makeText(applicationContext,
-                    "Some error occurred " + p0.statusMessage,
-                    Toast.LENGTH_SHORT).show()
                 binding.toolbar.title = "Enter an Address"
                 binding.bottomAppBar.performShow()
             }
 
             override fun onPlaceSelected(place: Place) {
                 val latlng = place.latLng
-
-                val selectedAddress = Address(Locale.getDefault()).apply {
+                val address = Address(Locale.getDefault()).apply {
                     latitude = latlng!!.latitude
                     longitude = latlng.longitude
+                    locality = place.address
                 }
-                if (latlng != null) {
-                    binding.toolbar.title = place.address
-                    binding.bottomAppBar.performShow()
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(binding.contentFrame.id,
-                            WeatherFragment.newInstance(selectedAddress))
-                        .commit()
+                uAddress = address
+                binding.toolbar.title = address.locality ?: ""
+                binding.bottomAppBar.performShow()
+                binding.vpContent.setCurrentItem(1, true)
+                val list = supportFragmentManager.fragments.toList()
+                list.size
+                if (supportFragmentManager.fragments.size > 3) {
+                    val fragment = supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
+                    fragment.fetchContent()
                 }
             }
         })
@@ -195,5 +181,6 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
 
     companion object {
         const val TAG = "Weather Activity"
+        var uAddress: Address? = null
     }
 }

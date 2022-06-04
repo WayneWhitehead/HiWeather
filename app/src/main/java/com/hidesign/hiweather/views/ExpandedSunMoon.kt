@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.gms.ads.AdView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.databinding.ExpandedSunMoonBinding
 import com.hidesign.hiweather.model.Daily
+import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtils.getMoonIcon
 
@@ -19,7 +19,6 @@ class ExpandedSunMoon : BottomSheetDialogFragment() {
     private lateinit var binding: ExpandedSunMoonBinding
     private lateinit var weatherDaily: Daily
     private var timeZone = ""
-    private lateinit var ads: AdView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = ExpandedSunMoonBinding.inflate(inflater)
@@ -40,7 +39,7 @@ class ExpandedSunMoon : BottomSheetDialogFragment() {
         binding.hoursOfMoonlight.text =
             DateUtils.getHours(weatherDaily.moonrise.toLong(), weatherDaily.moonset.toLong())
 
-        binding.nativeAd.addView(ads)
+        binding.nativeAd.addView(AdUtil.setupAds(requireContext(), AdUtil.bottomSheetId))
         return binding.root
     }
 
@@ -56,12 +55,11 @@ class ExpandedSunMoon : BottomSheetDialogFragment() {
         const val TAG = "Sun & Moon BottomSheet"
 
         @JvmStatic
-        fun newInstance(daily: Daily, tz: String, ad: AdView) =
+        fun newInstance(daily: Daily, tz: String) =
             ExpandedSunMoon().apply {
                 arguments = Bundle().apply {
                     weatherDaily = daily
                     timeZone = tz
-                    ads = ad
                 }
             }
     }

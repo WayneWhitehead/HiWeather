@@ -10,6 +10,7 @@
 
 	<!--    Cards-->
 	<color name="green_card">#8FDD93</color>
+	<color name="green_card_shimmer">#138100</color>
 	<color name="forecast_card">#A4DAF3</color>
 	<color name="forecast_card_content">#000000</color>
 	<color name="expanded_forecast_card">#05325A</color>

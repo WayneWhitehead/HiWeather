@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/headerCard"
+	style="@style/WeatherCards"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginHorizontal="20dp"
+	android:animateLayoutChanges="true"
+	android:backgroundTint="#2B2B2B"
+	app:cardElevation="10dp">
+
+	<TextView
+		android:id="@+id/header_title"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="20dp"
+		android:gravity="center"
+		android:paddingVertical="20dp"
+		android:text="@string/forecast"
+		android:textColor="@android:color/white"
+		android:textSize="30sp" />
+
+	<ImageView
+		android:id="@+id/display_forecast"
+		android:layout_width="50dp"
+		android:layout_height="50dp"
+		android:layout_gravity="center"
+		android:layout_marginTop="40dp"
+		android:layout_marginBottom="20dp"
+		android:contentDescription="@null"
+		android:src="@drawable/down"
+		app:tint="@color/white" />
+</com.google.android.material.card.MaterialCardView>

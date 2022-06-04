@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:shimmer="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="160dp"
+	android:layout_gravity="center"
+	android:layout_marginHorizontal="10dp"
+	android:layout_marginTop="-30dp"
+	android:backgroundTint="@color/white"
+	android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
+	app:cardCornerRadius="30dp">
+
+	<com.facebook.shimmer.ShimmerFrameLayout
+		android:id="@+id/currentShimmer"
+		style="@style/shimmerFrame"
+		android:layout_width="match_parent"
+		android:layout_height="150dp"
+		app:shimmer_base_color="#000000"
+		app:shimmer_colored="true"
+		app:shimmer_highlight_color="#000000"
+		shimmer:duration="800">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:orientation="vertical">
+
+			<include layout="@layout/placeholder_card_current" />
+		</LinearLayout>
+
+	</com.facebook.shimmer.ShimmerFrameLayout>
+
+	<LinearLayout
+		android:id="@+id/current_content"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:layout_marginVertical="25dp"
+		android:orientation="vertical">
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:orientation="horizontal">
+
+			<TextView
+				android:id="@+id/CurrentTemp"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:text="@string/_0_c"
+				android:textColor="@android:color/black"
+				android:textSize="60sp" />
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_margin="10dp"
+				android:gravity="center"
+				android:orientation="vertical">
+
+				<TextView
+					android:id="@+id/LowTemp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:text="@string/_0_c"
+					android:textColor="@android:color/black"
+					android:textSize="16sp" />
+
+				<TextView
+					android:id="@+id/HighTemp"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:text="@string/_0_c"
+					android:textColor="@android:color/black"
+					android:textSize="16sp" />
+			</LinearLayout>
+		</LinearLayout>
+
+		<TextView
+			android:id="@+id/RealFeelTemp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:text="@string/real_feel_0_c"
+			android:textColor="@android:color/black"
+			android:textSize="16sp" />
+	</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

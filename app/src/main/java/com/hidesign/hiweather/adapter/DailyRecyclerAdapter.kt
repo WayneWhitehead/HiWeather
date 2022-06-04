@@ -25,7 +25,7 @@ class DailyRecyclerAdapter internal constructor(
     var onItemClick: ((Daily) -> Unit)? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = mInflater.inflate(R.layout.daily_forecast_item, parent, false)
+        val view = mInflater.inflate(R.layout.card_daily_forecast_item, parent, false)
         return ViewHolder(view)
     }
 

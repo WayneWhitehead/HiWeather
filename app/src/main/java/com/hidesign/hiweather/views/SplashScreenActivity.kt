@@ -2,7 +2,6 @@ package com.hidesign.hiweather.views
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Address
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -21,10 +20,9 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope {
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + job
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onStart() {
+        super.onStart()
         firebaseAnalytics = Firebase.analytics
-
         val i = Intent(this@SplashScreenActivity, WeatherActivity::class.java)
         Thread.sleep(1000)
         startActivity(i)
@@ -41,8 +39,6 @@ class SplashScreenActivity : AppCompatActivity(), CoroutineScope {
     }
 
     companion object {
-        @JvmField
-        var uAddress: Address? = null
         const val TAG: String = "Splash Screen Activity"
     }
 }

@@ -22,9 +22,9 @@ class HourlyRecyclerAdapter internal constructor(
     private val weatherArrayList: ArrayList<Hourly>
     private var timezone: String = ""
     private val mInflater: LayoutInflater
-    var onItemClick: ((hourly: Hourly, v: View) -> Unit)? = null
+    var onItemClick: ((Hourly) -> Unit)? = null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = mInflater.inflate(R.layout.hourly_forecast_item, parent, false)
+        val view = mInflater.inflate(R.layout.card_hourly_forecast_item, parent, false)
         return ViewHolder(view)
     }
 
@@ -49,7 +49,7 @@ class HourlyRecyclerAdapter internal constructor(
 
         init {
             itemView.setOnClickListener {
-                onItemClick?.invoke(weatherArrayList[bindingAdapterPosition], itemView)
+                onItemClick?.invoke(weatherArrayList[bindingAdapterPosition])
             }
             date = itemView.findViewById(R.id.date)
             temp = itemView.findViewById(R.id.CurrentTemp)

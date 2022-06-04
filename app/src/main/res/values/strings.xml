@@ -25,26 +25,20 @@
 	<string name="today_s_date">Today\'s Date</string>
 	<string name="search">Search</string>
 	<string name="title_activity_weather">WeatherActivity</string>
-	<string name="DaysForecast">8 Day Forecast</string>
-	<string name="hourly_forecast">Hourly Forecast</string>
+	<string name="daily_forecast">7 Day Forecast</string>
+	<string name="hourly_forecast">24 Hour Forecast</string>
+	<string name="forecast">Forecast</string>
 
-	<string name="airCo">\n
-		9000-100000µg/m³ for no more than 8 hours \n
-		25000-35000µg/m³ for no more than 1 hour \n
-		90000-100000µg/m³ for no more than 15 minutes \n
-	</string>
-	<string name="airSoTwo">\n
-		24-Hour - 1400 µg/m³ - Not to be exceeded more than once per year \n
-		Annual - 300 µg/m³ - Annual arithmetic average
-	</string>
 	<string-array name="airTitles">
-		<item>Ammonia(NH₃)</item>
 		<item>Nitrogen Dioxide(NO₂)</item>
 		<item>Ozone(O₃)</item>
+		<item>Coarse Particulate Matter(PM₁₀)</item>
 		<item>Fine Particle Matter(PM₂₅)</item>
-		<item>Course Particulate Matter(PM₁₀)</item>
+		<item>Carbon Monoxide(CO)</item>
+		<item>Ammonia(NH₃)</item>
+		<item>Sulphur Dioxide(SO₂)</item>
 	</string-array>
-	<string-array name="airPMTwoFiveStrings">
+	<string-array name="airStrings">
 		<item>Good</item>
 		<item>Moderate</item>
 		<item>Unhealthy for \nSensitive Groups</item>
@@ -52,38 +46,55 @@
 		<item>Very Unhealthy</item>
 		<item>Hazardous</item>
 	</string-array>
-	<integer-array name="airPMTwoFiveValues">
-		<item>12</item>
-		<item>35</item>
-		<item>55</item>
-		<item>150</item>
-		<item>250</item>
+	<integer-array name="airNoTwoValues">
+		<item>50</item>
+		<item>100</item>
+		<item>200</item>
+		<item>400</item>
 		<item>500</item>
 	</integer-array>
-	<string-array name="airPMTenStrings">
-		<item>Good</item>
-		<item>Moderate</item>
-		<item>Unhealthy for \nSensitive Groups</item>
-		<item>Unhealthy</item>
-		<item>Very Unhealthy</item>
-		<item>Hazardous</item>
-	</string-array>
 	<integer-array name="airPMTenValues">
-		<item>55</item>
-		<item>155</item>
-		<item>255</item>
-		<item>355</item>
-		<item>425</item>
-		<item>505</item>
+		<item>25</item>
+		<item>50</item>
+		<item>90</item>
+		<item>180</item>
+		<item>360</item>
 	</integer-array>
+	<integer-array name="airOThreeValues">
+		<item>60</item>
+		<item>120</item>
+		<item>180</item>
+		<item>240</item>
+		<item>360</item>
+	</integer-array>
+	<integer-array name="airPMTwoFiveValues">
+		<item>15</item>
+		<item>30</item>
+		<item>55</item>
+		<item>110</item>
+		<item>220</item>
+	</integer-array>
+	<integer-array name="airSoTwoValues">
+		<item>40</item>
+		<item>80</item>
+		<item>380</item>
+		<item>800</item>
+		<!--		<item>1600</item>-->
+	</integer-array>
+	<integer-array name="airCoValues">
+		<item>1000</item>
+		<item>2000</item>
+		<item>10000</item>
+		<item>17000</item>
+		<!--		<item>34000</item>-->
+	</integer-array>
+
 	<string-array name="airNHThreeStrings">
 		<item>Detectable by smell</item>
 		<item>Uncomfortable, breathing support required</item>
 		<item>Maximum exposure limit</item>
 		<item>Irritated eyes, throat and mucous membranes</item>
 		<item>Moderate eye irritation, no long-term effect in exposures of less than 2 hours</item>
-		<item>Moderate throat irritation. Damage of mucous membranes with more than one hour exposure</item>
-		<item>Immediate danger to life limit</item>
 	</string-array>
 	<integer-array name="airNHThreeValues">
 		<item>25</item>
@@ -91,38 +102,6 @@
 		<item>50</item>
 		<item>100</item>
 		<item>140</item>
-		<item>400</item>
-		<item>500</item>
-	</integer-array>
-	<string-array name="airNOTwoStrings">
-		<item>Good</item>
-		<item>Moderate</item>
-		<item>Unhealthy for\nSensitive Groups</item>
-		<item>Unhealthy</item>
-		<item>Very Unhealthy</item>
-	</string-array>
-	<integer-array name="airNOTwoValues">
-		<item>50</item>
-		<item>100</item>
-		<item>150</item>
-		<item>200</item>
-		<item>300</item>
-	</integer-array>
-	<string-array name="airOThreeStrings">
-		<item>Good</item>
-		<item>Moderate</item>
-		<item>Unhealthy for \nSensitive Groups</item>
-		<item>Unhealthy</item>
-		<item>Very Unhealthy</item>
-		<item>Hazardous</item>
-	</string-array>
-	<integer-array name="airOThreeValues">
-		<item>50</item>
-		<item>100</item>
-		<item>150</item>
-		<item>200</item>
-		<item>300</item>
-		<item>500</item>
 	</integer-array>
 
 	<string name="precipitation">Precipitation</string>
@@ -136,6 +115,7 @@
 	<string name="precipitation_0">Precipitation {0}%</string>
 	<string name="real_feel_0_c">Real Feel {0}°C</string>
 	<string name="_0_c">{0}°C</string>
+	<string name="_0_p">{0}%</string>
 	<string name="low_0_c">Low {0}°C</string>
 	<string name="high_0_c">High {0}°C</string>
 	<string name="moonrise">Moonrise</string>
@@ -143,8 +123,5 @@
 	<string name="_0">{0}</string>
 	<string name="empty_time">--:--</string>
 	<string name="air_quality">Air Quality</string>
-	<string name="please_enter_an_address_in_the_search_bar_above">Please Enter an Address in the Search Bar Above</string>
-	<string name="appwidget_text">EXAMPLE</string>
-	<string name="add_widget">Add widget</string>
-	<string name="app_widget_description">This is an app widget description</string>
+	<string name="please_enter_an_address_in_the_search_bar_above">Please Search for an Address </string>
 </resources>

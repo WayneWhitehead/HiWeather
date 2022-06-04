@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.databinding.FragmentAirItemBinding
+import com.hidesign.hiweather.databinding.ExpandedAirItemBinding
 import com.hidesign.hiweather.model.Components
 import com.hidesign.hiweather.util.WeatherUtils
 import com.hookedonplay.decoviewlib.charts.SeriesItem
@@ -18,7 +18,7 @@ import java.text.MessageFormat
 
 class AirItemFragment : BottomSheetDialogFragment() {
 
-    private lateinit var binding: FragmentAirItemBinding
+    private lateinit var binding: ExpandedAirItemBinding
     private lateinit var airStrings: Array<String>
     private lateinit var airValues: IntArray
     private var currentValue = 0F
@@ -27,18 +27,7 @@ class AirItemFragment : BottomSheetDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-        binding.airPicker.minValue = 0
-        binding.airPicker.maxValue = resources.getStringArray(R.array.airTitles).size - 1
-        binding.airPicker.displayedValues = resources.getStringArray(R.array.airTitles)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            binding.airPicker.selectionDividerHeight = 0
-        }
-
-        for ((pos, item) in resources.getStringArray(R.array.airTitles).withIndex()) {
-            if (item == title) {
-                binding.airPicker.value = pos
-            }
-        }
+        updateValues(title)
         setAirItemValues()
         binding.airPicker.setOnValueChangedListener { _, _, newVal ->
             updateValues(resources.getStringArray(R.array.airTitles)[newVal])
@@ -51,62 +40,73 @@ class AirItemFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        binding = FragmentAirItemBinding.inflate(inflater, container, false)
+        binding = ExpandedAirItemBinding.inflate(inflater, container, false)
+        binding.airPicker.minValue = 0
+        binding.airPicker.maxValue = resources.getStringArray(R.array.airTitles).size - 1
+        binding.airPicker.displayedValues = resources.getStringArray(R.array.airTitles)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            binding.airPicker.selectionDividerHeight = 0
+        }
+
+        for ((pos, item) in resources.getStringArray(R.array.airTitles).withIndex()) {
+            if (item == title) {
+                binding.airPicker.value = pos
+            }
+        }
         return binding.root
     }
 
     private fun updateValues(item: String) {
         when (item) {
+            "Carbon Monoxide(CO)" -> {
+                airValues = resources.getIntArray(R.array.airCoValues)
+                airStrings = resources.getStringArray(R.array.airStrings)
+                currentValue = components.co.toFloat()
+                title = item
+            }
+            "Sulphur Dioxide(SO₂)" -> {
+                airValues = resources.getIntArray(R.array.airSoTwoValues)
+                airStrings = resources.getStringArray(R.array.airStrings)
+                currentValue = components.so2.toFloat()
+                title = item
+            }
             "Fine Particle Matter(PM₂₅)" -> {
                 airValues = resources.getIntArray(R.array.airPMTwoFiveValues)
-                airStrings = resources.getStringArray(R.array.airPMTwoFiveStrings)
+                airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.pm25.toFloat()
-                title = "Fine Particle Matter(PM₂₅)"
+                title = item
             }
-            "Course Particulate Matter(PM₁₀)" -> {
+            "Coarse Particulate Matter(PM₁₀)" -> {
                 airValues = resources.getIntArray(R.array.airPMTenValues)
-                airStrings = resources.getStringArray(R.array.airPMTenStrings)
+                airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.pm10.toFloat()
-                title = "Course Particulate Matter(PM₁₀)"
+                title = item
             }
             "Ozone(O₃)" -> {
                 airValues = resources.getIntArray(R.array.airOThreeValues)
-                airStrings = resources.getStringArray(R.array.airOThreeStrings)
+                airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.o3.toFloat()
-                title = "Ozone(O₃)"
+                title = item
             }
             "Nitrogen Dioxide(NO₂)" -> {
-                airValues = resources.getIntArray(R.array.airNOTwoValues)
-                airStrings = resources.getStringArray(R.array.airNOTwoStrings)
+                airValues = resources.getIntArray(R.array.airNoTwoValues)
+                airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.no2.toFloat()
-                title = "Nitrogen Dioxide(NO₂)"
+                title = item
             }
             "Ammonia(NH₃)" -> {
                 airValues = resources.getIntArray(R.array.airNHThreeValues)
                 airStrings = resources.getStringArray(R.array.airNHThreeStrings)
                 currentValue = components.nh3.toFloat()
-                title = "Ammonia(NH₃)"
+                title = item
             }
         }
-    }
-
-    override fun getTheme(): Int {
-        return R.style.AppTheme_BottomSheet
     }
 
     private fun setAirItemValues() {
         binding.progress.deleteAll()
         binding.progress.configureAngles(280, 0)
-
         val width = 90F
-        val initial = SeriesItem.Builder(Color.BLACK)
-            .setRange(0F,
-                airValues[airValues.size - 1].toFloat() * 2,
-                airValues[airValues.size - 1].toFloat() * 2)
-            .setLineWidth(width)
-            .build()
-        binding.progress.addSeries(initial)
-
         val ta = resources.obtainTypedArray(R.array.colors)
         val colors = IntArray(ta.length())
         for (i in 0 until ta.length()) {
@@ -130,38 +130,32 @@ class AirItemFragment : BottomSheetDialogFragment() {
             }
             binding.progress.addSeries(seriesItem)
         }
-        val current = SeriesItem.Builder(Color.BLACK)
+
+        binding.progress.addSeries(SeriesItem.Builder(Color.BLACK)
             .setRange(0F, airValues[airValues.size - 1].toFloat(), 0F)
             .setLineWidth(45F)
-            .setInitialVisibility(false)
             .setShadowSize(20F)
-            .build()
-        binding.progress.addSeries(current)
+            .build())
         binding.progress.addEvent(DecoEvent.Builder(currentValue)
-            .setIndex(airValues.size + 1)
-            .setDelay(500)
+            .setIndex(airValues.size)
+            .setDelay(250)
             .setColor(Color.BLACK)
-            .setDuration(500)
+            .setDuration(750)
             .setDisplayText(MessageFormat.format("{0}µg/m³", currentValue))
             .build())
     }
 
     companion object {
         const val TAG = "Air Item Dialog"
-        fun newInstance(
-            t: String,
-            stringArray: Array<String>,
-            valueArray: IntArray,
-            current: Float,
-            c: Components,
-        ): AirItemFragment {
+        fun newInstance(t: String, c: Components): AirItemFragment {
             val fragment = AirItemFragment()
-            fragment.currentValue = current
-            fragment.airStrings = stringArray
-            fragment.airValues = valueArray
             fragment.title = t
             fragment.components = c
             return fragment
         }
+    }
+
+    override fun getTheme(): Int {
+        return R.style.AppTheme_BottomSheet
     }
 }
