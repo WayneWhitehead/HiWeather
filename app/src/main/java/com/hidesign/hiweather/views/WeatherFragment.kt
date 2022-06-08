@@ -1,5 +1,6 @@
 package com.hidesign.hiweather.views
 
+import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -15,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearSnapHelper
+import com.bumptech.glide.Glide
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -27,15 +29,13 @@ import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.model.OneCallResponse
 import com.hidesign.hiweather.network.WeatherViewModel
+import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.DialogUtil
 import com.hidesign.hiweather.util.WeatherUtils
+import com.hidesign.hiweather.util.WeatherUtils.getWeatherIconUrl
 import com.hidesign.hiweather.views.WeatherActivity.Companion.uAddress
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import retrofit2.Response
+import kotlinx.coroutines.*
 import java.math.RoundingMode
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
@@ -61,10 +61,10 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         savedInstanceState: Bundle?,
     ): View {
         binding = FragmentWeatherBinding.inflate(layoutInflater)
-        binding.swipeLayout.setOnRefreshListener { fetchContent() }
+        binding.swipeLayout.setOnRefreshListener { launch { fetchContent() } }
 
         LinearSnapHelper().attachToRecyclerView(binding.rvHourlyForecast)
-        LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
+        binding.hourlyForecastHeader.headerTitle.text = getString(R.string.hourly_forecast)
         binding.hourlyForecastHeader.headerCard.setOnClickListener {
             if (binding.rvHourlyForecast.isVisible) {
                 binding.rvHourlyForecast.slideVisibility(true)
@@ -74,6 +74,8 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.hourlyForecastHeader.displayForecast.rotation =
                 binding.hourlyForecastHeader.displayForecast.rotation + 180F
         }
+        LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
+        binding.dailyForecastHeader.headerTitle.text = getString(R.string.daily_forecast)
         binding.dailyForecastHeader.headerCard.setOnClickListener {
             if (binding.rvDailyForecast.isVisible) {
                 binding.rvDailyForecast.slideVisibility(true)
@@ -83,8 +85,6 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.dailyForecastHeader.displayForecast.rotation =
                 binding.dailyForecastHeader.displayForecast.rotation + 180F
         }
-        binding.hourlyForecastHeader.headerTitle.text = getString(R.string.hourly_forecast)
-        binding.dailyForecastHeader.headerTitle.text = getString(R.string.daily_forecast)
         return binding.root
     }
 
@@ -92,7 +92,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         super.onStart()
         weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
         firebaseAnalytics = Firebase.analytics
-        fetchContent()
+        launch {
+            fetchContent()
+        }
     }
 
     override fun onResume() {
@@ -105,201 +107,225 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
     override fun onDestroy() {
         super.onDestroy()
+        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+        with(sharedPref.edit()) {
+            putLong(Constants.lastFetch, Calendar.getInstance().timeInMillis)
+            apply()
+        }
         job.cancel()
     }
 
-    fun fetchContent() {
-        if (uAddress == null) {
-            Toast.makeText(requireContext(),
-                "Something went wrong trying to get your location \n Please try again.",
-                Toast.LENGTH_SHORT).show()
-            val activity = requireActivity() as WeatherActivity
-            activity.binding.vpContent.setCurrentItem(0, true)
-            return
-        }
-
-        val df = SimpleDateFormat("d MMMM HH:mm", Locale.getDefault())
-        val formattedDate = df.format(Calendar.getInstance().time)
-        binding.dateHeader.date.text = formattedDate
-        setFetchingContent()
-
-        launch {
-            val ai: ApplicationInfo = requireContext().packageManager.getApplicationInfo(
-                requireContext().packageName,
-                PackageManager.GET_META_DATA)
-            val value = ai.metaData["weatherKey"]
-            val apiKey = value.toString()
-
-            val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress!!.latitude,
-                uAddress!!.longitude,
-                apiKey)
-            val airPollutionResponse =
-                weatherViewModel.getAirPollution(uAddress!!.latitude, uAddress!!.longitude, apiKey)
-
-            binding.swipeLayout.isRefreshing = false
-            onWeatherSuccess(oneCallResponse)
-            onAirPollutionSuccess(airPollutionResponse)
+    override fun onPause() {
+        super.onPause()
+        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
+        with(sharedPref.edit()) {
+            putLong(Constants.lastFetch, Calendar.getInstance().timeInMillis)
+            apply()
         }
     }
 
-    private fun onWeatherSuccess(result: Response<OneCallResponse?>?) {
-        if (result?.isSuccessful!!) {
-            weather = result.body()!!
-
-            //region Current Card
-            binding.currentCard.CurrentTemp.text =
-                MessageFormat.format(getString(R.string._0_c), weather.current.temp.roundToInt())
-            binding.currentCard.HighTemp.text =
-                MessageFormat.format(getString(R.string.high_0_c),
-                    weather.daily[0].temp.max.roundToInt())
-            binding.currentCard.LowTemp.text =
-                MessageFormat.format(getString(R.string.low_0_c),
-                    weather.daily[0].temp.min.roundToInt())
-            binding.currentCard.RealFeelTemp.text =
-                MessageFormat.format(getString(R.string.real_feel_0_c),
-                    weather.current.feelsLike.roundToInt())
-            //endregion Current Card
-
-            //region Current Extra Card
-            binding.currentExtraCard.skiesImage.setImageResource(WeatherUtils.getWeatherIcon(weather.current.weather[0].id))
-            binding.currentExtraCard.Precipitation.text =
-                MessageFormat.format(getString(R.string._0_p), (weather.daily[0].pop * 100))
-            binding.currentExtraCard.Humidity.text =
-                MessageFormat.format(getString(R.string.humidity_0), weather.current.humidity)
-            binding.currentExtraCard.DewPoint.text =
-                MessageFormat.format(getString(R.string.dew_point_0_c),
-                    weather.current.dewPoint.roundToInt())
-            binding.currentExtraCard.Pressure.text =
-                MessageFormat.format(getString(R.string.pressure_0_mbar), weather.current.pressure)
-            binding.currentExtraCard.UVIndex.text =
-                MessageFormat.format(getString(R.string.uv_index_0),
-                    weather.current.uvi.roundToInt())
-            binding.currentExtraCard.Visibility.text =
-                MessageFormat.format(getString(R.string.visibility_0_m), weather.current.visibility)
-            //endregion Current Extra Card
-
-            //region Wind Card
-            binding.windCard.WindSpeed.text = weather.current.windSpeed.roundToDecimal().toString()
-            binding.windCard.WindDirectionDegrees.rotation =
-                (weather.current.windDeg - 270).toFloat()
-            binding.windCard.WindDirectionText.text =
-                WeatherUtils.getWindDegreeText(weather.current.windDeg)
-            //endregion Wind Card
-
-            //region Hourly Forecast
-            val hourlyForecast: ArrayList<Hourly> = ArrayList()
-            for (i in 1..23) {
-                hourlyForecast.add(weather.hourly[i])
+    suspend fun fetchContent() {
+        coroutineScope {
+            if (uAddress == null) {
+                Toast.makeText(requireContext(),
+                    "Something went wrong trying to get your location \n Please try again.",
+                    Toast.LENGTH_SHORT).show()
+                val activity = requireActivity() as WeatherActivity
+                activity.binding.vpContent.setCurrentItem(0, true)
+                return@coroutineScope
             }
-            binding.hourlyForecastHeader.headerCard.isEnabled = true
-            binding.rvHourlyForecast.adapter =
-                HourlyRecyclerAdapter(requireContext(), hourlyForecast, weather.timezone).apply {
-                    onItemClick = {
-                        ExpandedForecast.newInstance(it, weather.timezone)
-                            .show(childFragmentManager, ExpandedForecast.TAG)
-                    }
+            setFetchingContent()
+            val df = SimpleDateFormat("d MMMM HH:mm", Locale.getDefault())
+            val formattedDate = df.format(Calendar.getInstance().time)
+            binding.dateHeader.date.text = formattedDate
+            launch {
+                val ai: ApplicationInfo = requireContext().packageManager.getApplicationInfo(
+                    requireContext().packageName,
+                    PackageManager.GET_META_DATA)
+                val value = ai.metaData["weatherKey"]
+                val apiKey = value.toString()
+
+                val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress!!.latitude,
+                    uAddress!!.longitude,
+                    apiKey)
+                val airPollutionResponse =
+                    weatherViewModel.getAirPollution(uAddress!!.latitude,
+                        uAddress!!.longitude,
+                        apiKey)
+
+                binding.swipeLayout.isRefreshing = false
+
+                if (oneCallResponse?.isSuccessful!!) {
+                    weather = oneCallResponse.body()!!
+                    onWeatherSuccess()
+                } else {
+                    DialogUtil.displayErrorDialog(requireContext(),
+                        oneCallResponse.code(),
+                        oneCallResponse.message())
                 }
-            //endregion Hourly Forecast
 
-            //region Daily Forecast
-            val dailyForecast: ArrayList<Daily> = ArrayList()
-            dailyForecast.addAll(weather.daily)
-            dailyForecast.removeAt(0)
-            binding.dailyForecastHeader.headerCard.isEnabled = true
-            binding.rvDailyForecast.adapter =
-                DailyRecyclerAdapter(requireContext(), dailyForecast, weather.timezone).apply {
-                    onItemClick = {
-                        ExpandedForecast.newInstance(it, weather.timezone)
-                            .show(childFragmentManager, ExpandedForecast.TAG)
-                    }
+                if (airPollutionResponse?.isSuccessful!!) {
+                    airPollution = airPollutionResponse.body()!!
+                    onAirPollutionSuccess()
+                } else {
+                    DialogUtil.displayErrorDialog(requireContext(),
+                        airPollutionResponse.code(),
+                        airPollutionResponse.message())
                 }
-            //endregion Daily Forecast
-
-            //region Sun Card
-            binding.sunCard.Sunrise.text = DateUtils.getDateTime("HH:mm",
-                (weather.daily[0].sunrise).toLong(),
-                weather.timezone)
-            binding.sunCard.Sunset.text =
-                DateUtils.getDateTime("HH:mm", (weather.daily[0].sunset).toLong(), weather.timezone)
-            binding.sunCard.sunContent.setOnClickListener {
-                ExpandedSunMoon.newInstance(weather.daily[0], weather.timezone)
-                    .show(childFragmentManager, ExpandedSunMoon.TAG)
-            }
-            //endregion Sun Card
-
-            setContentFound()
-        } else {
-            DialogUtil.displayErrorDialog(requireContext(), result.code(), result.message())
-            return
+            }.join()
         }
     }
 
-    private fun onAirPollutionSuccess(result: Response<AirPollutionResponse?>?) {
-        if (result?.isSuccessful!!) {
-            airPollution = result.body()!!
+    private fun onWeatherSuccess() {
+        //region Current Card
+        Glide.with(this)
+            .load(getWeatherIconUrl(weather.current.weather[0].id))
+            .into(binding.currentCard.skiesImage)
+        binding.currentCard.currentTemp.text =
+            MessageFormat.format(getString(R.string._0_c), weather.current.temp.roundToInt())
+        binding.currentCard.highTemp.text =
+            MessageFormat.format(getString(R.string.high_0_c),
+                weather.daily[0].temp.max.roundToInt())
+        binding.currentCard.lowTemp.text =
+            MessageFormat.format(getString(R.string.low_0_c),
+                weather.daily[0].temp.min.roundToInt())
+        binding.currentCard.realFeelTemp.text =
+            MessageFormat.format(getString(R.string.real_feel_0_c),
+                weather.current.feelsLike.roundToInt())
+        binding.currentCard.description.text =
+            weather.current.weather[0].description
+        //endregion Current Card
 
-            binding.airCard.airQuality.text = airPollution.list[0].main.aqi.toString()
-            binding.airCard.airQualityText.apply {
-                text = WeatherUtils.getAirQualityText(airPollution.list[0].main.aqi)
-            }
+        //region Current Extra Card
+        binding.currentExtraCard.precipitation.text =
+            MessageFormat.format(getString(R.string._0_p), (weather.daily[0].pop * 100))
+        binding.currentExtraCard.humidity.text =
+            MessageFormat.format(getString(R.string._0_p), weather.current.humidity)
+        binding.currentExtraCard.cloudiness.text =
+            MessageFormat.format(getString(R.string._0_p), (weather.daily[0].clouds))
+        binding.currentExtraCard.dewPoint.text =
+            MessageFormat.format(getString(R.string.dew_point_0_c),
+                weather.current.dewPoint.roundToInt())
+        binding.currentExtraCard.pressure.text =
+            MessageFormat.format(getString(R.string.pressure_0_mbar), weather.current.pressure)
+        binding.currentExtraCard.uvIndex.text =
+            MessageFormat.format(getString(R.string.uv_index_0),
+                weather.current.uvi.roundToInt())
+        binding.currentExtraCard.visibility.text =
+            MessageFormat.format(getString(R.string.visibility_0_m), weather.current.visibility)
+        //endregion Current Extra Card
 
-            binding.airCard.airCo.apply {
-                text = MessageFormat.format("CO - {0}",
-                    airPollution.list[0].components.co.roundToDecimal())
-                setOnClickListener { displayAirQualityItemFragment("Carbon Monoxide(CO)") }
-            }
-            binding.airCard.airNhThree.apply {
-                text = MessageFormat.format("NH₃ - {0}",
-                    airPollution.list[0].components.nh3.roundToDecimal())
-                setOnClickListener { displayAirQualityItemFragment("Ammonia(NH₃)") }
-            }
-            binding.airCard.airNo.apply {
-                text = MessageFormat.format("NO - {0}",
-                    airPollution.list[0].components.no.roundToDecimal())
-                setOnCloseIconClickListener {
-                    //TODO
-                }
-            }
-            binding.airCard.airNoTwo.apply {
-                text = MessageFormat.format("NO₂ - {0}",
-                    airPollution.list[0].components.no2.roundToDecimal())
-                setOnClickListener { displayAirQualityItemFragment("Nitrogen Dioxide(NO₂)") }
-            }
-            binding.airCard.airOThree.apply {
-                text = MessageFormat.format("O₃ - {0}",
-                    airPollution.list[0].components.o3.roundToDecimal())
-                setOnClickListener { displayAirQualityItemFragment("Ozone(O₃)") }
-            }
-            binding.airCard.airPmTen.apply {
-                text = MessageFormat.format("PM₁₀ - {0}",
-                    airPollution.list[0].components.pm10.roundToDecimal())
-                setOnClickListener { displayAirQualityItemFragment("Coarse Particulate Matter(PM₁₀)") }
-            }
-            binding.airCard.airPmTwoFive.apply {
-                text = MessageFormat.format("PM₂₅ - {0}",
-                    airPollution.list[0].components.pm25.roundToDecimal())
-                setOnClickListener { displayAirQualityItemFragment("Fine Particle Matter(PM₂₅)") }
-            }
-            binding.airCard.airSoTwo.apply {
-                text = MessageFormat.format("SO₂ - {0}",
-                    airPollution.list[0].components.so2.roundToDecimal())
-                setOnClickListener {
-                    setOnClickListener { displayAirQualityItemFragment("Sulphur Dioxide(SO₂)") }
-                }
-            }
+        //region Wind Card
+        binding.windCard.WindSpeed.text = weather.current.windSpeed.roundToDecimal().toString()
+        binding.windCard.WindDirectionDegrees.rotation =
+            (weather.current.windDeg - 270).toFloat()
+        binding.windCard.WindDirectionText.text =
+            WeatherUtils.getWindDegreeText(weather.current.windDeg)
+        //endregion Wind Card
 
-            binding.airCard.airShimmer.slideVisibility(true)
-            binding.airCard.airShimmer.stopShimmer()
-            binding.airCard.airContent.slideVisibility(false)
-        } else {
-            DialogUtil.displayErrorDialog(requireContext(), result.code(), result.message())
-            return
+        //region Hourly Forecast
+        val hourlyForecast: ArrayList<Hourly> = ArrayList()
+        for (i in 1..23) {
+            hourlyForecast.add(weather.hourly[i])
         }
+        binding.hourlyForecastHeader.headerCard.isEnabled = true
+        binding.rvHourlyForecast.adapter =
+            HourlyRecyclerAdapter(requireContext(), hourlyForecast, weather.timezone).apply {
+                onItemClick = {
+                    ExpandedForecast.newInstance(it, weather.timezone)
+                        .show(childFragmentManager, ExpandedForecast.TAG)
+                }
+            }
+        //endregion Hourly Forecast
+
+        //region Daily Forecast
+        val dailyForecast: ArrayList<Daily> = ArrayList()
+        dailyForecast.addAll(weather.daily)
+        dailyForecast.removeAt(0)
+        binding.dailyForecastHeader.headerCard.isEnabled = true
+        binding.rvDailyForecast.adapter =
+            DailyRecyclerAdapter(requireContext(), dailyForecast, weather.timezone).apply {
+                onItemClick = {
+                    ExpandedForecast.newInstance(it, weather.timezone)
+                        .show(childFragmentManager, ExpandedForecast.TAG)
+                }
+            }
+        //endregion Daily Forecast
+
+        //region Sun Card
+        binding.sunCard.Sunrise.text = DateUtils.getDateTime("HH:mm",
+            (weather.daily[0].sunrise).toLong(),
+            weather.timezone)
+        binding.sunCard.Sunset.text =
+            DateUtils.getDateTime("HH:mm", (weather.daily[0].sunset).toLong(), weather.timezone)
+        binding.sunCard.sunContent.setOnClickListener {
+            ExpandedSunMoon.newInstance(weather.daily[0], weather.timezone)
+                .show(childFragmentManager, ExpandedSunMoon.TAG)
+        }
+        //endregion Sun Card
+
+        setContentFound()
+    }
+
+    private fun onAirPollutionSuccess() {
+        binding.airCard.airQuality.text = airPollution.list[0].main.aqi.toString()
+        binding.airCard.airQualityText.apply {
+            text = WeatherUtils.getAirQualityText(airPollution.list[0].main.aqi)
+        }
+
+        binding.airCard.airCo.apply {
+            text = MessageFormat.format("CO - {0}",
+                airPollution.list[0].components.co.roundToDecimal())
+            setOnClickListener { displayAirQualityItemFragment(Constants.carbon_monoxide) }
+        }
+        binding.airCard.airNhThree.apply {
+            text = MessageFormat.format("NH₃ - {0}",
+                airPollution.list[0].components.nh3.roundToDecimal())
+            setOnClickListener { displayAirQualityItemFragment(Constants.ammonia) }
+        }
+        binding.airCard.airNo.apply {
+            text = MessageFormat.format("NO - {0}",
+                airPollution.list[0].components.no.roundToDecimal())
+            setOnCloseIconClickListener {
+                //TODO
+            }
+        }
+        binding.airCard.airNoTwo.apply {
+            text = MessageFormat.format("NO₂ - {0}",
+                airPollution.list[0].components.no2.roundToDecimal())
+            setOnClickListener { displayAirQualityItemFragment(Constants.nitrogen_dioxide) }
+        }
+        binding.airCard.airOThree.apply {
+            text = MessageFormat.format("O₃ - {0}",
+                airPollution.list[0].components.o3.roundToDecimal())
+            setOnClickListener { displayAirQualityItemFragment(Constants.ozone) }
+        }
+        binding.airCard.airPmTen.apply {
+            text = MessageFormat.format("PM₁₀ - {0}",
+                airPollution.list[0].components.pm10.roundToDecimal())
+            setOnClickListener { displayAirQualityItemFragment(Constants.coarse_particle_matter) }
+        }
+        binding.airCard.airPmTwoFive.apply {
+            text = MessageFormat.format("PM₂₅ - {0}",
+                airPollution.list[0].components.pm25.roundToDecimal())
+            setOnClickListener { displayAirQualityItemFragment(Constants.fine_particle_matter) }
+        }
+        binding.airCard.airSoTwo.apply {
+            text = MessageFormat.format("SO₂ - {0}",
+                airPollution.list[0].components.so2.roundToDecimal())
+            setOnClickListener {
+                setOnClickListener { displayAirQualityItemFragment(Constants.sulphur_dioxide) }
+            }
+        }
+
+        binding.airCard.airShimmer.slideVisibility(true)
+        binding.airCard.airShimmer.stopShimmer()
+        binding.airCard.airContent.slideVisibility(false)
     }
 
     private fun displayAirQualityItemFragment(item: String) {
-        AirItemFragment.newInstance(item, airPollution.list[0].components)
-            .showNow(parentFragmentManager, "Air Quality Item")
+        ExpandedAirItem.newInstance(item, airPollution.list[0].components)
+            .showNow(parentFragmentManager, Constants.airItemScreeName)
     }
 
     private fun setContentFound() {
@@ -307,8 +333,6 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             return
         }
 
-        binding.dailyForecastHeader.headerCard.isEnabled = true
-        binding.hourlyForecastHeader.headerCard.isEnabled = true
         binding.currentCard.currentContent.slideVisibility(false)
         binding.currentCard.currentShimmer.slideVisibility(true)
         binding.currentCard.currentShimmer.stopShimmer()
@@ -322,6 +346,8 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.sunCard.sunShimmer.slideVisibility(true)
         binding.sunCard.sunShimmer.stopShimmer()
 
+        binding.dailyForecastHeader.headerCard.isEnabled = true
+        binding.hourlyForecastHeader.headerCard.isEnabled = true
         isFetching = false
         val activity = requireActivity() as WeatherActivity
         activity.binding.linearProgress.visibility = View.INVISIBLE
@@ -337,7 +363,6 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.currentCard.currentContent.slideVisibility(true)
         binding.currentCard.currentShimmer.slideVisibility(false)
         binding.currentCard.currentShimmer.startShimmer()
-        binding.hourlyForecastHeader.headerCard.isEnabled = false
         binding.currentExtraCard.currentExtraContent.slideVisibility(true)
         binding.currentExtraCard.currentExtraShimmer.slideVisibility(false)
         binding.currentExtraCard.currentExtraShimmer.startShimmer()
@@ -350,7 +375,6 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.sunCard.sunContent.slideVisibility(true)
         binding.sunCard.sunShimmer.slideVisibility(false)
         binding.sunCard.sunShimmer.startShimmer()
-        binding.dailyForecastHeader.headerCard.isEnabled = false
 
         if (binding.rvHourlyForecast.isVisible) {
             binding.hourlyForecastHeader.displayForecast.rotation = 0F
@@ -360,7 +384,8 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.dailyForecastHeader.displayForecast.rotation = 0F
             binding.rvDailyForecast.slideVisibility(true)
         }
-
+        binding.hourlyForecastHeader.headerCard.isEnabled = false
+        binding.dailyForecastHeader.headerCard.isEnabled = false
         isFetching = true
     }
 

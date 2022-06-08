@@ -10,13 +10,14 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.databinding.ExpandedAirItemBinding
 import com.hidesign.hiweather.model.Components
+import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.WeatherUtils
 import com.hookedonplay.decoviewlib.charts.SeriesItem
 import com.hookedonplay.decoviewlib.events.DecoEvent
 import java.text.MessageFormat
 
 
-class AirItemFragment : BottomSheetDialogFragment() {
+class ExpandedAirItem : BottomSheetDialogFragment() {
 
     private lateinit var binding: ExpandedAirItemBinding
     private lateinit var airStrings: Array<String>
@@ -58,43 +59,43 @@ class AirItemFragment : BottomSheetDialogFragment() {
 
     private fun updateValues(item: String) {
         when (item) {
-            "Carbon Monoxide(CO)" -> {
+            Constants.carbon_monoxide -> {
                 airValues = resources.getIntArray(R.array.airCoValues)
                 airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.co.toFloat()
                 title = item
             }
-            "Sulphur Dioxide(SO₂)" -> {
+            Constants.sulphur_dioxide -> {
                 airValues = resources.getIntArray(R.array.airSoTwoValues)
                 airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.so2.toFloat()
                 title = item
             }
-            "Fine Particle Matter(PM₂₅)" -> {
+            Constants.fine_particle_matter -> {
                 airValues = resources.getIntArray(R.array.airPMTwoFiveValues)
                 airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.pm25.toFloat()
                 title = item
             }
-            "Coarse Particulate Matter(PM₁₀)" -> {
+            Constants.coarse_particle_matter -> {
                 airValues = resources.getIntArray(R.array.airPMTenValues)
                 airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.pm10.toFloat()
                 title = item
             }
-            "Ozone(O₃)" -> {
+            Constants.ozone -> {
                 airValues = resources.getIntArray(R.array.airOThreeValues)
                 airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.o3.toFloat()
                 title = item
             }
-            "Nitrogen Dioxide(NO₂)" -> {
+            Constants.nitrogen_dioxide -> {
                 airValues = resources.getIntArray(R.array.airNoTwoValues)
                 airStrings = resources.getStringArray(R.array.airStrings)
                 currentValue = components.no2.toFloat()
                 title = item
             }
-            "Ammonia(NH₃)" -> {
+            Constants.ammonia -> {
                 airValues = resources.getIntArray(R.array.airNHThreeValues)
                 airStrings = resources.getStringArray(R.array.airNHThreeStrings)
                 currentValue = components.nh3.toFloat()
@@ -147,8 +148,8 @@ class AirItemFragment : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "Air Item Dialog"
-        fun newInstance(t: String, c: Components): AirItemFragment {
-            val fragment = AirItemFragment()
+        fun newInstance(t: String, c: Components): ExpandedAirItem {
+            val fragment = ExpandedAirItem()
             fragment.title = t
             fragment.components = c
             return fragment

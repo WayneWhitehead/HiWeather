@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -14,7 +15,7 @@ import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.DateUtils
-import com.hidesign.hiweather.util.WeatherUtils.getWeatherIcon
+import com.hidesign.hiweather.util.WeatherUtils.getWeatherIconUrl
 import com.hidesign.hiweather.util.WeatherUtils.getWindDegreeText
 import java.math.RoundingMode
 import java.text.MessageFormat
@@ -42,8 +43,10 @@ class ExpandedForecast : BottomSheetDialogFragment() {
         firebaseAnalytics = Firebase.analytics
 
         val date = weatherHourly?.dt?.toLong() ?: weatherDaily?.dt?.toLong() ?: 0
-        val image = getWeatherIcon(weatherHourly?.clouds ?: weatherDaily?.clouds ?: 0)
-        binding.skiesImage.setImageResource(image)
+        val image = getWeatherIconUrl(weatherHourly?.clouds ?: weatherDaily?.clouds ?: 0)
+        Glide.with(this)
+            .load(image)
+            .into(binding.skiesImage)
 
         val realFeel = (weatherDaily?.feelsLike?.day ?: weatherHourly?.feelsLike)?.roundToInt() ?: 0
         binding.RealFeelTemp.text =

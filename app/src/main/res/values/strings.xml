@@ -124,4 +124,6 @@
 	<string name="empty_time">--:--</string>
 	<string name="air_quality">Air Quality</string>
 	<string name="please_enter_an_address_in_the_search_bar_above">Please Search for an Address </string>
+	<string name="cloudiness">Cloudiness</string>
+	<string name="humidity">Humidity</string>
 </resources>

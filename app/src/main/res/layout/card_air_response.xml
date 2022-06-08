@@ -35,17 +35,18 @@
 	<LinearLayout
 		android:id="@+id/air_content"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="220dp"
 		android:layout_gravity="center"
-		android:layout_margin="20dp"
-		android:layout_marginBottom="10dp"
 		android:gravity="center"
+		android:paddingHorizontal="20dp"
+		android:paddingTop="10dp"
+		android:paddingBottom="20dp"
 		android:orientation="horizontal">
 
 		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_gravity="start|center_vertical"
+			android:layout_gravity="center"
 			android:orientation="vertical"
 			android:paddingHorizontal="10dp">
 
@@ -56,7 +57,7 @@
 				android:layout_gravity="center"
 				android:text="@null"
 				android:textColor="@color/black"
-				android:textSize="60sp" />
+				android:textSize="65sp" />
 
 			<TextView
 				android:id="@+id/airQualityText"
@@ -65,7 +66,7 @@
 				android:layout_gravity="center"
 				android:text="@null"
 				android:textColor="@color/black"
-				android:textSize="22sp" />
+				android:textSize="20sp" />
 
 			<TextView
 				android:layout_width="wrap_content"
@@ -74,75 +75,88 @@
 				android:gravity="center"
 				android:text="@string/air_quality"
 				android:textColor="@android:color/black"
-				android:textSize="18sp" />
+				android:textSize="16sp" />
 		</LinearLayout>
 
-		<com.google.android.material.chip.ChipGroup
-			android:id="@+id/chipGroup"
+		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_gravity="center">
+			android:layout_gravity="center"
+			android:gravity="center"
+			android:orientation="vertical">
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_pm_ten"
-				style="@style/airChips"
+			<com.google.android.material.chip.ChipGroup
+				android:id="@+id/chipGroup"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
+				android:layout_height="wrap_content">
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_o_three"
-				style="@style/airChips"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_pm_ten"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_pm_two_five"
-				style="@style/airChips"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_o_three"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_no_two"
-				style="@style/airChips"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_pm_two_five"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
+
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_no_two"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
+			</com.google.android.material.chip.ChipGroup>
 
 			<com.google.android.material.divider.MaterialDivider
-				android:layout_width="match_parent"
+				android:layout_width="200dp"
 				android:layout_height="wrap_content"
 				app:dividerColor="@color/black" />
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_co"
-				style="@style/airChips"
+			<com.google.android.material.chip.ChipGroup
+				android:id="@+id/chipGroup2"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
+				android:layout_height="wrap_content">
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_nh_three"
-				style="@style/airChips"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_co"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_so_two"
-				style="@style/airChips"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_nh_three"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
 
-			<com.google.android.material.chip.Chip
-				android:id="@+id/air_no"
-				style="@style/airChips"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="@null" />
-		</com.google.android.material.chip.ChipGroup>
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_so_two"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
+
+				<com.google.android.material.chip.Chip
+					android:id="@+id/air_no"
+					style="@style/airChips"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@null" />
+			</com.google.android.material.chip.ChipGroup>
+		</LinearLayout>
 	</LinearLayout>
 </com.google.android.material.card.MaterialCardView>

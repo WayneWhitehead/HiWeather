@@ -16,17 +16,22 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_gravity="top"
-		app:shimmer_base_color="@color/windCardItems"
+		app:shimmer_base_color="@color/wind_card_items"
 		app:shimmer_colored="true"
-		app:shimmer_highlight_color="@color/windCardItems"
+		app:shimmer_highlight_color="@color/wind_card_items"
 		shimmer:duration="800">
 
 		<LinearLayout
+			android:layout_gravity="center"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<include layout="@layout/placeholder_card_wind" />
+			<include
+				layout="@layout/placeholder_card_wind"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_horizontal" />
 		</LinearLayout>
 
 	</com.facebook.shimmer.ShimmerFrameLayout>
@@ -58,7 +63,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@null"
-			android:textColor="@color/windCardItems"
+			android:textColor="@color/wind_card_items"
 			android:textSize="60sp" />
 
 		<LinearLayout
@@ -77,13 +82,13 @@
 				android:contentDescription="@string/winddirectionicon"
 				android:rotation="-90"
 				android:src="@drawable/direction"
-				app:tint="@color/windCardItems" />
+				app:tint="@color/wind_card_items" />
 
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/km_h"
-				android:textColor="@color/windCardItems"
+				android:textColor="@color/wind_card_items"
 				android:textSize="18sp" />
 		</LinearLayout>
 
@@ -93,7 +98,7 @@
 			android:layout_height="wrap_content"
 			android:layout_marginHorizontal="5dp"
 			android:text="@null"
-			android:textColor="@color/windCardItems"
+			android:textColor="@color/wind_card_items"
 			android:textSize="22sp" />
 	</LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -4,9 +4,9 @@
 	xmlns:shimmer="http://schemas.android.com/tools"
 	style="@style/WeatherCards"
 	android:layout_width="match_parent"
-	android:layout_height="175dp"
+	android:layout_height="195dp"
 	android:layout_marginHorizontal="10dp"
-	android:backgroundTint="@color/currentEXtraCard"
+	android:backgroundTint="@color/current_extra_card"
 	app:cardElevation="20dp">
 
 	<com.facebook.shimmer.ShimmerFrameLayout
@@ -25,7 +25,10 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<include layout="@layout/placeholder_card_current_extra" />
+			<include
+				layout="@layout/placeholder_card_current_extra"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent" />
 		</LinearLayout>
 
 	</com.facebook.shimmer.ShimmerFrameLayout>
@@ -45,15 +48,6 @@
 			android:layout_marginEnd="25dp"
 			android:orientation="vertical">
 
-			<ImageView
-				android:id="@+id/skiesImage"
-				android:layout_width="90dp"
-				android:layout_height="90dp"
-				android:layout_gravity="center"
-				android:contentDescription="@string/cloud_cover"
-				android:src="@drawable/weather"
-				app:tint="@android:color/black" />
-
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -66,7 +60,47 @@
 				android:textStyle="bold" />
 
 			<TextView
-				android:id="@+id/Precipitation"
+				android:id="@+id/precipitation"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:maxWidth="150dp"
+				android:text="@null"
+				android:textColor="@color/forecast_card_content"
+				android:textSize="18sp" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:layout_marginTop="5dp"
+				android:maxWidth="150dp"
+				android:text="@string/humidity"
+				android:textColor="@color/forecast_card_content"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/humidity"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:textColor="@android:color/black"
+				android:textSize="16sp" />
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:layout_marginTop="5dp"
+				android:maxWidth="150dp"
+				android:text="@string/cloudiness"
+				android:textColor="@color/forecast_card_content"
+				android:textSize="15sp"
+				android:textStyle="bold" />
+
+			<TextView
+				android:id="@+id/cloudiness"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"
@@ -83,16 +117,7 @@
 			android:orientation="vertical">
 
 			<TextView
-				android:id="@+id/Humidity"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:text="@string/humidity_0"
-				android:textColor="@android:color/black"
-				android:textSize="16sp" />
-
-			<TextView
-				android:id="@+id/DewPoint"
+				android:id="@+id/dewPoint"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"
@@ -101,7 +126,7 @@
 				android:textSize="16sp" />
 
 			<TextView
-				android:id="@+id/Pressure"
+				android:id="@+id/pressure"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"
@@ -110,7 +135,7 @@
 				android:textSize="16sp" />
 
 			<TextView
-				android:id="@+id/UVIndex"
+				android:id="@+id/uv_index"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"
@@ -119,7 +144,7 @@
 				android:textSize="16sp" />
 
 			<TextView
-				android:id="@+id/Visibility"
+				android:id="@+id/visibility"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"

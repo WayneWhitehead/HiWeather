@@ -7,25 +7,32 @@
 	android:layout_height="wrap_content"
 	android:layout_marginHorizontal="50dp"
 	android:padding="20dp"
+	app:rippleColor="@color/sunShimmer"
 	app:cardElevation="50dp">
 
 	<com.facebook.shimmer.ShimmerFrameLayout
 		android:id="@+id/sunShimmer"
 		style="@style/shimmerFrame"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="125dp"
+		android:layout_gravity="top"
 		android:elevation="100dp"
-		app:shimmer_base_color="#BEFF0033"
 		app:shimmer_colored="true"
-		app:shimmer_highlight_color="#BEFF0033"
+		app:shimmer_base_color="@color/sunShimmer"
+		app:shimmer_highlight_color="@color/sunShimmer"
 		shimmer:duration="800">
 
 		<LinearLayout
-			android:layout_width="match_parent"
+			android:layout_width="wrap_content"
+			android:layout_gravity="center"
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<include layout="@layout/placeholder_card_sun" />
+			<include
+				layout="@layout/placeholder_card_sun"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center_horizontal" />
 		</LinearLayout>
 
 	</com.facebook.shimmer.ShimmerFrameLayout>
@@ -33,14 +40,14 @@
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@drawable/gradient_sun"
-		android:elevation="0dp" />
+		android:background="@drawable/gradient_sun" />
 
 	<LinearLayout
 		android:id="@+id/sun_content"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:gravity="center"
+		android:elevation="5dp"
 		android:orientation="horizontal"
 		android:theme="@style/Theme.MaterialComponents.DayNight">
 
@@ -56,8 +63,9 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/empty_time"
+				android:textSize="32sp"
 				android:textColor="@android:color/black"
-				android:textSize="35sp" />
+				android:textStyle="bold" />
 
 			<TextView
 				android:layout_width="wrap_content"
@@ -80,8 +88,9 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="@string/empty_time"
+				android:textSize="32sp"
 				android:textColor="@android:color/black"
-				android:textSize="35sp" />
+				android:textStyle="bold" />
 
 			<TextView
 				android:layout_width="wrap_content"

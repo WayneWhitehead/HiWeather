@@ -70,14 +70,14 @@
 
 
 	<style name="Alert.Button.Neutral" parent="Widget.MaterialComponents.Button.TextButton">
-		<item name="backgroundTint">#00FFFFFF</item>
+		<item name="backgroundTint">#00000000</item>
 		<item name="rippleColor">#138100</item>
 		<item name="android:textColor">@color/green_card</item>
 		<item name="android:textSize">14sp</item>
 	</style>
 
 	<style name="Alert.Button.Error" parent="Widget.MaterialComponents.Button.TextButton">
-		<item name="backgroundTint">#00FFFFFF</item>
+		<item name="backgroundTint">#00000000</item>
 		<item name="rippleColor">@color/colorPrimary</item>
 		<item name="android:textColor">@color/colorPrimaryLight</item>
 		<item name="android:textSize">14sp</item>

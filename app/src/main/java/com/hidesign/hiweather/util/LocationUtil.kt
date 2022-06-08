@@ -48,7 +48,7 @@ object LocationUtil {
             interval = TimeUnit.SECONDS.toMillis(60)
             fastestInterval = TimeUnit.SECONDS.toMillis(30)
             maxWaitTime = TimeUnit.MINUTES.toMillis(2)
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            priority = LocationRequest.create().priority
         }
         val userAddress = CompletableDeferred<Address?>()
         fusedLocationProviderClient.lastLocation.addOnSuccessListener(activity) { location: Location? ->

@@ -2,26 +2,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:orientation="vertical"
-	android:layout_width="250dp"
+	android:layout_width="wrap_content"
 	android:layout_height="wrap_content">
 
 	<com.google.android.material.card.MaterialCardView
-		android:layout_width="match_parent"
+		android:layout_width="220dp"
 		android:layout_height="wrap_content"
 		app:cardCornerRadius="30dp"
 		android:layout_marginHorizontal="10dp"
 		android:layout_marginTop="15dp"
 		android:layout_marginBottom="10dp"
 		android:backgroundTint="@color/forecast_card"
-		android:theme="@style/Theme.MaterialComponents.DayNight"
-		android:minHeight="130dp">
+		android:theme="@style/Theme.MaterialComponents.DayNight">
 
 		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center"
 			android:padding="10dp"
-			android:layout_marginBottom="5dp"
+			android:layout_marginRight="10dp"
 			android:orientation="vertical">
 
 			<TextView
@@ -44,17 +43,13 @@
 
 				<ImageView
 					android:id="@+id/skiesImage"
-					android:layout_weight="1"
-					android:layout_width="0dp"
+					android:layout_width="80dp"
 					android:layout_height="80dp"
 					android:layout_gravity="start"
-					android:contentDescription="@string/cloud_cover"
-					android:src="@drawable/weather"
-					app:tint="@color/forecast_card_content" />
+					android:contentDescription="@string/cloud_cover" />
 
 				<LinearLayout
-					android:layout_weight="1"
-					android:layout_width="0dp"
+					android:layout_width="100dp"
 					android:layout_height="wrap_content"
 					android:layout_gravity="center"
 					android:orientation="vertical">

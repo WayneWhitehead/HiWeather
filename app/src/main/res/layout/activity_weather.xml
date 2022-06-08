@@ -9,22 +9,37 @@
 	app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
 	tools:context=".views.WeatherActivity">
 
-	<com.google.android.gms.ads.AdView
-		android:id="@+id/AdView"
+	<RelativeLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_gravity="top"
-		android:elevation="1dp"
-		ads:adSize="BANNER"
-		ads:adUnitId="ca-app-pub-1988108128017627/4633391685" />
+		android:layout_height="match_parent">
 
-	<androidx.viewpager2.widget.ViewPager2
-		android:id="@+id/vp_content"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:background="@color/backgroundDark"
-		android:elevation="0dp"
-		android:orientation="vertical" />
+		<com.google.android.gms.ads.AdView
+			android:id="@+id/AdView"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="top"
+			android:elevation="1dp"
+			ads:adSize="BANNER"
+			ads:adUnitId="ca-app-pub-1988108128017627/4633391685" />
+
+		<androidx.viewpager2.widget.ViewPager2
+			android:id="@+id/vp_content"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:layout_below="@id/AdView"
+			android:background="@color/backgroundDark"
+			android:elevation="0dp"
+			android:orientation="vertical" />
+
+		<androidx.fragment.app.FragmentContainerView
+			android:id="@+id/autocomplete_fragment"
+			android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom"
+			android:elevation="6dp"
+			android:visibility="invisible" />
+	</RelativeLayout>
 
 	<com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/searchFAB"
@@ -38,15 +53,6 @@
 		app:layout_anchor="@id/bottomAppBar"
 		app:layout_behavior="com.google.android.material.floatingactionbutton.FloatingActionButton$Behavior"
 		app:srcCompat="@drawable/quantum_ic_search_grey600_24" />
-
-	<androidx.fragment.app.FragmentContainerView
-		android:id="@+id/autocomplete_fragment"
-		android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom"
-		android:elevation="6dp"
-		android:visibility="invisible" />
 
 	<com.google.android.material.progressindicator.LinearProgressIndicator
 		android:id="@+id/linear_progress"
@@ -68,6 +74,7 @@
 		android:backgroundTint="#151515"
 		app:fabAlignmentMode="end"
 		app:hideOnScroll="true"
+		android:layout_alignParentBottom="true"
 		app:menu="@menu/menu_weather">
 
 		<com.google.android.material.appbar.MaterialToolbar

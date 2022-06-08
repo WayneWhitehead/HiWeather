@@ -1,119 +1,98 @@
 package com.hidesign.hiweather.util
 
 import com.hidesign.hiweather.R
+import java.util.*
 
 object WeatherUtils {
 
     fun getMoonIcon(id: Double): Int {
         return when (id) {
-            in 0.0..0.1 -> {
-                R.drawable.new_moon
-            }
-            in 0.11..0.19 -> {
-
-                R.drawable.waxing_moon_2
-            }
-            in 0.2..0.3 -> {
-                R.drawable.first_quarter_moon
-            }
-            in 0.31..0.39 -> {
-                R.drawable.waxing_moon
-            }
-            in 0.4..0.6 -> {
-                R.drawable.full_moon
-            }
-            in 0.61..0.69 -> {
-                R.drawable.waning_moon
-            }
-            in 0.7..0.8 -> {
-                R.drawable.last_quarter_moon
-            }
-            in 0.81..0.89 -> {
-                R.drawable.waning_moon_2
-            }
-            in 0.9..1.0 -> {
-                R.drawable.new_moon
-            }
-            else -> {
-                R.drawable.full_moon
-            }
+            in 0.0..0.1 -> R.drawable.new_moon
+            in 0.11..0.19 -> R.drawable.waxing_moon_2
+            in 0.2..0.3 -> R.drawable.first_quarter_moon
+            in 0.31..0.39 -> R.drawable.waxing_moon
+            in 0.4..0.6 -> R.drawable.full_moon
+            in 0.61..0.69 -> R.drawable.waning_moon
+            in 0.7..0.8 -> R.drawable.last_quarter_moon
+            in 0.81..0.89 -> R.drawable.waning_moon_2
+            in 0.9..1.0 -> R.drawable.new_moon
+            else -> R.drawable.full_moon
         }
     }
 
     fun getWindDegreeText(deg: Int): String {
         return when (deg) {
-            in 0..45 -> {
-                "S"
-            }
-            in 46..90 -> {
-                "SW"
-            }
-            in 91..135 -> {
-                "W"
-            }
-            in 136..180 -> {
-                "NW"
-            }
-            in 181..225 -> {
-                "N"
-            }
-            in 226..270 -> {
-                "NE"
-            }
-            in 271..315 -> {
-                "E"
-            }
-            in 316..360 -> {
-                "SE"
-            }
-            else -> {
-                "?"
-            }
+            in 0..11 -> "N"
+            in 12..34 -> "NNE"
+            in 35..56 -> "NE"
+            in 57..79 -> "ENE"
+            in 80..101 -> "E"
+            in 102..124 -> "ESE"
+            in 125..146 -> "SE"
+            in 147..169 -> "SSE"
+            in 170..191 -> "S"
+            in 192..214 -> "SSW"
+            in 215..236 -> "SW"
+            in 237..259 -> "WSW"
+            in 260..281 -> "W"
+            in 281..304 -> "WNW"
+            in 305..327 -> "NW"
+            in 328..349 -> "NNW"
+            in 350..360 -> "N"
+            else -> "?"
         }
     }
 
-    fun getWeatherIcon(id: Int): Int {
-        return when (id) {
-            in 800..800 -> {
-                R.drawable.sun
-            }
-            in 801..804 -> {
-                R.drawable.overcast
-            }
-            in 200..599 -> {
-                R.drawable.rain
-            }
-            else -> {
-                R.drawable.sun
-            }
+    fun getWeatherIconUrl(id: Int): String {
+        val base = "https://openweathermap.org/img/wn/"
+
+        val iconNumber: String = when (id) {
+            in 200..299 -> "11"
+            in 300..399 -> "09"
+            in 500..504 -> "10"
+            511 -> "13"
+            in 520..531 -> "09"
+            in 600..699 -> "13"
+            in 700..799 -> "50"
+            800 -> "01"
+            801 -> "02"
+            802 -> "03"
+            in 803..804 -> "04"
+            else -> "01"
         }
+
+        val iconDN = when (Calendar.getInstance()[Calendar.HOUR_OF_DAY]) {
+            in 6..17 -> "d"
+            else -> "n"
+        }
+
+        val suffix = "@2x.png"
+
+        return base + iconNumber + iconDN + suffix
     }
 
     fun getCurrentActiveSeriesItem(valueArray: IntArray, current: Float): Int {
         return when (current) {
-            in 0F..valueArray[0].toFloat() -> {
-                0
-            }
-            in valueArray[0].toFloat()..valueArray[1].toFloat() -> {
-                1
-            }
-            in valueArray[1].toFloat()..valueArray[2].toFloat() -> {
-                2
-            }
-            in valueArray[2].toFloat()..valueArray[3].toFloat() -> {
-                3
-            }
-            in valueArray[3].toFloat()..valueArray[4].toFloat() -> {
-                4
-            }
-            in valueArray[4].toFloat()..valueArray[5].toFloat() -> {
-                5
-            }
-            in valueArray[5].toFloat()..valueArray[6].toFloat() -> {
-                6
-            }
+            in 0F..valueArray[0].toFloat() -> 0
+            in valueArray[0].toFloat()..valueArray[1].toFloat() -> 1
+            in valueArray[1].toFloat()..valueArray[2].toFloat() -> 2
+            in valueArray[2].toFloat()..valueArray[3].toFloat() -> 3
+            in valueArray[3].toFloat()..valueArray[4].toFloat() -> 4
+            in valueArray[4].toFloat()..valueArray[5].toFloat() -> 5
+            in valueArray[5].toFloat()..valueArray[6].toFloat() -> 6
+            else -> -1
+        }
+    }
+
+    fun getAirCardBackground(value: Int): Int {
+        return when (value) {
+            1 -> R.color.airIndex1
+            2 -> R.color.airIndex2
+            3 -> R.color.airIndex3
+            4 -> R.color.airIndex4
+            5 -> R.color.airIndex5
             else -> {
-                -1
+                R.color.airIndex1
             }
         }
     }
@@ -125,9 +104,7 @@ object WeatherUtils {
             3 -> "Moderate"
             4 -> "Poor"
             5 -> "Very Poor"
-            else -> {
-                "Unknown"
-            }
+            else -> "Unknown"
         }
     }
 }

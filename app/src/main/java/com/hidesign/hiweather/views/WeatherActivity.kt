@@ -120,10 +120,13 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                 binding.bottomAppBar.performShow()
                 binding.vpContent.setCurrentItem(1, true)
                 val list = supportFragmentManager.fragments
-                list.size
-                if (supportFragmentManager.fragments.size > 3) {
-                    val fragment = supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
-                    fragment.fetchContent()
+                for (frag in list) {
+                    if (frag.tag == "f1") {
+                        val fragment =
+                            supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
+                        fragment.fetchContent()
+                        return@launch
+                    }
                 }
             } else {
                 binding.toolbar.title = "Enter an Address"
@@ -169,11 +172,16 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                 binding.toolbar.title = address.locality ?: ""
                 binding.bottomAppBar.performShow()
                 binding.vpContent.setCurrentItem(1, true)
-                val list = supportFragmentManager.fragments.toList()
-                list.size
-                if (supportFragmentManager.fragments.size > 3) {
-                    val fragment = supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
-                    fragment.fetchContent()
+                val list = supportFragmentManager.fragments
+                for (frag in list) {
+                    if (frag.tag == "f1") {
+                        val fragment =
+                            supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
+                        launch {
+                            fragment.fetchContent()
+                        }
+                        return
+                    }
                 }
             }
         })

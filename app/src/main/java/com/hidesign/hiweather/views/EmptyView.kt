@@ -58,9 +58,5 @@ class EmptyView : Fragment() {
     companion object {
         const val TAG = "Empty View"
 
-        @JvmStatic
-        fun newInstance() =
-            EmptyView().apply {
-            }
     }
 }

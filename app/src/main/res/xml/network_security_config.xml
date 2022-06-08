@@ -8,6 +8,7 @@
 
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">api.openweathermap.org/</domain>
+        <domain includeSubdomains="true">http://api.openweathermap.org/</domain>
         <domain includeSubdomains="true">https://api.openweathermap.org/</domain>
     </domain-config>
 </network-security-config>

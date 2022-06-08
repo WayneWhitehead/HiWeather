@@ -42,8 +42,8 @@ android {
         applicationId "com.hidesign.hiweather"
         minSdkVersion 26
         targetSdkVersion 32
-        versionCode 21
-        versionName "0.1.51"
+        versionCode 23
+        versionName "0.1.53"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -118,9 +118,11 @@ dependencies {
     implementation 'com.facebook.shimmer:shimmer:0.5.0@aar'
     implementation 'com.github.Jay-Goo:RangeSeekBar:v3.0.0'
     implementation 'com.github.bmarrdev:android-DecoView-charting:v1.2'
+    implementation 'com.github.bumptech.glide:glide:4.13.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
 
     implementation 'com.google.android.libraries.places:places:2.6.0'
-    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.android.gms:play-services-location:20.0.0'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'com.google.android.gms:play-services-ads:21.0.0'
     implementation 'com.google.firebase:firebase-crashlytics-ktx:18.2.11'

@@ -7,10 +7,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.util.DateUtils
-import com.hidesign.hiweather.util.WeatherUtils.getWeatherIcon
+import com.hidesign.hiweather.util.WeatherUtils.getWeatherIconUrl
 import java.text.MessageFormat
 import kotlin.math.roundToInt
 
@@ -35,9 +36,13 @@ class DailyRecyclerAdapter internal constructor(
             timezone))
         holder.high.text =
             MessageFormat.format("High {0}°C", weatherArrayList[position].temp.max.roundToInt())
-        holder.low.text = MessageFormat.format("Low {0}°C", weatherArrayList[position].temp.min.roundToInt())
-        holder.precipitation.text = MessageFormat.format("{0}%",  weatherArrayList[position].pop * 100)
-        holder.icon.setImageResource(getWeatherIcon(weatherArrayList[position].weather[0].id))
+        holder.low.text =
+            MessageFormat.format("Low {0}°C", weatherArrayList[position].temp.min.roundToInt())
+        holder.precipitation.text =
+            MessageFormat.format("{0}%", weatherArrayList[position].pop * 100)
+        Glide.with(holder.itemView)
+            .load(getWeatherIconUrl(weatherArrayList[position].weather[0].id))
+            .into(holder.icon)
     }
 
     override fun getItemCount(): Int {

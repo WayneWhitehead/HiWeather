@@ -18,12 +18,12 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center"
+			android:background="@drawable/bg_gradient_merge"
 			android:orientation="vertical" >
 
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:background="@drawable/gradient_sun"
 				android:paddingVertical="20dp"
 				android:orientation="vertical">
 
@@ -46,7 +46,7 @@
 							android:id="@+id/Sunrise"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textSize="35sp"
+							android:textSize="32sp"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textColor="@android:color/black" />
@@ -69,7 +69,7 @@
 							android:id="@+id/Sunset"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textSize="35sp"
+							android:textSize="32sp"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textColor="@android:color/black" />
@@ -88,37 +88,31 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center"
+					android:textSize="24sp"
 					android:textColor="@color/black"
-					android:textSize="26sp"
+					android:textStyle="bold"
 					android:text="@null" />
 
 			</LinearLayout>
 
-			<View
+			<com.google.android.material.divider.MaterialDivider
 				android:layout_width="match_parent"
-				android:layout_height="2dp"
-				android:background="@color/black" />
+				android:layout_height="wrap_content"
+				android:layout_marginHorizontal="20dp"
+				android:layout_marginBottom="2dp"
+				app:dividerColor="@color/black" />
 
-			<View
+			<com.google.android.material.divider.MaterialDivider
 				android:layout_width="match_parent"
-				android:layout_height="2dp"
-				android:background="@color/white" />
-
-			<View
-				android:layout_width="match_parent"
-				android:layout_height="2dp"
-				android:background="@color/black" />
-
-			<View
-				android:layout_width="match_parent"
-				android:layout_height="2dp"
-				android:background="@color/white" />
+				android:layout_height="wrap_content"
+				android:layout_marginHorizontal="20dp"
+				app:dividerColor="@color/black" />
 
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:paddingVertical="20dp"
-				android:background="@drawable/gradient_moon"
+				android:layout_marginBottom="10dp"
 				android:orientation="vertical">
 
 				<LinearLayout
@@ -140,14 +134,14 @@
 							android:id="@+id/Moonrise"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textSize="35sp"
+							android:textColor="@android:color/black"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
-							android:textColor="@android:color/white" />
+							android:textSize="32sp" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@android:color/white"
+							android:textColor="@android:color/black"
 							android:textSize="18sp"
 							android:text="@string/moonrise"/>
 
@@ -157,7 +151,7 @@
 						android:layout_width="50dp"
 						android:layout_height="50dp"
 						android:src="@drawable/full_moon"
-						app:tint="@color/white"
+						app:tint="@color/black"
 						android:contentDescription="@null" />
 					<LinearLayout
 						android:layout_width="wrap_content"
@@ -170,14 +164,14 @@
 							android:id="@+id/Moonset"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textSize="35sp"
+							android:textColor="@android:color/black"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
-							android:textColor="@android:color/white" />
+							android:textSize="32sp" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@android:color/white"
+							android:textColor="@android:color/black"
 							android:textSize="18sp"
 							android:text="@string/moonset"/>
 
@@ -189,8 +183,9 @@
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
 					android:gravity="center"
-					android:textColor="@color/white"
-					android:textSize="26sp"
+					android:textColor="@color/black"
+					android:textSize="24sp"
+					android:textStyle="bold"
 					android:text="@null" />
 			</LinearLayout>
 
