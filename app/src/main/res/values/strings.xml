@@ -104,23 +104,25 @@
 		<item>140</item>
 	</integer-array>
 
-	<string name="precipitation">Precipitation</string>
-	<string name="today">Today</string>
-	<string name="hello_blank_fragment">Hello blank fragment</string>
 	<string name="visibility_0_m">Visibility {0}m</string>
 	<string name="uv_index_0">UV Index {0}</string>
 	<string name="pressure_0_mbar">Pressure {0}mBar</string>
 	<string name="dew_point_0_c">Dew Point {0}°C</string>
-	<string name="humidity_0">Humidity {0}%</string>
 	<string name="precipitation_0">Precipitation {0}%</string>
 	<string name="real_feel_0_c">Real Feel {0}°C</string>
+	<string name="_0">{0}</string>
 	<string name="_0_c">{0}°C</string>
 	<string name="_0_p">{0}%</string>
 	<string name="low_0_c">Low {0}°C</string>
 	<string name="high_0_c">High {0}°C</string>
+	<string name="humidity_0">Humidity {0}%</string>
+
+	<string name="precipitation">Precipitation </string>
+	<string name="cloudiness">Cloudiness </string>
+	<string name="humidity">Humidity </string>
+	<string name="today">Today</string>
 	<string name="moonrise">Moonrise</string>
 	<string name="moonset">Moonset</string>
-	<string name="_0">{0}</string>
 	<string name="empty_time">--:--</string>
 	<string name="air_quality">Air Quality</string>
 	<string name="please_enter_an_address_in_the_search_bar_above">Please Search for an Address </string>

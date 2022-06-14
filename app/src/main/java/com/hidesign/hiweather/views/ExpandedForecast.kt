@@ -43,20 +43,19 @@ class ExpandedForecast : BottomSheetDialogFragment() {
         firebaseAnalytics = Firebase.analytics
 
         val date = weatherHourly?.dt?.toLong() ?: weatherDaily?.dt?.toLong() ?: 0
-        val image = getWeatherIconUrl(weatherHourly?.clouds ?: weatherDaily?.clouds ?: 0)
+        val image = getWeatherIconUrl(weatherHourly?.weather?.get(0)?.icon
+            ?: weatherDaily?.weather?.get(0)?.icon ?: "")
         Glide.with(this)
             .load(image)
             .into(binding.skiesImage)
 
         val realFeel = (weatherDaily?.feelsLike?.day ?: weatherHourly?.feelsLike)?.roundToInt() ?: 0
-        binding.RealFeelTemp.text =
+        binding.realFeelTemp.text =
             MessageFormat.format(getString(R.string.real_feel_0_c), realFeel)
-
         val precipitation = ((weatherDaily?.pop ?: weatherHourly?.pop)?.roundToInt() ?: 0) * 100
-        binding.Precipitation.text =
-            MessageFormat.format(getString(R.string.precipitation_0), precipitation)
+        binding.precipitation.text = MessageFormat.format(getString(R.string._0_p), precipitation)
         val humidity = weatherHourly?.humidity ?: weatherDaily?.humidity ?: 0
-        binding.Humidity.text = MessageFormat.format(getString(R.string.humidity_0), humidity)
+        binding.humidity.text = MessageFormat.format(getString(R.string._0_p), humidity)
         val dewPoint = (weatherHourly?.dewPoint ?: weatherDaily?.dewPoint)?.roundToInt() ?: 0
         binding.DewPoint.text = MessageFormat.format(getString(R.string.dew_point_0_c), dewPoint)
         val pressure = weatherHourly?.pressure ?: weatherDaily?.pressure ?: 0
@@ -75,23 +74,23 @@ class ExpandedForecast : BottomSheetDialogFragment() {
         if (weatherHourly != null) {
             binding.date.text = DateUtils.getDateTime("HH:00", date, timezone)
             val currentTemp = weatherHourly?.temp?.roundToInt() ?: 0
-            binding.CurrentTemp.text = MessageFormat.format(getString(R.string._0_c), currentTemp)
+            binding.currentTemp.text = MessageFormat.format(getString(R.string._0_c), currentTemp)
             val visibility = weatherHourly?.visibility ?: 0
             binding.Visibility.text =
                 MessageFormat.format(getString(R.string.visibility_0_m), visibility)
 
-            binding.HighTemp.visibility = View.GONE
-            binding.LowTemp.visibility = View.GONE
+            binding.lowTemp.visibility = View.GONE
+            binding.highTemp.visibility = View.GONE
         }
         if (weatherDaily != null) {
             binding.date.text =
                 DateUtils.getDayOfWeekText(DateUtils.getDateTime("u", date, timezone))
             val high = weatherDaily?.temp?.max?.roundToInt() ?: 0
-            binding.HighTemp.text = MessageFormat.format(getString(R.string.high_0_c), high)
+            binding.highTemp.text = MessageFormat.format(getString(R.string.high_0_c), high)
             val low = weatherDaily?.temp?.min?.roundToInt() ?: 0
-            binding.LowTemp.text = MessageFormat.format(getString(R.string.low_0_c), low)
+            binding.lowTemp.text = MessageFormat.format(getString(R.string.low_0_c), low)
 
-            binding.CurrentTemp.visibility = View.GONE
+            binding.currentTemp.visibility = View.GONE
             binding.Visibility.visibility = View.GONE
         }
     }

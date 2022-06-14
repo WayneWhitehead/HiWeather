@@ -2,12 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/layout"
-	android:layout_width="wrap_content"
-	android:layout_height="195dp"
-	android:layout_gravity="center"
-	android:layout_marginBottom="15dp"
-	tools:viewBindingIgnore="true"
-	android:gravity="center">
+	android:layout_width="match_parent"
+	android:layout_height="150dp"
+	android:layout_marginBottom="35dp"
+	android:gravity="center"
+	tools:viewBindingIgnore="true">
 
 	<LinearLayout
 		android:id="@+id/left"
@@ -18,39 +17,21 @@
 		android:orientation="vertical">
 
 		<View
-			android:layout_width="100dp"
-			android:layout_height="20dp"
-			android:layout_marginVertical="2dp"
+			android:layout_width="120dp"
+			android:layout_height="25dp"
+			android:layout_marginVertical="3dp"
 			android:background="@color/background" />
 
 		<View
-			android:layout_width="50dp"
-			android:layout_height="20dp"
-			android:layout_marginVertical="2dp"
+			android:layout_width="120dp"
+			android:layout_height="25dp"
+			android:layout_marginVertical="3dp"
 			android:background="@color/background" />
 
 		<View
-			android:layout_width="100dp"
-			android:layout_height="20dp"
-			android:layout_marginVertical="2dp"
-			android:background="@color/background" />
-
-		<View
-			android:layout_width="50dp"
-			android:layout_height="20dp"
-			android:layout_marginVertical="2dp"
-			android:background="@color/background" />
-
-		<View
-			android:layout_width="100dp"
-			android:layout_height="20dp"
-			android:layout_marginVertical="2dp"
-			android:background="@color/background" />
-
-		<View
-			android:layout_width="50dp"
-			android:layout_height="20dp"
-			android:layout_marginVertical="2dp"
+			android:layout_width="120dp"
+			android:layout_height="25dp"
+			android:layout_marginVertical="3dp"
 			android:background="@color/background" />
 
 	</LinearLayout>

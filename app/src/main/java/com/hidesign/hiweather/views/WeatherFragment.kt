@@ -1,8 +1,6 @@
 package com.hidesign.hiweather.views
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.transition.Slide
 import android.transition.TransitionManager
@@ -16,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearSnapHelper
+import androidx.room.Room
 import com.bumptech.glide.Glide
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -23,6 +22,7 @@ import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.adapter.DailyRecyclerAdapter
 import com.hidesign.hiweather.adapter.HourlyRecyclerAdapter
+import com.hidesign.hiweather.database.WeatherDatabase
 import com.hidesign.hiweather.databinding.FragmentWeatherBinding
 import com.hidesign.hiweather.model.AirPollutionResponse
 import com.hidesign.hiweather.model.Daily
@@ -30,6 +30,7 @@ import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.model.OneCallResponse
 import com.hidesign.hiweather.network.WeatherViewModel
 import com.hidesign.hiweather.util.Constants
+import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.DialogUtil
 import com.hidesign.hiweather.util.WeatherUtils
@@ -51,6 +52,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
     private lateinit var weather: OneCallResponse
     private lateinit var airPollution: AirPollutionResponse
     private var isFetching = false
+    private lateinit var db: WeatherDatabase
 
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + job
@@ -131,30 +133,21 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         coroutineScope {
             if (uAddress == null) {
                 Toast.makeText(requireContext(),
-                    "Something went wrong trying to get your location \n Please try again.",
+                    "Something went wrong trying to get the location \n Please try again.",
                     Toast.LENGTH_SHORT).show()
                 val activity = requireActivity() as WeatherActivity
                 activity.binding.vpContent.setCurrentItem(0, true)
                 return@coroutineScope
             }
+
             setFetchingContent()
             val df = SimpleDateFormat("d MMMM HH:mm", Locale.getDefault())
             val formattedDate = df.format(Calendar.getInstance().time)
             binding.dateHeader.date.text = formattedDate
             launch {
-                val ai: ApplicationInfo = requireContext().packageManager.getApplicationInfo(
-                    requireContext().packageName,
-                    PackageManager.GET_META_DATA)
-                val value = ai.metaData["weatherKey"]
-                val apiKey = value.toString()
-
-                val oneCallResponse = weatherViewModel.getOneCallWeather(uAddress!!.latitude,
-                    uAddress!!.longitude,
-                    apiKey)
-                val airPollutionResponse =
-                    weatherViewModel.getAirPollution(uAddress!!.latitude,
-                        uAddress!!.longitude,
-                        apiKey)
+                val apiKey = getAPIKey(requireContext(), Constants.openWeatherKey)
+                val oneCallResponse = weatherViewModel.getOneCallWeather(apiKey)
+                val airPollutionResponse = weatherViewModel.getAirPollution(apiKey)
 
                 binding.swipeLayout.isRefreshing = false
 
@@ -193,16 +186,16 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
     private fun onWeatherSuccess() {
         //region Current Card
         Glide.with(this)
-            .load(getWeatherIconUrl(weather.current.weather[0].id))
+            .load(getWeatherIconUrl(weather.current.weather[0].icon))
             .into(binding.currentCard.skiesImage)
         binding.currentCard.currentTemp.text =
             MessageFormat.format(getString(R.string._0_c), weather.current.temp.roundToInt())
         binding.currentCard.highTemp.text =
             MessageFormat.format(getString(R.string.high_0_c),
-                weather.daily[0].temp.max.roundToInt())
+                weather.daily[0].temp!!.max.roundToInt())
         binding.currentCard.lowTemp.text =
             MessageFormat.format(getString(R.string.low_0_c),
-                weather.daily[0].temp.min.roundToInt())
+                weather.daily[0].temp!!.min.roundToInt())
         binding.currentCard.realFeelTemp.text =
             MessageFormat.format(getString(R.string.real_feel_0_c),
                 weather.current.feelsLike.roundToInt())
@@ -212,7 +205,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
         //region Current Extra Card
         binding.currentExtraCard.precipitation.text =
-            MessageFormat.format(getString(R.string._0_p), (weather.daily[0].pop * 100))
+            MessageFormat.format(getString(R.string._0_p), (weather.daily[0].pop!! * 100))
         binding.currentExtraCard.humidity.text =
             MessageFormat.format(getString(R.string._0_p), weather.current.humidity)
         binding.currentExtraCard.cloudiness.text =
@@ -268,10 +261,10 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
         //region Sun Card
         binding.sunCard.Sunrise.text = DateUtils.getDateTime("HH:mm",
-            (weather.daily[0].sunrise).toLong(),
+            (weather.daily[0].sunrise)!!.toLong(),
             weather.timezone)
         binding.sunCard.Sunset.text =
-            DateUtils.getDateTime("HH:mm", (weather.daily[0].sunset).toLong(), weather.timezone)
+            DateUtils.getDateTime("HH:mm", (weather.daily[0].sunset)!!.toLong(), weather.timezone)
         binding.sunCard.sunContent.setOnClickListener {
             ExpandedSunMoon.newInstance(weather.daily[0], weather.timezone)
                 .show(childFragmentManager, ExpandedSunMoon.TAG)

@@ -1,8 +1,6 @@
 package com.hidesign.hiweather.views
 
 import android.Manifest
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.location.Address
 import android.os.Bundle
 import android.util.Log
@@ -24,6 +22,8 @@ import com.hidesign.hiweather.R
 import com.hidesign.hiweather.adapter.ViewPagerAdapter
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
 import com.hidesign.hiweather.util.AdUtil
+import com.hidesign.hiweather.util.Constants
+import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.hidesign.hiweather.util.LocationUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -95,14 +95,17 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         super.onStart()
         val adapter = ViewPagerAdapter(this)
         binding.vpContent.adapter = adapter
-        binding.vpContent.currentItem = 0
         binding.vpContent.isUserInputEnabled = false
         checkLocation()
     }
 
     private fun checkLocation() {
         if (LocationUtil.verifyPermissions(this)) {
-            getLocation()
+            val activity = this
+            launch {
+                val address = LocationUtil.getLocation(activity)
+                displayFragment(address)
+            }
         } else {
             mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -110,79 +113,54 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         }
     }
 
-    private fun getLocation() {
-        val activity = this
-        launch {
-            val address = LocationUtil.getLocation(activity)
-            if (address != null) {
-                uAddress = address
-                binding.toolbar.title = address.locality ?: ""
-                binding.bottomAppBar.performShow()
-                binding.vpContent.setCurrentItem(1, true)
-                val list = supportFragmentManager.fragments
-                for (frag in list) {
-                    if (frag.tag == "f1") {
-                        val fragment =
-                            supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
+    private fun displayFragment(address: Address?) {
+        binding.bottomAppBar.performShow()
+        if (address != null) {
+            uAddress = address
+            binding.toolbar.title = address.locality ?: ""
+            val list = supportFragmentManager.fragments
+            for (frag in list) {
+                if (frag.tag == "f1") {
+                    val fragment =
+                        supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
+                    launch {
                         fragment.fetchContent()
-                        return@launch
                     }
+                    return
                 }
-            } else {
-                binding.toolbar.title = "Enter an Address"
-                binding.bottomAppBar.performShow()
-                binding.vpContent.setCurrentItem(1, true)
-                binding.linearProgress.visibility = View.INVISIBLE
+            }
+            if (binding.vpContent.currentItem != 1) {
+                binding.vpContent.setCurrentItem(1, false)
+            }
+        } else {
+            binding.toolbar.title = "Enter an Address"
+            binding.linearProgress.visibility = View.INVISIBLE
+            if (binding.vpContent.currentItem != 0) {
+                binding.vpContent.setCurrentItem(0, false)
             }
         }
     }
 
     private fun setupPlacesAutoComplete() {
-        val ai: ApplicationInfo = applicationContext.packageManager
-            .getApplicationInfo(applicationContext.packageName, PackageManager.GET_META_DATA)
-        val value = ai.metaData["placesKey"]
-        val apiKey = value.toString()
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, apiKey)
+            Places.initialize(applicationContext,
+                getAPIKey(applicationContext, Constants.placesKey))
         }
 
         autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES)
-        autocompleteSupportFragment.setPlaceFields(
-            listOf(
-                Place.Field.NAME,
-                Place.Field.ADDRESS,
-                Place.Field.LAT_LNG,
-            )
-        )
-
+        autocompleteSupportFragment.setPlaceFields(listOf(Place.Field.NAME, Place.Field.LAT_LNG))
         autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onError(p0: Status) {
-                binding.toolbar.title = "Enter an Address"
-                binding.bottomAppBar.performShow()
+                displayFragment(null)
             }
 
             override fun onPlaceSelected(place: Place) {
-                val latlng = place.latLng
                 val address = Address(Locale.getDefault()).apply {
-                    latitude = latlng!!.latitude
-                    longitude = latlng.longitude
-                    locality = place.address
+                    latitude = place.latLng?.latitude ?: 0.0
+                    longitude = place.latLng?.longitude ?: 0.0
+                    locality = place.name
                 }
-                uAddress = address
-                binding.toolbar.title = address.locality ?: ""
-                binding.bottomAppBar.performShow()
-                binding.vpContent.setCurrentItem(1, true)
-                val list = supportFragmentManager.fragments
-                for (frag in list) {
-                    if (frag.tag == "f1") {
-                        val fragment =
-                            supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
-                        launch {
-                            fragment.fetchContent()
-                        }
-                        return
-                    }
-                }
+                displayFragment(address)
             }
         })
     }

@@ -19,58 +19,115 @@
 			android:layout_height="wrap_content"
 			android:gravity="center">
 
-			<com.google.android.material.card.MaterialCardView
+			<LinearLayout
 				android:id="@+id/image"
-				android:layout_height="90dp"
-				android:layout_width="wrap_content"
-				app:cardCornerRadius="45dp"
-				android:layout_centerHorizontal="true"
-				android:layout_gravity="center"
-				style="@style/CardView.Light"
-				android:orientation="horizontal"
-				android:layout_marginTop="20dp">
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="20dp"
+				android:gravity="center"
+				android:orientation="horizontal">
 
-				<LinearLayout
+				<com.google.android.material.card.MaterialCardView
+					style="@style/CardView.Light"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:paddingHorizontal="20dp"
-					android:layout_gravity="center"
 					android:orientation="horizontal"
-					tools:ignore="UseCompoundDrawables">
-
-					<ImageView
-						android:id="@+id/skiesImage"
-						android:layout_width="90dp"
-						android:layout_height="90dp"
-						android:contentDescription="@string/cloud_cover"
-						android:padding="5dp" />
+					app:cardCornerRadius="45dp"
+					app:cardElevation="5dp">
 
 					<LinearLayout
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:layout_gravity="center"
-						android:orientation="vertical">
+						android:layout_marginStart="10dp"
+						android:layout_marginEnd="30dp"
+						android:orientation="horizontal"
+						tools:ignore="UseCompoundDrawables">
+
+						<ImageView
+							android:id="@+id/skiesImage"
+							android:layout_width="80dp"
+							android:layout_height="80dp"
+							android:layout_margin="-20dp"
+							android:contentDescription="@string/cloud_cover" />
+
 						<TextView
 							android:id="@+id/date"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
 							android:layout_gravity="center"
-							android:paddingStart="15dp"
-							android:paddingEnd="15dp"
+							android:paddingStart="10dp"
+							android:paddingEnd="10dp"
 							android:text="@string/today"
 							android:textColor="@color/expanded_forecast_card"
-							android:textSize="28sp"
+							android:textSize="26sp"
 							android:textStyle="bold" />
 					</LinearLayout>
-				</LinearLayout>
-			</com.google.android.material.card.MaterialCardView>
+				</com.google.android.material.card.MaterialCardView>
 
-			<LinearLayout android:id="@+id/currentInfo"
+				<com.google.android.material.card.MaterialCardView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="-35dp"
+					android:backgroundTint="#012240"
+					app:cardCornerRadius="30dp"
+					app:cardElevation="10dp">
+
+					<LinearLayout
+						android:id="@+id/current_card"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="center"
+						android:orientation="vertical"
+						android:paddingHorizontal="15dp"
+						android:paddingVertical="10dp">
+
+						<TextView
+							android:id="@+id/current_temp"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_gravity="center"
+							android:text="@string/_0_c"
+							android:textColor="@color/white"
+							android:textSize="40sp" />
+
+						<TextView
+							android:id="@+id/low_temp"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_gravity="center"
+							android:text="@string/low_0_c"
+							android:textColor="@color/white"
+							android:textSize="16sp" />
+
+						<TextView
+							android:id="@+id/high_temp"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_gravity="center"
+							android:text="@string/high_0_c"
+							android:textColor="@color/white"
+							android:textSize="16sp" />
+
+						<TextView
+							android:id="@+id/real_feel_temp"
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_gravity="center"
+							android:text="@string/real_feel_0_c"
+							android:textColor="@color/white"
+							android:textSize="16sp" />
+					</LinearLayout>
+				</com.google.android.material.card.MaterialCardView>
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/currentInfo"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_below="@id/image"
-				android:baselineAligned="false"
 				android:layout_marginBottom="20dp"
+				android:baselineAligned="false"
 				android:orientation="horizontal">
 
 				<LinearLayout
@@ -78,62 +135,91 @@
 					android:layout_height="wrap_content"
 					android:layout_gravity="center"
 					android:layout_weight="1"
-					android:layout_marginTop="10dp"
 					android:gravity="center"
 					android:orientation="vertical">
 
-					<androidx.cardview.widget.CardView
-						android:layout_width="wrap_content"
+					<LinearLayout
+						android:layout_width="match_parent"
 						android:layout_height="wrap_content"
-						android:backgroundTint="#012240"
-						android:elevation="5dp"
-						app:cardCornerRadius="30dp">
+						android:layout_gravity="center"
+						android:gravity="center"
+						android:orientation="vertical">
 
 						<LinearLayout
-							android:id="@+id/currentCard"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:layout_gravity="center"
-							android:orientation="vertical"
-							android:padding="10dp">
+							android:layout_marginTop="5dp"
+							android:orientation="horizontal">
+
+							<ImageView
+								android:layout_width="20dp"
+								android:layout_height="20dp"
+								android:layout_gravity="center"
+								android:layout_marginHorizontal="4dp"
+								android:contentDescription="@null"
+								android:src="@drawable/rain"
+								app:tint="@color/white" />
 
 							<TextView
-								android:id="@+id/CurrentTemp"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_gravity="center"
-								android:text="@string/_0_c"
-								android:textColor="@color/white"
-								android:textSize="40sp" />
-
-							<TextView
-								android:id="@+id/LowTemp"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_gravity="center"
-								android:text="@string/low_0_c"
-								android:textColor="@color/white"
-								android:textSize="16sp" />
-
-							<TextView
-								android:id="@+id/HighTemp"
-								android:layout_width="wrap_content"
-								android:layout_height="wrap_content"
-								android:layout_gravity="center"
-								android:text="@string/high_0_c"
+								android:maxWidth="150dp"
+								android:paddingEnd="5dp"
+								android:text="@string/precipitation"
 								android:textColor="@color/white"
 								android:textSize="16sp" />
 
 							<TextView
-								android:id="@+id/RealFeelTemp"
+								android:id="@+id/precipitation"
 								android:layout_width="wrap_content"
 								android:layout_height="wrap_content"
 								android:layout_gravity="center"
-								android:text="@string/real_feel_0_c"
+								android:text="@null"
 								android:textColor="@color/white"
-								android:textSize="16sp" />
+								android:textSize="15sp" />
 						</LinearLayout>
-					</androidx.cardview.widget.CardView>
+
+						<LinearLayout
+							android:layout_width="wrap_content"
+							android:layout_height="wrap_content"
+							android:layout_marginTop="5dp"
+							android:orientation="horizontal">
+
+							<ImageView
+								android:layout_width="20dp"
+								android:layout_height="20dp"
+								android:layout_gravity="center"
+								android:layout_marginHorizontal="4dp"
+								android:contentDescription="@null"
+								android:src="@drawable/humidity"
+								app:tint="@color/white" />
+
+							<TextView
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_gravity="center"
+								android:paddingEnd="5dp"
+								android:text="@string/humidity"
+								android:textColor="@color/white"
+								android:textSize="16sp" />
+
+							<TextView
+								android:id="@+id/humidity"
+								android:layout_width="wrap_content"
+								android:layout_height="wrap_content"
+								android:layout_gravity="center"
+								android:textColor="@android:color/white"
+								android:textSize="17sp" />
+						</LinearLayout>
+					</LinearLayout>
+
+					<com.google.android.material.divider.MaterialDivider
+						android:layout_width="match_parent"
+						android:layout_height="2dp"
+						android:layout_marginHorizontal="10dp"
+						android:layout_marginVertical="5dp"
+						app:dividerColor="@color/white" />
 
 					<LinearLayout
 						android:id="@+id/wind_content"
@@ -148,7 +234,7 @@
 							android:layout_height="wrap_content"
 							android:text="@string/_0_c"
 							android:textColor="@android:color/white"
-							android:textSize="50sp" />
+							android:textSize="40sp" />
 
 						<LinearLayout
 							android:layout_width="wrap_content"
@@ -159,8 +245,8 @@
 
 							<ImageView
 								android:id="@+id/WindDirectionDegrees"
-								android:layout_width="20dp"
-								android:layout_height="20dp"
+								android:layout_width="15dp"
+								android:layout_height="15dp"
 								android:layout_gravity="center"
 								android:layout_margin="5dp"
 								android:contentDescription="@string/winddirectionicon"
@@ -173,7 +259,7 @@
 								android:layout_height="wrap_content"
 								android:text="@string/km_h"
 								android:textColor="@android:color/white"
-								android:textSize="18sp" />
+								android:textSize="16sp" />
 						</LinearLayout>
 
 						<TextView
@@ -215,28 +301,10 @@
 						android:textSize="16sp" />
 
 					<TextView
-						android:id="@+id/Precipitation"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="@string/precipitation_0"
-						android:textAlignment="center"
-						android:textColor="@color/white"
-						android:textSize="16sp" />
-
-					<TextView
 						android:id="@+id/DewPoint"
 						android:layout_width="wrap_content"
 						android:layout_height="wrap_content"
 						android:text="@string/dew_point_0_c"
-						android:textAlignment="center"
-						android:textColor="@android:color/white"
-						android:textSize="16sp" />
-
-					<TextView
-						android:id="@+id/Humidity"
-						android:layout_width="wrap_content"
-						android:layout_height="wrap_content"
-						android:text="@string/humidity_0"
 						android:textAlignment="center"
 						android:textColor="@android:color/white"
 						android:textSize="16sp" />

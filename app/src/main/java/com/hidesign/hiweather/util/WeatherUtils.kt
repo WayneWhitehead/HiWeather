@@ -1,7 +1,6 @@
 package com.hidesign.hiweather.util
 
 import com.hidesign.hiweather.R
-import java.util.*
 
 object WeatherUtils {
 
@@ -43,32 +42,10 @@ object WeatherUtils {
         }
     }
 
-    fun getWeatherIconUrl(id: Int): String {
+    fun getWeatherIconUrl(icon: String): String {
         val base = "https://openweathermap.org/img/wn/"
-
-        val iconNumber: String = when (id) {
-            in 200..299 -> "11"
-            in 300..399 -> "09"
-            in 500..504 -> "10"
-            511 -> "13"
-            in 520..531 -> "09"
-            in 600..699 -> "13"
-            in 700..799 -> "50"
-            800 -> "01"
-            801 -> "02"
-            802 -> "03"
-            in 803..804 -> "04"
-            else -> "01"
-        }
-
-        val iconDN = when (Calendar.getInstance()[Calendar.HOUR_OF_DAY]) {
-            in 6..17 -> "d"
-            else -> "n"
-        }
-
         val suffix = "@2x.png"
-
-        return base + iconNumber + iconDN + suffix
+        return base + icon + suffix
     }
 
     fun getCurrentActiveSeriesItem(valueArray: IntArray, current: Float): Int {

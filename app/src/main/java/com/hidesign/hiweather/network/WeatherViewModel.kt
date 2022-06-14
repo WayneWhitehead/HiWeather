@@ -1,26 +1,31 @@
 package com.hidesign.hiweather.network
 
-import com.hidesign.hiweather.model.OneCallResponse
 import androidx.lifecycle.ViewModel
 import com.hidesign.hiweather.model.AirPollutionResponse
 import com.hidesign.hiweather.model.HistoricalWeather
+import com.hidesign.hiweather.model.OneCallResponse
+import com.hidesign.hiweather.views.WeatherActivity.Companion.uAddress
 import retrofit2.Response
 
 class WeatherViewModel : ViewModel() {
 
-    suspend fun getOneCallWeather(lat: Double, lon: Double, key: String): Response<OneCallResponse?>? {
+    suspend fun getOneCallWeather(key: String): Response<OneCallResponse?>? {
         val apiClient = getApiClient()
-        return apiClient?.getOneCall(lat, lon, "minutely", key, "metric")
+        return apiClient?.getOneCall(uAddress!!.latitude,
+            uAddress!!.longitude,
+            "minutely",
+            key,
+            "metric")
     }
 
-    suspend fun getHistoricalWeather(lat: Double, lon: Double, dt: Long, key: String): Response<HistoricalWeather?>? {
+    suspend fun getHistoricalWeather(dt: Long, key: String): Response<HistoricalWeather?>? {
         val apiClient = getApiClient()
-        return apiClient?.getOneCallHistory(lat, lon, dt, key)
+        return apiClient?.getOneCallHistory(uAddress!!.latitude, uAddress!!.longitude, dt, key)
     }
 
-    suspend fun getAirPollution(lat: Double, lon: Double, key: String): Response<AirPollutionResponse?>? {
+    suspend fun getAirPollution(key: String): Response<AirPollutionResponse?>? {
         val apiClient = getApiClient()
-        return apiClient?.getAirPollution(lat, lon, key)
+        return apiClient?.getAirPollution(uAddress!!.latitude, uAddress!!.longitude, key)
     }
 
     private fun getApiClient() = ApiClient().apiService

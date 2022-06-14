@@ -31,13 +31,13 @@ class HourlyRecyclerAdapter internal constructor(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.date.text =
-            DateUtils.getDateTime("HH:00", weatherArrayList[position].dt.toLong(), timezone)
+            DateUtils.getDateTime("HH:00", weatherArrayList[position].dt!!.toLong(), timezone)
         holder.temp.text =
-            MessageFormat.format("{0}°C", weatherArrayList[position].temp.roundToInt())
+            MessageFormat.format("{0}°C", weatherArrayList[position].temp!!.roundToInt())
         holder.precipitation.text =
-            MessageFormat.format("{0}%", (weatherArrayList[position].pop * 100))
+            MessageFormat.format("{0}%", (weatherArrayList[position].pop!! * 100))
         Glide.with(holder.itemView)
-            .load(getWeatherIconUrl(weatherArrayList[position].weather[0].id))
+            .load(getWeatherIconUrl(weatherArrayList[position].weather!![0].icon))
             .into(holder.icon)
     }
 

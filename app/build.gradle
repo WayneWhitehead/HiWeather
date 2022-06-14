@@ -45,6 +45,12 @@ android {
         versionCode 25
         versionName "0.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
     }
 
     flavorDimensions 'tier'
@@ -99,6 +105,12 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.1"
     implementation "com.squareup.okhttp3:okhttp:5.0.0-alpha.1"
     implementation "com.squareup.okhttp3:okhttp-urlconnection:5.0.0-alpha.1"
+
+    //Database Dependencies
+    implementation("androidx.room:room-runtime:2.4.2")
+    annotationProcessor("androidx.room:room-compiler:2.4.2")
+    kapt("androidx.room:room-compiler:2.4.2")
+    implementation("androidx.room:room-ktx:2.4.2")
 
     //Kotlin Dependencies
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.7.0"

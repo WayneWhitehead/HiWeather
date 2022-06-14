@@ -1,8 +1,8 @@
 package com.hidesign.hiweather.network
 
-import com.hidesign.hiweather.model.OneCallResponse
 import com.hidesign.hiweather.model.AirPollutionResponse
 import com.hidesign.hiweather.model.HistoricalWeather
+import com.hidesign.hiweather.model.OneCallResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

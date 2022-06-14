@@ -4,7 +4,7 @@
 	xmlns:shimmer="http://schemas.android.com/tools"
 	style="@style/WeatherCards"
 	android:layout_width="match_parent"
-	android:layout_height="195dp"
+	android:layout_height="150dp"
 	android:layout_marginHorizontal="10dp"
 	android:backgroundTint="@color/current_extra_card"
 	app:cardElevation="20dp">
@@ -37,10 +37,10 @@
 		android:id="@+id/current_extra_content"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_gravity="center"
+		android:layout_gravity="center_horizontal"
 		android:orientation="horizontal"
-		android:paddingTop="10dp"
-		android:paddingBottom="25dp">
+		android:paddingTop="15dp"
+		android:paddingBottom="35dp">
 
 		<LinearLayout
 			android:layout_width="wrap_content"
@@ -48,66 +48,113 @@
 			android:layout_marginEnd="25dp"
 			android:orientation="vertical">
 
-			<TextView
+			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="center"
 				android:layout_marginTop="5dp"
-				android:maxWidth="150dp"
-				android:text="@string/precipitation"
-				android:textColor="@color/forecast_card_content"
-				android:textSize="15sp"
-				android:textStyle="bold" />
+				android:orientation="horizontal">
 
-			<TextView
-				android:id="@+id/precipitation"
+				<ImageView
+					android:layout_width="25dp"
+					android:layout_height="25dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/rain" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:paddingEnd="5dp"
+					android:text="@string/precipitation"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+
+				<TextView
+					android:id="@+id/precipitation"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:text="@null"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="18sp" />
+			</LinearLayout>
+
+			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:maxWidth="150dp"
-				android:text="@null"
-				android:textColor="@color/forecast_card_content"
-				android:textSize="18sp" />
-
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
+				android:layout_gravity="center_vertical"
 				android:layout_marginTop="5dp"
-				android:maxWidth="150dp"
-				android:text="@string/humidity"
-				android:textColor="@color/forecast_card_content"
-				android:textSize="15sp"
-				android:textStyle="bold" />
+				android:gravity="center_vertical"
+				android:orientation="horizontal">
 
-			<TextView
-				android:id="@+id/humidity"
+				<ImageView
+					android:layout_width="25dp"
+					android:layout_height="25dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/humidity" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:paddingEnd="5dp"
+					android:text="@string/humidity"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+
+				<TextView
+					android:id="@+id/humidity"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:textColor="@android:color/black"
+					android:textSize="16sp" />
+			</LinearLayout>
+
+			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:textColor="@android:color/black"
-				android:textSize="16sp" />
-
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
 				android:layout_marginTop="5dp"
-				android:maxWidth="150dp"
-				android:text="@string/cloudiness"
-				android:textColor="@color/forecast_card_content"
-				android:textSize="15sp"
-				android:textStyle="bold" />
+				android:orientation="horizontal">
 
-			<TextView
-				android:id="@+id/cloudiness"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:maxWidth="150dp"
-				android:text="@null"
-				android:textColor="@color/forecast_card_content"
-				android:textSize="18sp" />
+				<ImageView
+					android:layout_width="25dp"
+					android:layout_height="25dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/precipitation" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:paddingEnd="5dp"
+					android:text="@string/cloudiness"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+
+				<TextView
+					android:id="@+id/cloudiness"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:text="@null"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="18sp" />
+			</LinearLayout>
 		</LinearLayout>
 
 		<LinearLayout
