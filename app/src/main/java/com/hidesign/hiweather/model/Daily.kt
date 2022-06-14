@@ -1,45 +1,49 @@
 package com.hidesign.hiweather.model
 
 
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
+@Entity
 data class Daily(
-    @SerializedName("clouds")
-    var clouds: Int,
-    @SerializedName("dew_point")
-    var dewPoint: Double,
     @SerializedName("dt")
-    var dt: Int,
+    @PrimaryKey var dt: Int? = 0,
+    @SerializedName("clouds")
+    var clouds: Int? = 0,
+    @SerializedName("dew_point")
+    var dewPoint: Double? = 0.0,
     @SerializedName("feels_like")
-    var feelsLike: FeelsLike,
+    @Ignore var feelsLike: FeelsLike? = null,
     @SerializedName("humidity")
-    var humidity: Int,
+    var humidity: Int? = 0,
     @SerializedName("moon_phase")
-    var moonPhase: Double,
+    @Ignore var moonPhase: Double? = null,
     @SerializedName("moonrise")
-    var moonrise: Int,
+    @Ignore var moonrise: Int? = null,
     @SerializedName("moonset")
-    var moonset: Int,
+    @Ignore var moonset: Int? = null,
     @SerializedName("pop")
-    var pop: Double,
+    var pop: Double? = 0.0,
     @SerializedName("pressure")
-    var pressure: Int,
+    var pressure: Int? = 0,
     @SerializedName("rain")
-    var rain: Double,
+    @Ignore var rain: Double? = null,
     @SerializedName("sunrise")
-    var sunrise: Int,
+    @Ignore var sunrise: Int? = null,
     @SerializedName("sunset")
-    var sunset: Int,
+    @Ignore var sunset: Int? = null,
     @SerializedName("temp")
-    var temp: Temp,
+    @Ignore var temp: Temp? = null,
     @SerializedName("uvi")
-    var uvi: Double,
+    var uvi: Double? = 0.0,
     @SerializedName("weather")
-    var weather: List<Weather>,
+    @Ignore var weather: List<Weather>? = null,
     @SerializedName("wind_deg")
-    var windDeg: Int,
+    var windDeg: Int? = 0,
     @SerializedName("wind_gust")
-    var windGust: Double,
+    @Ignore var windGust: Double? = null,
     @SerializedName("wind_speed")
-    var windSpeed: Double
+    var windSpeed: Double? = 0.0,
 )

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:background="#99000000"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="150sp"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center"
+		android:gravity="center"
+		android:orientation="vertical"
+		android:paddingTop="10dp">
+
+		<TextView
+			android:id="@+id/date"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/today"
+			android:textColor="@color/white"
+			android:textSize="14sp" />
+
+		<TextView
+			android:id="@+id/current_temp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/template_current_temp"
+			android:textColor="@color/white"
+			android:textSize="30sp" />
+
+		<TextView
+			android:id="@+id/real_feel_temp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:text="@string/template_real_feel"
+			android:textColor="@color/white"
+			android:textSize="12sp" />
+
+		<TextView
+			android:id="@+id/uv_index"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:layout_marginBottom="10dp"
+			android:text="@string/template_uv_index_with_name"
+			android:textColor="@color/white"
+			android:textSize="12sp" />
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:background="#80FFFFFF"
+			android:gravity="center"
+			android:orientation="vertical"
+			android:paddingBottom="10dp">
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="15dp"
+					android:layout_height="15dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/rain" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:paddingEnd="5dp"
+					android:text="@string/precipitation"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="12sp" />
+
+				<TextView
+					android:id="@+id/precipitation"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:text="@null"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="12sp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="15dp"
+					android:layout_height="15dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/humidity" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:paddingEnd="5dp"
+					android:text="@string/humidity"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="12sp" />
+
+				<TextView
+					android:id="@+id/humidity"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:textColor="@android:color/black"
+					android:textSize="12sp" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="5dp"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="15dp"
+					android:layout_height="15dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/precipitation" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:paddingEnd="5dp"
+					android:text="@string/cloudiness"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="12sp" />
+
+				<TextView
+					android:id="@+id/cloudiness"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:text="@null"
+					android:textColor="@color/forecast_card_content"
+					android:textSize="12sp" />
+			</LinearLayout>
+		</LinearLayout>
+	</LinearLayout>
+</RelativeLayout>

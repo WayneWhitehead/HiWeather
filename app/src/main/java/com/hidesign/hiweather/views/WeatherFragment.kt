@@ -92,6 +92,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         super.onStart()
         weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
         firebaseAnalytics = Firebase.analytics
+        db = Room.databaseBuilder(requireContext(), WeatherDatabase::class.java, "Weather")
+            .allowMainThreadQueries()
+            .fallbackToDestructiveMigration().build()
         launch {
             fetchContent()
         }
@@ -157,6 +160,17 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
                 if (oneCallResponse?.isSuccessful!!) {
                     weather = oneCallResponse.body()!!
+                    var found = false
+                    db.hourlyDao().getAll().forEach {
+                        if (it.dt == weather.hourly[0].dt) {
+                            found = true
+                        }
+                    }
+                    if (!found) {
+                        val hourly = weather.hourly[0]
+                        hourly.timezone = weather.timezone
+                        db.hourlyDao().insertAll(hourly)
+                    }
                     onWeatherSuccess()
                 } else {
                     DialogUtil.displayErrorDialog(requireContext(),

@@ -124,6 +124,18 @@
 	<string name="empty_time">--:--</string>
 	<string name="air_quality">Air Quality</string>
 	<string name="please_enter_an_address_in_the_search_bar_above">Please Search for an Address </string>
-	<string name="cloudiness">Cloudiness</string>
-	<string name="humidity">Humidity</string>
+	<string name="add_widget">Add widget</string>
+	<string name="app_widget_description">See our current weather data on your home-screen!</string>
+	<string name="dew_point">Dew Point</string>
+	<string name="uv_index">UV Index</string>
+	<string name="template_current_temp">21°C</string>
+	<string name="template_real_feel">Real Feel 23°C</string>
+	<string name="template_uv_index_with_name">UV Index 5</string>
+	<string name="template_precipitation">45%</string>
+	<string name="template_humidity">30%</string>
+	<string name="template_dew_point">14°C</string>
+	<string name="template_uv_index">3</string>
+	<string name="template_wind_speed">4.3</string>
+	<string name="template_wind_direction">N</string>
+
 </resources>
