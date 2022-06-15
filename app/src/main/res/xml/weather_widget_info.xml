@@ -5,5 +5,5 @@
 	android:initialLayout="@layout/weather_widget"
 	android:minWidth="160dp"
 	android:resizeMode="horizontal|vertical"
-	android:updatePeriodMillis="86400000"
+	android:updatePeriodMillis="@integer/widget_update_period"
 	android:widgetCategory="home_screen" />

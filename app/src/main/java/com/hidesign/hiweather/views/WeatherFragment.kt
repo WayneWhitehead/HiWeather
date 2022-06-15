@@ -1,6 +1,5 @@
 package com.hidesign.hiweather.views
 
-import android.content.Context
 import android.os.Bundle
 import android.transition.Slide
 import android.transition.TransitionManager
@@ -87,6 +86,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.dailyForecastHeader.displayForecast.rotation =
                 binding.dailyForecastHeader.displayForecast.rotation + 180F
         }
+        setFetchingContent()
         return binding.root
     }
 
@@ -112,21 +112,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
     override fun onDestroy() {
         super.onDestroy()
-        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
-        with(sharedPref.edit()) {
-            putLong(Constants.lastFetch, Calendar.getInstance().timeInMillis)
-            apply()
-        }
         job.cancel()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE) ?: return
-        with(sharedPref.edit()) {
-            putLong(Constants.lastFetch, Calendar.getInstance().timeInMillis)
-            apply()
-        }
     }
 
     suspend fun fetchContent() {
@@ -137,6 +123,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
                     Toast.LENGTH_SHORT).show()
                 val activity = requireActivity() as WeatherActivity
                 activity.binding.vpContent.setCurrentItem(0, true)
+                binding.swipeLayout.isRefreshing = false
                 return@coroutineScope
             }
 

@@ -8,4 +8,6 @@
 	<dimen name="padding_10">15dp</dimen>
 	<dimen name="list_item_spacing">16dp</dimen>
 	<dimen name="list_item_spacing_half">8dp</dimen>
+
+	<integer name="widget_update_period">3600000</integer>
 </resources>

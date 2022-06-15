@@ -127,7 +127,9 @@
 	<string name="air_quality">Air Quality</string>
 	<string name="please_enter_an_address_in_the_search_bar_above">Please Search for an Address </string>
 	<string name="add_widget">Add widget</string>
-	<string name="app_widget_description">See our current weather data on your home-screen!</string>
+	<string name="app_widget_description">See your current weather data on your home-screen! \n
+		Updates once an hour on the hour
+	</string>
 	<string name="dew_point">Dew Point</string>
 	<string name="uv_index">UV Index</string>
 	<string name="template_current_temp">21°C</string>

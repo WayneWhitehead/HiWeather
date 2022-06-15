@@ -12,7 +12,7 @@ interface HourlyDao {
     fun getAll(): List<Hourly>
 
     @Insert
-    fun insertAll(vararg users: Hourly)
+    fun insertAll(vararg weather: Hourly)
 
     @Delete
     fun delete(user: Hourly)

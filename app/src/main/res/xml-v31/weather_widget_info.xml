@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+	android:description="@string/app_widget_description"
+	android:initialKeyguardLayout="@layout/weather_widget"
+	android:initialLayout="@layout/weather_widget"
+	android:minWidth="160dp"
+	android:resizeMode="horizontal|vertical"
+	android:updatePeriodMillis="@integer/widget_update_period"
+	android:widgetCategory="home_screen"
 	android:previewLayout="@layout/weather_widget"
 	android:targetCellWidth="2"
 	android:targetCellHeight="2" />
