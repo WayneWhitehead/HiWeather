@@ -1,29 +1,11 @@
 <resources>
 	<string name="app_name">HiWeather</string>
-	<string name="action_settings">Settings</string>
-	<string name="splash_screen_logo">splash Screen logo</string>
-	<string name="TempTemp">1°C</string>
-	<string name="low_14_c">Low 1°C</string>
-	<string name="high_28_c">High 1°C</string>
-	<string name="real_feel_22_c">Real Feel: 1°C</string>
 	<string name="cloud_cover">Cloud Cover</string>
-	<string name="humidity_80">Humidity: 1%</string>
-	<string name="dew_point_19_c">Dew Point: 1°C</string>
-	<string name="pressure_1014_mbar">Pressure: 1111 mBar</string>
-	<string name="uv_index_very_high_8">UV Index: None, 1</string>
-	<string name="visibility_10km">Visibility: 1Km</string>
-	<string name="_13">1</string>
 	<string name="winddirectionicon">WindDirectionIcon</string>
 	<string name="km_h">km/h</string>
-	<string name="from_east">From East</string>
-	<string name="_20_chance_of_rain">1% Chance of Rain</string>
-	<string name="_3_day_forecast">3 Day Forecast</string>
 	<string name="sunrise">Sunrise</string>
 	<string name="sunset">Sunset</string>
-	<string name="title_activity_search">SearchActivity</string>
-	<string name="plus">+</string>
 	<string name="today_s_date">Today\'s Date</string>
-	<string name="search">Search</string>
 	<string name="title_activity_weather">WeatherActivity</string>
 	<string name="daily_forecast">7 Day Forecast</string>
 	<string name="hourly_forecast">24 Hour Forecast</string>
@@ -32,7 +14,7 @@
 	<string-array name="airTitles">
 		<item>Nitrogen Dioxide(NO₂)</item>
 		<item>Ozone(O₃)</item>
-		<item>Coarse Particulate Matter(PM₁₀)</item>
+		<item>Coarse Particle Matter(PM₁₀)</item>
 		<item>Fine Particle Matter(PM₂₅)</item>
 		<item>Carbon Monoxide(CO)</item>
 		<item>Ammonia(NH₃)</item>
@@ -106,7 +88,7 @@
 
 	<string name="visibility_0_m">Visibility {0}m</string>
 	<string name="uv_index_0">UV Index {0}</string>
-	<string name="pressure_0_mbar">Pressure {0}mBar</string>
+	<string name="pressure_0_mbar">Pressure {0}hPa</string>
 	<string name="dew_point_0_c">Dew Point {0}°C</string>
 	<string name="precipitation_0">Precipitation {0}%</string>
 	<string name="real_feel_0_c">Real Feel {0}°C</string>
@@ -125,13 +107,9 @@
 	<string name="moonset">Moonset</string>
 	<string name="empty_time">--:--</string>
 	<string name="air_quality">Air Quality</string>
-	<string name="please_enter_an_address_in_the_search_bar_above">Please Search for an Address </string>
-	<string name="add_widget">Add widget</string>
 	<string name="app_widget_description">See your current weather data on your home-screen! \n
 		Updates once an hour on the hour
 	</string>
-	<string name="dew_point">Dew Point</string>
-	<string name="uv_index">UV Index</string>
 	<string name="template_current_temp">21°C</string>
 	<string name="template_real_feel">Real Feel 23°C</string>
 	<string name="template_uv_index_with_name">UV Index 5</string>

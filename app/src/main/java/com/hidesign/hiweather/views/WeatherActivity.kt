@@ -19,7 +19,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.adapter.ViewPagerAdapter
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Constants
@@ -32,7 +31,6 @@ import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
-
 class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     lateinit var binding: ActivityWeatherBinding
@@ -41,7 +39,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + job
 
-    val mPermissionResult = registerForActivityResult(RequestPermission()) { result ->
+    private val mPermissionResult = registerForActivityResult(RequestPermission()) { result ->
         if (result) {
             binding.linearProgress.visibility = View.VISIBLE
             checkLocation()
@@ -80,7 +78,6 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
             binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input)
                 .performClick()
         }
-        binding.AdView.addView(AdUtil.setupAds(this, AdUtil.appBarId))
     }
 
     override fun onResume() {
@@ -93,10 +90,8 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
 
     override fun onStart() {
         super.onStart()
-        val adapter = ViewPagerAdapter(this)
-        binding.vpContent.adapter = adapter
-        binding.vpContent.isUserInputEnabled = false
         checkLocation()
+        binding.AdView.addView(AdUtil.setupAds(this, AdUtil.appBarId))
     }
 
     private fun checkLocation() {
@@ -129,15 +124,12 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                     return
                 }
             }
-            if (binding.vpContent.currentItem != 1) {
-                binding.vpContent.setCurrentItem(1, false)
-            }
+            supportFragmentManager.beginTransaction()
+                .add(binding.fragment.id, WeatherFragment())
+                .commitNow()
         } else {
             binding.toolbar.title = "Enter an Address"
             binding.linearProgress.visibility = View.INVISIBLE
-            if (binding.vpContent.currentItem != 0) {
-                binding.vpContent.setCurrentItem(0, false)
-            }
         }
     }
 

@@ -21,23 +21,23 @@ object WeatherUtils {
 
     fun getWindDegreeText(deg: Int): String {
         return when (deg) {
-            in 0..11 -> "N"
-            in 12..34 -> "NNE"
-            in 35..56 -> "NE"
-            in 57..79 -> "ENE"
-            in 80..101 -> "E"
-            in 102..124 -> "ESE"
-            in 125..146 -> "SE"
-            in 147..169 -> "SSE"
-            in 170..191 -> "S"
-            in 192..214 -> "SSW"
-            in 215..236 -> "SW"
-            in 237..259 -> "WSW"
-            in 260..281 -> "W"
-            in 281..304 -> "WNW"
-            in 305..327 -> "NW"
-            in 328..349 -> "NNW"
-            in 350..360 -> "N"
+            in 0..4 -> "NNW"
+            in 5..26 -> "N"
+            in 27..49 -> "NNE"
+            in 50..71 -> "NE"
+            in 72..94 -> "ENE"
+            in 95..116 -> "E"
+            in 117..139 -> "ESE"
+            in 140..161 -> "SE"
+            in 162..184 -> "SSE"
+            in 185..206 -> "S"
+            in 207..229 -> "SSW"
+            in 230..251 -> "SW"
+            in 252..274 -> "WSW"
+            in 275..296 -> "W"
+            in 297..319 -> "WNW"
+            in 320..342 -> "NW"
+            in 343..360 -> "NNW"
             else -> "?"
         }
     }
@@ -58,19 +58,6 @@ object WeatherUtils {
             in valueArray[4].toFloat()..valueArray[5].toFloat() -> 5
             in valueArray[5].toFloat()..valueArray[6].toFloat() -> 6
             else -> -1
-        }
-    }
-
-    fun getAirCardBackground(value: Int): Int {
-        return when (value) {
-            1 -> R.color.airIndex1
-            2 -> R.color.airIndex2
-            3 -> R.color.airIndex3
-            4 -> R.color.airIndex4
-            5 -> R.color.airIndex5
-            else -> {
-                R.color.airIndex1
-            }
         }
     }
 

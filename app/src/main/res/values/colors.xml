@@ -13,7 +13,7 @@
 	<color name="green_card_shimmer">#138100</color>
 	<color name="forecast_card">#B8B8B8</color>
 	<color name="forecast_card_content">#000000</color>
-	<color name="expanded_forecast_card">#05325A</color>
+	<color name="expanded_forecast_card">#3E3E3E</color>
 	<color name="wind_card_items">#031B43</color>
 	<color name="current_extra_card">#FF6666</color>
 	<color name="sunShimmer">#BEFF0033</color>

@@ -22,14 +22,21 @@
 			ads:adSize="BANNER"
 			ads:adUnitId="ca-app-pub-1988108128017627/4633391685" />
 
-		<androidx.viewpager2.widget.ViewPager2
-			android:id="@+id/vp_content"
+		<androidx.fragment.app.FragmentContainerView
+			android:id="@+id/fragment"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_below="@id/AdView"
-			android:background="@color/backgroundDark"
-			android:elevation="0dp"
-			android:orientation="vertical" />
+			android:background="@color/backgroundDark" />
+
+		<!--		<androidx.viewpager2.widget.ViewPager2-->
+		<!--			android:id="@+id/vp_content"-->
+		<!--			android:layout_width="match_parent"-->
+		<!--			android:layout_height="match_parent"-->
+		<!--			android:layout_below="@id/AdView"-->
+		<!--			android:background="@color/backgroundDark"-->
+		<!--			android:elevation="0dp"-->
+		<!--			android:orientation="vertical" />-->
 
 		<androidx.fragment.app.FragmentContainerView
 			android:id="@+id/autocomplete_fragment"

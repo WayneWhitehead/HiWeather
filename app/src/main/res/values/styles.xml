@@ -5,6 +5,7 @@
 		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 		<item name="colorAccent">@color/colorAccent</item>
 		<item name="android:windowContentTransitions">true</item>
+		<item name="android:windowBackground">@color/backgroundDark</item>
 		<item name="android:statusBarColor">@color/backgroundDark</item>
 		<item name="colorSurface">@color/colorPrimary</item>
 		<item name="colorOnSurface">@color/white</item>
@@ -29,15 +30,6 @@
 		<item name="colorControlNormal">#00000000</item>
 	</style>
 
-	<style name="AppTheme.NoActionBar">
-		<item name="windowActionBar">false</item>
-		<item name="windowNoTitle">true</item>
-	</style>
-
-	<style name="AppTheme.AppBarOverlay" parent="Theme.MaterialComponents.Light.NoActionBar" />
-
-	<style name="AppTheme.PopupOverlay" parent="Theme.MaterialComponents.Light.Bridge" />
-
 	<style name="WeatherCards" parent="Widget.MaterialComponents.CardView">
 		<item name="android:layout_marginTop">-20dp</item>
 		<item name="android:layout_marginHorizontal">10dp</item>
@@ -45,14 +37,6 @@
 		<item name="android:paddingBottom">30dp</item>
 		<item name="android:layout_gravity">center</item>
 		<item name="cardCornerRadius">30dp</item>
-	</style>
-
-	<style name="SplashTheme" parent="AppTheme">
-		<item name="android:windowBackground">@drawable/splash_background</item>
-		<item name="colorPrimary">@color/colorPrimary</item>
-		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-		<item name="colorAccent">@color/colorAccent</item>
-		<item name="android:statusBarColor">@color/colorPrimary</item>
 	</style>
 
 	<style name="airChips">
@@ -68,25 +52,11 @@
 		<item name="android:visibility">gone</item>
 	</style>
 
-
-	<style name="Alert.Button.Neutral" parent="Widget.MaterialComponents.Button.TextButton">
-		<item name="backgroundTint">#00000000</item>
-		<item name="rippleColor">#138100</item>
-		<item name="android:textColor">@color/green_card</item>
-		<item name="android:textSize">14sp</item>
-	</style>
-
 	<style name="Alert.Button.Error" parent="Widget.MaterialComponents.Button.TextButton">
 		<item name="backgroundTint">#00000000</item>
 		<item name="rippleColor">@color/colorPrimary</item>
 		<item name="android:textColor">@color/colorPrimaryLight</item>
 		<item name="android:textSize">14sp</item>
-	</style>
-
-	<style name="AppTheme.Dialogs.Neutral" parent="Theme.MaterialComponents.Dialog.Bridge">
-		<item name="buttonBarNeutralButtonStyle">@style/Alert.Button.Neutral</item>
-		<item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Neutral</item>
-		<item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Neutral</item>
 	</style>
 
 	<style name="AppTheme.Dialogs.Error" parent="Theme.MaterialComponents.Dialog.Bridge">

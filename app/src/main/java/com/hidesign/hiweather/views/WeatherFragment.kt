@@ -1,5 +1,7 @@
 package com.hidesign.hiweather.views
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.os.Bundle
 import android.transition.Slide
 import android.transition.TransitionManager
@@ -7,6 +9,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RemoteViews
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -121,8 +124,6 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
                 Toast.makeText(requireContext(),
                     "Something went wrong trying to get the location \n Please try again.",
                     Toast.LENGTH_SHORT).show()
-                val activity = requireActivity() as WeatherActivity
-                activity.binding.vpContent.setCurrentItem(0, true)
                 binding.swipeLayout.isRefreshing = false
                 return@coroutineScope
             }
@@ -150,6 +151,13 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
                         val hourly = weather.hourly[0]
                         hourly.timezone = weather.timezone
                         db.hourlyDao().insertAll(hourly)
+                        val appWidgetManager = AppWidgetManager.getInstance(context)
+                        val ids = appWidgetManager.getAppWidgetIds(ComponentName(requireContext(),
+                            WeatherWidget::class.java))
+                        for (id in ids) {
+                            appWidgetManager.updateAppWidget(id,
+                                RemoteViews(requireContext().packageName, R.layout.weather_widget))
+                        }
                     }
                     onWeatherSuccess()
                 } else {
@@ -187,7 +195,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             MessageFormat.format(getString(R.string.real_feel_0_c),
                 weather.current.feelsLike.roundToInt())
         binding.currentCard.description.text =
-            weather.current.weather[0].description
+            weather.current.weather[0].description.replaceFirstChar {
+                it.titlecase(Locale.ROOT)
+            }
         //endregion Current Card
 
         //region Current Extra Card
@@ -204,7 +214,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             MessageFormat.format(getString(R.string.pressure_0_mbar), weather.current.pressure)
         binding.currentExtraCard.uvIndex.text =
             MessageFormat.format(getString(R.string.uv_index_0),
-                weather.current.uvi.roundToInt())
+                weather.current.uvi.roundToDecimal(1))
         binding.currentExtraCard.visibility.text =
             MessageFormat.format(getString(R.string.visibility_0_m), weather.current.visibility)
         //endregion Current Extra Card

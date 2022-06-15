@@ -7,6 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.databinding.ExpandedAirItemBinding
 import com.hidesign.hiweather.model.Components
@@ -19,6 +22,7 @@ import java.text.MessageFormat
 
 class ExpandedAirItem : BottomSheetDialogFragment() {
 
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var binding: ExpandedAirItemBinding
     private lateinit var airStrings: Array<String>
     private lateinit var airValues: IntArray
@@ -28,11 +32,20 @@ class ExpandedAirItem : BottomSheetDialogFragment() {
 
     override fun onStart() {
         super.onStart()
+        firebaseAnalytics = Firebase.analytics
         updateValues(title)
         setAirItemValues()
         binding.airPicker.setOnValueChangedListener { _, _, newVal ->
             updateValues(resources.getStringArray(R.array.airTitles)[newVal])
             setAirItemValues()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Bundle().apply {
+            this.putString(FirebaseAnalytics.Event.SCREEN_VIEW, TAG)
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, this)
         }
     }
 
