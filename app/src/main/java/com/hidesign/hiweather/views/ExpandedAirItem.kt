@@ -1,5 +1,6 @@
 package com.hidesign.hiweather.views
 
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -120,7 +121,8 @@ class ExpandedAirItem : BottomSheetDialogFragment() {
     private fun setAirItemValues() {
         binding.progress.deleteAll()
         binding.progress.configureAngles(280, 0)
-        val width = 90F
+
+        val width = (Resources.getSystem().displayMetrics.widthPixels / 12).toFloat()
         val ta = resources.obtainTypedArray(R.array.colors)
         val colors = IntArray(ta.length())
         for (i in 0 until ta.length()) {
@@ -139,7 +141,8 @@ class ExpandedAirItem : BottomSheetDialogFragment() {
             if (activeItem != -1 && activeItem == pos) {
                 binding.airText.text = airStrings[pos]
                 binding.airText.setTextColor(colors[pos])
-                binding.airValue.text = MessageFormat.format("{0}µg/m³", currentValue)
+                binding.airValue.text =
+                    MessageFormat.format(getString(R.string.air_item_value), currentValue)
                 binding.airValue.setTextColor(colors[pos])
             }
             binding.progress.addSeries(seriesItem)
@@ -147,7 +150,7 @@ class ExpandedAirItem : BottomSheetDialogFragment() {
 
         binding.progress.addSeries(SeriesItem.Builder(Color.BLACK)
             .setRange(0F, airValues[airValues.size - 1].toFloat(), 0F)
-            .setLineWidth(45F)
+            .setLineWidth(width / 2)
             .setShadowSize(20F)
             .build())
         binding.progress.addEvent(DecoEvent.Builder(currentValue)
@@ -155,7 +158,7 @@ class ExpandedAirItem : BottomSheetDialogFragment() {
             .setDelay(250)
             .setColor(Color.BLACK)
             .setDuration(750)
-            .setDisplayText(MessageFormat.format("{0}µg/m³", currentValue))
+            .setDisplayText(MessageFormat.format(getString(R.string.air_item_value), currentValue))
             .build())
     }
 

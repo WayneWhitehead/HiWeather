@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/swipeLayout"
 	android:layout_width="match_parent"
@@ -31,19 +30,8 @@
 				layout="@layout/card_current" />
 
 			<include
-				android:id="@+id/hourlyForecastHeader"
-				layout="@layout/card_forecast_header" />
-
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/rv_hourly_forecast"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-				android:layout_marginTop="-30dp"
-				android:elevation="15dp"
-				android:visibility="gone"
-				android:orientation="horizontal"
-				tools:listitem="@layout/card_hourly_forecast_item" />
+				android:id="@+id/hourly_forecast"
+				layout="@layout/card_forecast" />
 
 			<include
 				android:id="@+id/current_extra_card"
@@ -62,19 +50,8 @@
 				layout="@layout/card_sun" />
 
 			<include
-				android:id="@+id/daily_forecast_header"
-				layout="@layout/card_forecast_header" />
-
-			<androidx.recyclerview.widget.RecyclerView
-				android:id="@+id/rv_daily_forecast"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-				android:layout_marginTop="-30dp"
-				android:elevation="10dp"
-				android:orientation="horizontal"
-				android:visibility="gone"
-				tools:listitem="@layout/card_daily_forecast_item" />
+				android:id="@+id/daily_forecast"
+				layout="@layout/card_forecast" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

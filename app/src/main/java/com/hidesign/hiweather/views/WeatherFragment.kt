@@ -9,12 +9,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RemoteViews
 import android.widget.Toast
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.room.Room
 import com.bumptech.glide.Glide
@@ -67,28 +67,10 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding = FragmentWeatherBinding.inflate(layoutInflater)
         binding.swipeLayout.setOnRefreshListener { launch { fetchContent() } }
 
-        LinearSnapHelper().attachToRecyclerView(binding.rvHourlyForecast)
-        binding.hourlyForecastHeader.headerTitle.text = getString(R.string.hourly_forecast)
-        binding.hourlyForecastHeader.headerCard.setOnClickListener {
-            if (binding.rvHourlyForecast.isVisible) {
-                binding.rvHourlyForecast.slideVisibility(true)
-            } else {
-                binding.rvHourlyForecast.slideVisibility(false)
-            }
-            binding.hourlyForecastHeader.displayForecast.rotation =
-                binding.hourlyForecastHeader.displayForecast.rotation + 180F
-        }
-        LinearSnapHelper().attachToRecyclerView(binding.rvDailyForecast)
-        binding.dailyForecastHeader.headerTitle.text = getString(R.string.daily_forecast)
-        binding.dailyForecastHeader.headerCard.setOnClickListener {
-            if (binding.rvDailyForecast.isVisible) {
-                binding.rvDailyForecast.slideVisibility(true)
-            } else {
-                binding.rvDailyForecast.slideVisibility(false)
-            }
-            binding.dailyForecastHeader.displayForecast.rotation =
-                binding.dailyForecastHeader.displayForecast.rotation + 180F
-        }
+        LinearSnapHelper().attachToRecyclerView(binding.hourlyForecast.rvForecast)
+        binding.hourlyForecast.headerTitle.text = getString(R.string.hourly_forecast)
+        LinearSnapHelper().attachToRecyclerView(binding.dailyForecast.rvForecast)
+        binding.dailyForecast.headerTitle.text = getString(R.string.daily_forecast)
         setFetchingContent()
         return binding.root
     }
@@ -141,24 +123,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
                 if (oneCallResponse?.isSuccessful!!) {
                     weather = oneCallResponse.body()!!
-                    var found = false
-                    db.hourlyDao().getAll().forEach {
-                        if (it.dt == weather.hourly[0].dt) {
-                            found = true
-                        }
-                    }
-                    if (!found) {
-                        val hourly = weather.hourly[0]
-                        hourly.timezone = weather.timezone
-                        db.hourlyDao().insertAll(hourly)
-                        val appWidgetManager = AppWidgetManager.getInstance(context)
-                        val ids = appWidgetManager.getAppWidgetIds(ComponentName(requireContext(),
-                            WeatherWidget::class.java))
-                        for (id in ids) {
-                            appWidgetManager.updateAppWidget(id,
-                                RemoteViews(requireContext().packageName, R.layout.weather_widget))
-                        }
-                    }
+                    updateWidget()
                     onWeatherSuccess()
                 } else {
                     DialogUtil.displayErrorDialog(requireContext(),
@@ -186,11 +151,11 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.currentCard.currentTemp.text =
             MessageFormat.format(getString(R.string._0_c), weather.current.temp.roundToInt())
         binding.currentCard.highTemp.text =
-            MessageFormat.format(getString(R.string.high_0_c),
-                weather.daily[0].temp!!.max.roundToInt())
+            MessageFormat.format(getString(R.string._0_c),
+                weather.daily[0].temp.max.roundToInt())
         binding.currentCard.lowTemp.text =
-            MessageFormat.format(getString(R.string.low_0_c),
-                weather.daily[0].temp!!.min.roundToInt())
+            MessageFormat.format(getString(R.string._0_c),
+                weather.daily[0].temp.min.roundToInt())
         binding.currentCard.realFeelTemp.text =
             MessageFormat.format(getString(R.string.real_feel_0_c),
                 weather.current.feelsLike.roundToInt())
@@ -198,11 +163,14 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             weather.current.weather[0].description.replaceFirstChar {
                 it.titlecase(Locale.ROOT)
             }
+        binding.currentCard.uvIndex.text =
+            MessageFormat.format(getString(R.string.uv_index_0),
+                weather.current.uvi.roundToDecimal(1))
         //endregion Current Card
 
         //region Current Extra Card
         binding.currentExtraCard.precipitation.text =
-            MessageFormat.format(getString(R.string._0_p), (weather.daily[0].pop!! * 100))
+            MessageFormat.format(getString(R.string._0_p), (weather.daily[0].pop * 100))
         binding.currentExtraCard.humidity.text =
             MessageFormat.format(getString(R.string._0_p), weather.current.humidity)
         binding.currentExtraCard.cloudiness.text =
@@ -212,11 +180,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
                 weather.current.dewPoint.roundToInt())
         binding.currentExtraCard.pressure.text =
             MessageFormat.format(getString(R.string.pressure_0_mbar), weather.current.pressure)
-        binding.currentExtraCard.uvIndex.text =
-            MessageFormat.format(getString(R.string.uv_index_0),
-                weather.current.uvi.roundToDecimal(1))
         binding.currentExtraCard.visibility.text =
-            MessageFormat.format(getString(R.string.visibility_0_m), weather.current.visibility)
+            MessageFormat.format(getString(R.string.visibility_0_m),
+                weather.current.visibility / 1000)
         //endregion Current Extra Card
 
         //region Wind Card
@@ -232,8 +198,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         for (i in 1..23) {
             hourlyForecast.add(weather.hourly[i])
         }
-        binding.hourlyForecastHeader.headerCard.isEnabled = true
-        binding.rvHourlyForecast.adapter =
+        binding.hourlyForecast.rvForecast.adapter =
             HourlyRecyclerAdapter(requireContext(), hourlyForecast, weather.timezone).apply {
                 onItemClick = {
                     ExpandedForecast.newInstance(it, weather.timezone)
@@ -246,8 +211,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         val dailyForecast: ArrayList<Daily> = ArrayList()
         dailyForecast.addAll(weather.daily)
         dailyForecast.removeAt(0)
-        binding.dailyForecastHeader.headerCard.isEnabled = true
-        binding.rvDailyForecast.adapter =
+        binding.dailyForecast.rvForecast.adapter =
             DailyRecyclerAdapter(requireContext(), dailyForecast, weather.timezone).apply {
                 onItemClick = {
                     ExpandedForecast.newInstance(it, weather.timezone)
@@ -258,10 +222,10 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
 
         //region Sun Card
         binding.sunCard.Sunrise.text = DateUtils.getDateTime("HH:mm",
-            (weather.daily[0].sunrise)!!.toLong(),
+            (weather.daily[0].sunrise).toLong(),
             weather.timezone)
         binding.sunCard.Sunset.text =
-            DateUtils.getDateTime("HH:mm", (weather.daily[0].sunset)!!.toLong(), weather.timezone)
+            DateUtils.getDateTime("HH:mm", (weather.daily[0].sunset).toLong(), weather.timezone)
         binding.sunCard.sunContent.setOnClickListener {
             ExpandedSunMoon.newInstance(weather.daily[0], weather.timezone)
                 .show(childFragmentManager, ExpandedSunMoon.TAG)
@@ -332,6 +296,25 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             .showNow(parentFragmentManager, Constants.airItemScreeName)
     }
 
+    private fun updateWidget() {
+        var found = false
+        db.widgetDao().getAll().forEach {
+            if (it.dt == weather.hourly[0].dt) {
+                found = true
+            }
+        }
+        if (!found) {
+            val current = WeatherUtils.createWidgetModel(weather)
+            db.widgetDao().insertAll(current)
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            for (appWidgetId in appWidgetManager.getAppWidgetIds(ComponentName(requireContext(),
+                WeatherWidget::class.java))) {
+                appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId,
+                    R.layout.weather_widget)
+            }
+        }
+    }
+
     private fun setContentFound() {
         if (!isFetching) {
             return
@@ -350,8 +333,12 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.sunCard.sunShimmer.slideVisibility(true)
         binding.sunCard.sunShimmer.stopShimmer()
 
-        binding.dailyForecastHeader.headerCard.isEnabled = true
-        binding.hourlyForecastHeader.headerCard.isEnabled = true
+        binding.dailyForecast.rvForecast.slideVisibility(false)
+        binding.dailyForecast.rvForecast.addItemDecoration(DividerItemDecoration(requireContext(),
+            LinearLayoutManager.HORIZONTAL))
+        binding.hourlyForecast.rvForecast.slideVisibility(false)
+        binding.hourlyForecast.rvForecast.addItemDecoration(DividerItemDecoration(requireContext(),
+            LinearLayoutManager.HORIZONTAL))
         isFetching = false
         val activity = requireActivity() as WeatherActivity
         activity.binding.linearProgress.visibility = View.INVISIBLE
@@ -380,16 +367,8 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.sunCard.sunShimmer.slideVisibility(false)
         binding.sunCard.sunShimmer.startShimmer()
 
-        if (binding.rvHourlyForecast.isVisible) {
-            binding.hourlyForecastHeader.displayForecast.rotation = 0F
-            binding.rvHourlyForecast.slideVisibility(true)
-        }
-        if (binding.rvDailyForecast.isVisible) {
-            binding.dailyForecastHeader.displayForecast.rotation = 0F
-            binding.rvDailyForecast.slideVisibility(true)
-        }
-        binding.hourlyForecastHeader.headerCard.isEnabled = false
-        binding.dailyForecastHeader.headerCard.isEnabled = false
+        binding.dailyForecast.rvForecast.slideVisibility(true)
+        binding.hourlyForecast.rvForecast.slideVisibility(true)
         isFetching = true
     }
 

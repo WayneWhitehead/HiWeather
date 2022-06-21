@@ -40,7 +40,7 @@
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@drawable/gradient_sun" />
+		android:background="@drawable/bg_gradient_sun" />
 
 	<LinearLayout
 		android:id="@+id/sun_content"

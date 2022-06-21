@@ -6,8 +6,11 @@ import android.content.pm.PackageManager
 
 object Constants {
 
+    const val preferences = "userPreferences"
+    const val REFRESH = "refreshButtonClick"
     const val lastFetch = "LAST_FETCH"
-    const val userPreferences = "userPreferences"
+    const val latitude = "userLatitude"
+    const val longitude = "userLongitude"
 
     //AIR Constants
     const val airItemScreeName = "Air Quality Item"

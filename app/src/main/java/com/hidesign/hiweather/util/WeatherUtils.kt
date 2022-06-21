@@ -1,6 +1,8 @@
 package com.hidesign.hiweather.util
 
 import com.hidesign.hiweather.R
+import com.hidesign.hiweather.model.OneCallResponse
+import com.hidesign.hiweather.model.WeatherWidgetModel
 
 object WeatherUtils {
 
@@ -21,23 +23,23 @@ object WeatherUtils {
 
     fun getWindDegreeText(deg: Int): String {
         return when (deg) {
-            in 0..4 -> "NNW"
-            in 5..26 -> "N"
-            in 27..49 -> "NNE"
-            in 50..71 -> "NE"
-            in 72..94 -> "ENE"
-            in 95..116 -> "E"
-            in 117..139 -> "ESE"
-            in 140..161 -> "SE"
-            in 162..184 -> "SSE"
-            in 185..206 -> "S"
-            in 207..229 -> "SSW"
-            in 230..251 -> "SW"
-            in 252..274 -> "WSW"
-            in 275..296 -> "W"
-            in 297..319 -> "WNW"
-            in 320..342 -> "NW"
-            in 343..360 -> "NNW"
+            in 347..360 -> "N"
+            in 0..11 -> "N"
+            in 12..33 -> "NNE"
+            in 34..55 -> "NE"
+            in 56..77 -> "ENE"
+            in 78..101 -> "E"
+            in 101..122 -> "ESE"
+            in 123..144 -> "SE"
+            in 145..166 -> "SSE"
+            in 167..190 -> "S"
+            in 191..212 -> "SSW"
+            in 213..234 -> "SW"
+            in 235..256 -> "WSW"
+            in 257..280 -> "W"
+            in 281..302 -> "WNW"
+            in 303..324 -> "NW"
+            in 325..346 -> "NNW"
             else -> "?"
         }
     }
@@ -70,5 +72,18 @@ object WeatherUtils {
             5 -> "Very Poor"
             else -> "Unknown"
         }
+    }
+
+    fun createWidgetModel(model: OneCallResponse): WeatherWidgetModel {
+        return WeatherWidgetModel(
+            model.hourly[0].dt,
+            model.hourly[0].temp,
+            model.hourly[0].feelsLike,
+            model.hourly[0].uvi,
+            model.hourly[0].pop,
+            model.hourly[0].humidity,
+            model.hourly[0].clouds,
+            model.timezone,
+            model.current.weather[0].icon)
     }
 }

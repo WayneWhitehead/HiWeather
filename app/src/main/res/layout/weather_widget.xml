@@ -3,6 +3,7 @@
 	android:layout_width="150dp"
 	android:layout_height="wrap_content"
 	android:background="#99000000"
+	android:id="@+id/layout"
 	android:orientation="vertical">
 
 	<TextView
@@ -16,21 +17,36 @@
 		android:textSize="18sp"
 		android:textStyle="bold" />
 
-	<TextView
-		android:id="@+id/current_temp"
-		android:layout_width="wrap_content"
+	<LinearLayout
+		android:id="@+id/current"
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/date"
-		android:layout_centerHorizontal="true"
-		android:text="@string/template_current_temp"
-		android:textColor="@color/white"
-		android:textSize="30sp" />
+		android:gravity="center"
+		android:orientation="horizontal">
+
+		<ImageView
+			android:id="@+id/image"
+			android:layout_width="35dp"
+			android:layout_height="35dp"
+			android:contentDescription="@null"
+			android:visibility="gone" />
+
+		<TextView
+			android:id="@+id/current_temp"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/template_current_temp"
+			android:textColor="@color/white"
+			android:textSize="30sp" />
+	</LinearLayout>
+
 
 	<TextView
 		android:id="@+id/real_feel_temp"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_below="@id/current_temp"
+		android:layout_below="@id/current"
 		android:layout_centerHorizontal="true"
 		android:text="@string/template_real_feel"
 		android:textColor="@color/white"
@@ -87,7 +103,7 @@
 				android:layout_height="wrap_content"
 				android:layout_gravity="center"
 				android:text="@null"
-				android:textColor="@color/forecast_card_content"
+				android:textColor="@color/black"
 				android:textSize="12sp" />
 		</LinearLayout>
 
@@ -153,17 +169,8 @@
 				android:layout_gravity="center"
 				android:maxWidth="150dp"
 				android:text="@null"
-				android:textColor="@color/forecast_card_content"
+				android:textColor="@color/black"
 				android:textSize="12sp" />
 		</LinearLayout>
-
-		<ImageView
-			android:id="@+id/reload"
-			android:layout_width="25dp"
-			android:layout_height="25dp"
-			android:clickable="true"
-			android:contentDescription="@null"
-			android:scaleType="fitCenter"
-			android:src="@drawable/reload" />
 	</LinearLayout>
 </RelativeLayout>

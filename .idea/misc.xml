@@ -23,10 +23,11 @@
         <entry key="app/src/main/res/layout/activity_scrolling.xml" value="0.36770833333333336" />
         <entry key="app/src/main/res/layout/activity_weather.xml" value="0.335" />
         <entry key="app/src/main/res/layout/card_air_response.xml" value="0.31252672082086363" />
-        <entry key="app/src/main/res/layout/card_current.xml" value="0.38177083333333334" />
+        <entry key="app/src/main/res/layout/card_current.xml" value="0.5816062176165803" />
         <entry key="app/src/main/res/layout/card_current_extra.xml" value="0.45" />
         <entry key="app/src/main/res/layout/card_daily_forecast_item.xml" value="0.335" />
-        <entry key="app/src/main/res/layout/card_forecast_header.xml" value="0.31338178708849934" />
+        <entry key="app/src/main/res/layout/card_forecast.xml" value="0.19375" />
+        <entry key="app/src/main/res/layout/card_forecast_header.xml" value="0.375" />
         <entry key="app/src/main/res/layout/card_hourly_forecast_item.xml" value="0.375" />
         <entry key="app/src/main/res/layout/card_sun.xml" value="0.31252672082086363" />
         <entry key="app/src/main/res/layout/card_wind.xml" value="0.31252672082086363" />

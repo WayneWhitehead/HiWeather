@@ -3,14 +3,14 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/layout"
 	android:layout_width="match_parent"
-	android:layout_height="150dp"
+	android:layout_height="140dp"
 	android:layout_marginBottom="35dp"
 	android:gravity="center"
 	tools:viewBindingIgnore="true">
 
 	<LinearLayout
 		android:id="@+id/left"
-		android:layout_width="wrap_content"
+		android:layout_width="160dp"
 		android:layout_height="195dp"
 		android:layout_marginHorizontal="12dp"
 		android:gravity="center"
@@ -18,26 +18,26 @@
 
 		<View
 			android:layout_width="120dp"
-			android:layout_height="25dp"
+			android:layout_height="20dp"
 			android:layout_marginVertical="3dp"
 			android:background="@color/background" />
 
 		<View
-			android:layout_width="120dp"
-			android:layout_height="25dp"
+			android:layout_width="100dp"
+			android:layout_height="20dp"
 			android:layout_marginVertical="3dp"
 			android:background="@color/background" />
 
 		<View
-			android:layout_width="120dp"
-			android:layout_height="25dp"
+			android:layout_width="110dp"
+			android:layout_height="20dp"
 			android:layout_marginVertical="3dp"
 			android:background="@color/background" />
 
 	</LinearLayout>
 
 	<LinearLayout
-		android:layout_width="wrap_content"
+		android:layout_width="160dp"
 		android:layout_height="195dp"
 		android:layout_marginHorizontal="12dp"
 		android:layout_toEndOf="@id/left"
@@ -53,13 +53,6 @@
 
 		<View
 			android:layout_width="160dp"
-			android:layout_height="20dp"
-			android:layout_marginTop="5dp"
-			android:background="@color/background"
-			android:gravity="center" />
-
-		<View
-			android:layout_width="100dp"
 			android:layout_height="20dp"
 			android:layout_marginTop="5dp"
 			android:background="@color/background"

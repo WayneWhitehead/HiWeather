@@ -55,6 +55,12 @@ object LocationUtil {
         val userAddress = CompletableDeferred<Address?>()
         fusedLocationProviderClient.lastLocation.addOnSuccessListener(activity) { location: Location? ->
             if (location != null) {
+                val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+                with(sharedPref.edit()) {
+                    putFloat(Constants.latitude, location.latitude.toFloat())
+                    putFloat(Constants.longitude, location.longitude.toFloat())
+                    apply()
+                }
                 myTrace.stop()
                 userAddress.complete(getAddress(activity, location.latitude, location.longitude))
             }

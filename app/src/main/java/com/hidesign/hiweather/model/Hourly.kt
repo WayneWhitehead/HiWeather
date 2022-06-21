@@ -1,41 +1,34 @@
 package com.hidesign.hiweather.model
 
-
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
-import java.util.*
 
-@Entity
 data class Hourly(
     @SerializedName("clouds")
-    var clouds: Int? = 0,
+    var clouds: Int,
     @SerializedName("dew_point")
-    var dewPoint: Double? = 0.0,
+    var dewPoint: Double,
     @SerializedName("dt")
-    @PrimaryKey var dt: Int? = 0,
+    var dt: Int,
     @SerializedName("feels_like")
-    var feelsLike: Double? = 0.0,
+    var feelsLike: Double,
     @SerializedName("humidity")
-    var humidity: Int? = 0,
+    var humidity: Int,
     @SerializedName("pop")
-    var pop: Double? = 0.0,
+    var pop: Double,
     @SerializedName("pressure")
-    var pressure: Int? = 0,
+    var pressure: Int,
     @SerializedName("temp")
-    var temp: Double? = 0.0,
+    var temp: Double,
     @SerializedName("uvi")
-    var uvi: Double? = 0.0,
+    var uvi: Double,
     @SerializedName("visibility")
-    var visibility: Int? = 0,
+    var visibility: Int,
     @SerializedName("weather")
-    @Ignore var weather: List<Weather>? = null,
+    var weather: List<Weather>,
     @SerializedName("wind_deg")
-    var windDeg: Int? = 0,
+    var windDeg: Int,
     @SerializedName("wind_gust")
-    @Ignore var windGust: Double? = 0.0,
+    var windGust: Double,
     @SerializedName("wind_speed")
-    var windSpeed: Double? = 0.0,
-    var timezone: String? = TimeZone.getDefault().toString(),
+    var windSpeed: Double,
 )

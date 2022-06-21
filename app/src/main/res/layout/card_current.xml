@@ -3,7 +3,7 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:shimmer="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
-	android:layout_height="170dp"
+	android:layout_height="185dp"
 	android:layout_gravity="center"
 	android:layout_marginHorizontal="10dp"
 	android:layout_marginTop="-30dp"
@@ -15,7 +15,7 @@
 		android:id="@+id/currentShimmer"
 		style="@style/shimmerFrame"
 		android:layout_width="match_parent"
-		android:layout_height="150dp"
+		android:layout_height="165dp"
 		app:shimmer_base_color="#000000"
 		app:shimmer_colored="true"
 		app:shimmer_highlight_color="#000000"
@@ -36,7 +36,8 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="center"
-		android:layout_marginVertical="25dp"
+		android:layout_marginTop="15dp"
+		android:paddingBottom="20dp"
 		android:orientation="vertical">
 
 		<RelativeLayout
@@ -47,6 +48,8 @@
 				android:id="@+id/skies_image"
 				android:layout_width="90dp"
 				android:layout_height="90dp"
+				android:layout_marginTop="-10dp"
+				android:layout_marginBottom="-10dp"
 				android:layout_centerVertical="true"
 				android:layout_toStartOf="@id/current_temp"
 				android:contentDescription="@string/cloud_cover" />
@@ -67,46 +70,114 @@
 				android:layout_height="wrap_content"
 				android:layout_centerVertical="true"
 				android:layout_toEndOf="@id/current_temp"
-				android:padding="10dp"
-				android:gravity="center"
-				android:orientation="vertical">
+				android:gravity="start"
+				android:orientation="vertical"
+				android:padding="10dp">
 
-				<TextView
-					android:id="@+id/low_temp"
+				<LinearLayout
 					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="start|center_vertical"
-					android:text="@string/_0_c"
-					android:textColor="@android:color/black"
-					android:textSize="15sp" />
+					android:layout_height="wrap_content">
 
-				<TextView
-					android:id="@+id/high_temp"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="start|center_vertical"
-					android:text="@string/_0_c"
-					android:textColor="@android:color/black"
-					android:textSize="15sp" />
+					<ImageView
+						android:layout_width="16dp"
+						android:layout_height="16dp"
+						android:layout_gravity="center"
+						android:layout_marginHorizontal="4dp"
+						android:contentDescription="@null"
+						android:src="@drawable/up"
+						app:tint="@color/current_card_text" />
 
-				<TextView
-					android:id="@+id/real_feel_temp"
+					<TextView
+						android:id="@+id/high_temp"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:text="@string/_0_c"
+						android:textColor="@color/current_card_text"
+						android:textSize="16sp" />
+				</LinearLayout>
+
+				<LinearLayout
 					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="start|center_vertical"
-					android:text="@string/real_feel_0_c"
-					android:textColor="@android:color/black"
-					android:textSize="15sp" />
+					android:layout_height="wrap_content">
+
+					<ImageView
+						android:layout_width="16dp"
+						android:layout_height="16dp"
+						android:layout_gravity="center"
+						android:layout_marginHorizontal="4dp"
+						android:contentDescription="@null"
+						android:rotation="180"
+						android:src="@drawable/up"
+						app:tint="@color/current_card_text" />
+
+					<TextView
+						android:id="@+id/low_temp"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:layout_gravity="start|center_vertical"
+						android:text="@string/_0_c"
+						android:textColor="@color/current_card_text"
+						android:textSize="16sp" />
+				</LinearLayout>
 			</LinearLayout>
 		</RelativeLayout>
 
 		<TextView
-			android:id="@+id/description"
+			android:id="@+id/real_feel_temp"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center"
-			android:text="@string/cloud_cover"
+			android:text="@string/real_feel_0_c"
 			android:textColor="@android:color/black"
-			android:textSize="16sp" />
+			android:textSize="15sp" />
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:orientation="horizontal">
+
+			<TextView
+				android:id="@+id/description"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="center"
+				android:gravity="center"
+				android:text="@string/cloud_cover"
+				android:textColor="@android:color/black"
+				android:textSize="16sp" />
+
+			<com.google.android.material.divider.MaterialDivider
+				android:layout_width="10dp"
+				android:layout_height="wrap_content"
+				android:layout_marginHorizontal="5dp"
+				app:dividerColor="@color/current_card_text"
+
+				app:dividerThickness="1dp" />
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_gravity="center"
+				android:gravity="center"
+				android:orientation="horizontal">
+
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:layout_gravity="center"
+					android:layout_marginEnd="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/uv" />
+
+				<TextView
+					android:id="@+id/uv_index"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:textColor="@android:color/black"
+					android:textSize="16sp" />
+			</LinearLayout>
+		</LinearLayout>
 	</LinearLayout>
 </com.google.android.material.card.MaterialCardView>

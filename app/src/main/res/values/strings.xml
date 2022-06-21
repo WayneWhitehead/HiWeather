@@ -2,7 +2,7 @@
 	<string name="app_name">HiWeather</string>
 	<string name="cloud_cover">Cloud Cover</string>
 	<string name="winddirectionicon">WindDirectionIcon</string>
-	<string name="km_h">km/h</string>
+	<string name="km_h">m/s</string>
 	<string name="sunrise">Sunrise</string>
 	<string name="sunset">Sunset</string>
 	<string name="today_s_date">Today\'s Date</string>
@@ -10,6 +10,18 @@
 	<string name="daily_forecast">7 Day Forecast</string>
 	<string name="hourly_forecast">24 Hour Forecast</string>
 	<string name="forecast">Forecast</string>
+
+	<!--Template Weather Strings-->
+	<string name="template_current_temp">21°</string>
+	<string name="template_real_feel">Real Feel 23°</string>
+	<string name="template_uv_index_with_name">UV Index 5</string>
+	<string name="template_precipitation">45%</string>
+	<string name="template_humidity">30%</string>
+	<string name="template_dew_point">14°</string>
+	<string name="template_uv_index">3</string>
+	<string name="template_wind_speed">4.3</string>
+	<string name="template_wind_direction">N</string>
+	<string name="template_sun_and_moon_duration">12 Hours and 0 Minutes</string>
 
 	<string-array name="airTitles">
 		<item>Nitrogen Dioxide(NO₂)</item>
@@ -86,17 +98,21 @@
 		<item>140</item>
 	</integer-array>
 
-	<string name="visibility_0_m">Visibility {0}m</string>
+	<string name="dew_point">Dew Point</string>
+	<string name="pressure">Pressure</string>
+	<string name="visibility">Visibility</string>
+	<string name="air_item_value">{0}µg/m³</string>
+	<string name="visibility_0_m">{0}Km</string>
 	<string name="uv_index_0">UV Index {0}</string>
-	<string name="pressure_0_mbar">Pressure {0}hPa</string>
-	<string name="dew_point_0_c">Dew Point {0}°C</string>
+	<string name="pressure_0_mbar">{0}hPa</string>
+	<string name="dew_point_0_c">{0}°</string>
 	<string name="precipitation_0">Precipitation {0}%</string>
-	<string name="real_feel_0_c">Real Feel {0}°C</string>
+	<string name="real_feel_0_c">Real Feel {0}°</string>
 	<string name="_0">{0}</string>
-	<string name="_0_c">{0}°C</string>
+	<string name="_0_c">{0}°</string>
 	<string name="_0_p">{0}%</string>
-	<string name="low_0_c">Low {0}°C</string>
-	<string name="high_0_c">High {0}°C</string>
+	<string name="low_0_c">Low {0}°</string>
+	<string name="high_0_c">High {0}°</string>
 	<string name="humidity_0">Humidity {0}%</string>
 
 	<string name="precipitation">Precipitation </string>
@@ -110,14 +126,5 @@
 	<string name="app_widget_description">See your current weather data on your home-screen! \n
 		Updates once an hour on the hour
 	</string>
-	<string name="template_current_temp">21°C</string>
-	<string name="template_real_feel">Real Feel 23°C</string>
-	<string name="template_uv_index_with_name">UV Index 5</string>
-	<string name="template_precipitation">45%</string>
-	<string name="template_humidity">30%</string>
-	<string name="template_dew_point">14°C</string>
-	<string name="template_uv_index">3</string>
-	<string name="template_wind_speed">4.3</string>
-	<string name="template_wind_direction">N</string>
 
 </resources>

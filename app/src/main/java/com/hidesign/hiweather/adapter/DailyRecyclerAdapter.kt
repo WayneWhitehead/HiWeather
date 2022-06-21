@@ -32,16 +32,16 @@ class DailyRecyclerAdapter internal constructor(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.date.text = DateUtils.getDayOfWeekText(DateUtils.getDateTime("u",
-            weatherArrayList[position].dt!!.toLong(),
+            weatherArrayList[position].dt.toLong(),
             timezone))
         holder.high.text =
-            MessageFormat.format("High {0}°C", weatherArrayList[position].temp!!.max.roundToInt())
+            MessageFormat.format("{0}°", weatherArrayList[position].temp.max.roundToInt())
         holder.low.text =
-            MessageFormat.format("Low {0}°C", weatherArrayList[position].temp!!.min.roundToInt())
+            MessageFormat.format("{0}°", weatherArrayList[position].temp.min.roundToInt())
         holder.precipitation.text =
-            MessageFormat.format("{0}%", weatherArrayList[position].pop!! * 100)
+            MessageFormat.format("{0}%", weatherArrayList[position].pop * 100)
         Glide.with(holder.itemView)
-            .load(getWeatherIconUrl(weatherArrayList[position].weather!![0].icon))
+            .load(getWeatherIconUrl(weatherArrayList[position].weather[0].icon))
             .into(holder.icon)
     }
 
@@ -61,8 +61,8 @@ class DailyRecyclerAdapter internal constructor(
                 onItemClick?.invoke(weatherArrayList[bindingAdapterPosition])
             }
             date = itemView.findViewById(R.id.date)
-            high = itemView.findViewById(R.id.HighTemp)
-            low = itemView.findViewById(R.id.LowTemp)
+            high = itemView.findViewById(R.id.high_temp)
+            low = itemView.findViewById(R.id.low_temp)
             precipitation = itemView.findViewById(R.id.Precipitation)
             icon = itemView.findViewById(R.id.skiesImage)
         }

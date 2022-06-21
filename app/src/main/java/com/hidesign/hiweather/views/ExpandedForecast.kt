@@ -77,7 +77,7 @@ class ExpandedForecast : BottomSheetDialogFragment() {
             binding.currentTemp.text = MessageFormat.format(getString(R.string._0_c), currentTemp)
             val visibility = weatherHourly?.visibility ?: 0
             binding.Visibility.text =
-                MessageFormat.format(getString(R.string.visibility_0_m), visibility)
+                MessageFormat.format(getString(R.string.visibility_0_m), visibility / 1000)
 
             binding.lowTemp.visibility = View.GONE
             binding.highTemp.visibility = View.GONE

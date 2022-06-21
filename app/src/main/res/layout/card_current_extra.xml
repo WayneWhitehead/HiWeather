@@ -4,7 +4,7 @@
 	xmlns:shimmer="http://schemas.android.com/tools"
 	style="@style/WeatherCards"
 	android:layout_width="match_parent"
-	android:layout_height="150dp"
+	android:layout_height="140dp"
 	android:layout_marginHorizontal="10dp"
 	android:backgroundTint="@color/current_extra_card"
 	app:cardElevation="20dp">
@@ -33,34 +33,33 @@
 
 	</com.facebook.shimmer.ShimmerFrameLayout>
 
-	<RelativeLayout
+	<androidx.constraintlayout.widget.ConstraintLayout
 		android:id="@+id/current_extra_content"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="match_parent"
 		android:orientation="horizontal"
 		android:paddingTop="15dp"
+		android:layout_marginHorizontal="10dp"
 		android:paddingBottom="35dp">
 
 		<LinearLayout
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignStart="@id/divider"
-			android:layout_alignParentStart="true"
-			android:layout_alignParentTop="true"
-			android:layout_alignParentBottom="true"
-			android:layout_gravity="center"
-			android:layout_marginStart="15dp"
+			android:layout_height="match_parent"
+			android:gravity="center"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="@id/divider"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
 			android:orientation="vertical">
 
 			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="5dp"
 				android:orientation="horizontal">
 
 				<ImageView
-					android:layout_width="25dp"
-					android:layout_height="25dp"
+					android:layout_width="20dp"
+					android:layout_height="20dp"
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
@@ -73,9 +72,8 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/precipitation"
-					android:textColor="@color/forecast_card_content"
-					android:textSize="15sp"
-					android:textStyle="bold" />
+					android:textColor="@color/black"
+					android:textSize="15sp" />
 
 				<TextView
 					android:id="@+id/precipitation"
@@ -84,8 +82,9 @@
 					android:layout_gravity="center"
 					android:maxWidth="150dp"
 					android:text="@null"
-					android:textColor="@color/forecast_card_content"
-					android:textSize="18sp" />
+					android:textColor="@color/black"
+					android:textSize="15sp"
+					android:textStyle="bold" />
 			</LinearLayout>
 
 			<LinearLayout
@@ -95,8 +94,8 @@
 				android:orientation="horizontal">
 
 				<ImageView
-					android:layout_width="25dp"
-					android:layout_height="25dp"
+					android:layout_width="20dp"
+					android:layout_height="20dp"
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
@@ -109,9 +108,8 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/humidity"
-					android:textColor="@color/forecast_card_content"
-					android:textSize="15sp"
-					android:textStyle="bold" />
+					android:textColor="@color/black"
+					android:textSize="15sp" />
 
 				<TextView
 					android:id="@+id/humidity"
@@ -119,7 +117,8 @@
 					android:layout_height="wrap_content"
 					android:layout_gravity="center"
 					android:textColor="@android:color/black"
-					android:textSize="16sp" />
+					android:textSize="15sp"
+					android:textStyle="bold" />
 			</LinearLayout>
 
 			<LinearLayout
@@ -129,8 +128,8 @@
 				android:orientation="horizontal">
 
 				<ImageView
-					android:layout_width="25dp"
-					android:layout_height="25dp"
+					android:layout_width="20dp"
+					android:layout_height="20dp"
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
@@ -143,9 +142,8 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/cloudiness"
-					android:textColor="@color/forecast_card_content"
-					android:textSize="15sp"
-					android:textStyle="bold" />
+					android:textColor="@color/black"
+					android:textSize="15sp" />
 
 				<TextView
 					android:id="@+id/cloudiness"
@@ -154,8 +152,9 @@
 					android:layout_gravity="center"
 					android:maxWidth="150dp"
 					android:text="@null"
-					android:textColor="@color/forecast_card_content"
-					android:textSize="18sp" />
+					android:textColor="@color/black"
+					android:textSize="15sp"
+					android:textStyle="bold" />
 			</LinearLayout>
 		</LinearLayout>
 
@@ -163,57 +162,128 @@
 			android:id="@+id/divider"
 			android:layout_width="2dp"
 			android:layout_height="match_parent"
-			android:layout_centerInParent="true"
-			android:layout_marginHorizontal="5dp"
+			android:paddingHorizontal="5dp"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
 			app:dividerColor="@color/black" />
 
 		<LinearLayout
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_alignEnd="@id/divider"
-			android:layout_alignParentTop="true"
-			android:layout_alignParentEnd="true"
-			android:layout_alignParentBottom="true"
-			android:layout_marginEnd="15dp"
-			android:layout_gravity="center"
-			android:orientation="vertical">
+			android:layout_height="match_parent"
+			android:gravity="center"
+			android:orientation="vertical"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintStart_toStartOf="@id/divider"
+			app:layout_constraintTop_toTopOf="parent">
 
-			<TextView
-				android:id="@+id/dewPoint"
+			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:text="@string/dew_point_0_c"
-				android:textColor="@android:color/black"
-				android:textSize="16sp" />
+				android:orientation="horizontal">
 
-			<TextView
-				android:id="@+id/pressure"
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/dew_point" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:paddingEnd="5dp"
+					android:text="@string/dew_point"
+					android:textColor="@color/black"
+					android:textSize="15sp" />
+
+				<TextView
+					android:id="@+id/dew_point"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:text="@null"
+					android:textColor="@color/black"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:text="@string/pressure_0_mbar"
-				android:textColor="@android:color/black"
-				android:textSize="16sp" />
+				android:layout_marginTop="5dp"
+				android:orientation="horizontal">
 
-			<TextView
-				android:id="@+id/uv_index"
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/pressure" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:paddingEnd="5dp"
+					android:text="@string/pressure"
+					android:textColor="@color/black"
+					android:textSize="15sp" />
+
+				<TextView
+					android:id="@+id/pressure"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:text="@null"
+					android:textColor="@color/black"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+			</LinearLayout>
+
+			<LinearLayout
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:text="@string/uv_index_0"
-				android:textColor="@android:color/black"
-				android:textSize="16sp" />
+				android:layout_marginTop="5dp"
+				android:orientation="horizontal">
 
-			<TextView
-				android:id="@+id/visibility"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:text="@string/visibility_0_m"
-				android:textColor="@android:color/black"
-				android:textSize="16sp" />
+				<ImageView
+					android:layout_width="20dp"
+					android:layout_height="20dp"
+					android:layout_gravity="center"
+					android:layout_marginHorizontal="4dp"
+					android:contentDescription="@null"
+					android:src="@drawable/visibility" />
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:paddingEnd="5dp"
+					android:text="@string/visibility"
+					android:textColor="@color/black"
+					android:textSize="15sp" />
+
+				<TextView
+					android:id="@+id/visibility"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="center"
+					android:maxWidth="150dp"
+					android:text="@null"
+					android:textColor="@color/black"
+					android:textSize="15sp"
+					android:textStyle="bold" />
+			</LinearLayout>
 		</LinearLayout>
 
-	</RelativeLayout>
+	</androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

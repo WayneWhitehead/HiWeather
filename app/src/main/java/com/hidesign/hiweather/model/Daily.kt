@@ -1,49 +1,45 @@
 package com.hidesign.hiweather.model
 
 
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
-@Entity
 data class Daily(
-    @SerializedName("dt")
-    @PrimaryKey var dt: Int? = 0,
     @SerializedName("clouds")
-    var clouds: Int? = 0,
+    var clouds: Int,
     @SerializedName("dew_point")
-    var dewPoint: Double? = 0.0,
+    var dewPoint: Double,
+    @SerializedName("dt")
+    var dt: Int,
     @SerializedName("feels_like")
-    @Ignore var feelsLike: FeelsLike? = null,
+    var feelsLike: FeelsLike,
     @SerializedName("humidity")
-    var humidity: Int? = 0,
+    var humidity: Int,
     @SerializedName("moon_phase")
-    @Ignore var moonPhase: Double? = null,
+    var moonPhase: Double,
     @SerializedName("moonrise")
-    @Ignore var moonrise: Int? = null,
+    var moonrise: Int,
     @SerializedName("moonset")
-    @Ignore var moonset: Int? = null,
+    var moonset: Int,
     @SerializedName("pop")
-    var pop: Double? = 0.0,
+    var pop: Double,
     @SerializedName("pressure")
-    var pressure: Int? = 0,
+    var pressure: Int,
     @SerializedName("rain")
-    @Ignore var rain: Double? = null,
+    var rain: Double,
     @SerializedName("sunrise")
-    @Ignore var sunrise: Int? = null,
+    var sunrise: Int,
     @SerializedName("sunset")
-    @Ignore var sunset: Int? = null,
+    var sunset: Int,
     @SerializedName("temp")
-    @Ignore var temp: Temp? = null,
+    var temp: Temp,
     @SerializedName("uvi")
-    var uvi: Double? = 0.0,
+    var uvi: Double,
     @SerializedName("weather")
-    @Ignore var weather: List<Weather>? = null,
+    var weather: List<Weather>,
     @SerializedName("wind_deg")
-    var windDeg: Int? = 0,
+    var windDeg: Int,
     @SerializedName("wind_gust")
-    @Ignore var windGust: Double? = null,
+    var windGust: Double,
     @SerializedName("wind_speed")
-    var windSpeed: Double? = 0.0,
+    var windSpeed: Double,
 )
