@@ -1,6 +1,8 @@
 package com.hidesign.hiweather.network
 
 import com.google.gson.GsonBuilder
+import com.hidesign.hiweather.BuildConfig
+import com.localebro.okhttpprofiler.OkHttpProfilerInterceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -17,6 +19,9 @@ class ApiClient {
         val httpClient = OkHttpClient.Builder().apply {
             readTimeout(30L, TimeUnit.SECONDS)
             connectTimeout(30L, TimeUnit.SECONDS)
+            if (BuildConfig.DEBUG) {
+                addInterceptor(OkHttpProfilerInterceptor())
+            }
             addInterceptor(HttpLoggingInterceptor().apply {
                 this.level = HttpLoggingInterceptor.Level.BODY
             })

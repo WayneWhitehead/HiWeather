@@ -1,8 +1,6 @@
 package com.hidesign.hiweather.util
 
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.model.WeatherWidgetModel
 
 object WeatherUtils {
 
@@ -72,18 +70,5 @@ object WeatherUtils {
             5 -> "Very Poor"
             else -> "Unknown"
         }
-    }
-
-    fun createWidgetModel(model: OneCallResponse): WeatherWidgetModel {
-        return WeatherWidgetModel(
-            model.hourly[0].dt,
-            model.hourly[0].temp,
-            model.hourly[0].feelsLike,
-            model.hourly[0].uvi,
-            model.hourly[0].pop,
-            model.hourly[0].humidity,
-            model.hourly[0].clouds,
-            model.timezone,
-            model.current.weather[0].icon)
     }
 }

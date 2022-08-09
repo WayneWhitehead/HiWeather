@@ -57,11 +57,11 @@ class ExpandedForecast : BottomSheetDialogFragment() {
         val humidity = weatherHourly?.humidity ?: weatherDaily?.humidity ?: 0
         binding.humidity.text = MessageFormat.format(getString(R.string._0_p), humidity)
         val dewPoint = (weatherHourly?.dewPoint ?: weatherDaily?.dewPoint)?.roundToInt() ?: 0
-        binding.DewPoint.text = MessageFormat.format(getString(R.string.dew_point_0_c), dewPoint)
+        binding.dewPoint.text = MessageFormat.format(getString(R.string._0_c), dewPoint)
         val pressure = weatherHourly?.pressure ?: weatherDaily?.pressure ?: 0
-        binding.Pressure.text = MessageFormat.format(getString(R.string.pressure_0_mbar), pressure)
+        binding.pressure.text = MessageFormat.format(getString(R.string._0_hpa), pressure)
         val uvi = (weatherHourly?.uvi ?: weatherDaily?.uvi)?.roundToInt() ?: 0
-        binding.UVIndex.text = MessageFormat.format(getString(R.string.uv_index_0), uvi)
+        binding.uvIndex.text = MessageFormat.format(getString(R.string.uv_template), uvi)
 
         val windSpeed = (weatherHourly?.windSpeed ?: weatherDaily?.windSpeed ?: 0.0).toBigDecimal()
             .setScale(1, RoundingMode.HALF_EVEN)
@@ -76,11 +76,10 @@ class ExpandedForecast : BottomSheetDialogFragment() {
             val currentTemp = weatherHourly?.temp?.roundToInt() ?: 0
             binding.currentTemp.text = MessageFormat.format(getString(R.string._0_c), currentTemp)
             val visibility = weatherHourly?.visibility ?: 0
-            binding.Visibility.text =
-                MessageFormat.format(getString(R.string.visibility_0_m), visibility / 1000)
+            binding.visibility.text =
+                MessageFormat.format(getString(R.string._0_m), visibility / 1000)
 
-            binding.lowTemp.visibility = View.GONE
-            binding.highTemp.visibility = View.GONE
+            binding.temps.visibility = View.GONE
         }
         if (weatherDaily != null) {
             binding.date.text =
@@ -91,7 +90,7 @@ class ExpandedForecast : BottomSheetDialogFragment() {
             binding.lowTemp.text = MessageFormat.format(getString(R.string.low_0_c), low)
 
             binding.currentTemp.visibility = View.GONE
-            binding.Visibility.visibility = View.GONE
+            binding.visibility.visibility = View.GONE
         }
     }
 

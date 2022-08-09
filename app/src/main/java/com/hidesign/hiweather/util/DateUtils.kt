@@ -1,5 +1,6 @@
 package com.hidesign.hiweather.util
 
+import android.content.Context
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -48,10 +49,24 @@ object DateUtils {
             "6" -> {
                 "Saturday"
             }
-            "7"-> {
+            "7" -> {
                 "Sunday"
             }
-            else -> { "Unknown" }
+            else -> {
+                "Unknown"
+            }
+        }
+    }
+
+    fun getRefreshInterval(activity: Context): Long {
+        val sharedPref = activity.getSharedPreferences(Constants.preferences, Context.MODE_PRIVATE)
+        return when (sharedPref!!.getInt(Constants.refreshInterval, 1)) {
+            0 -> 1L
+            1 -> 3L
+            2 -> 6L
+            3 -> 12L
+            4 -> 24L
+            else -> 1L
         }
     }
 }

@@ -2,12 +2,11 @@ package com.hidesign.hiweather.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.hidesign.hiweather.model.WeatherWidgetModel
+import com.hidesign.hiweather.model.DbModel
 
 @Database(
-    entities = [WeatherWidgetModel::class],
-    version = 1,
-    exportSchema = true)
+    entities = [DbModel::class],
+    version = 3)
 abstract class WeatherDatabase : RoomDatabase() {
-    abstract fun widgetDao(): WidgetDao
+    abstract fun weatherDao(): WeatherDao
 }

@@ -29,15 +29,6 @@
 			android:layout_below="@id/AdView"
 			android:background="@color/backgroundDark" />
 
-		<!--		<androidx.viewpager2.widget.ViewPager2-->
-		<!--			android:id="@+id/vp_content"-->
-		<!--			android:layout_width="match_parent"-->
-		<!--			android:layout_height="match_parent"-->
-		<!--			android:layout_below="@id/AdView"-->
-		<!--			android:background="@color/backgroundDark"-->
-		<!--			android:elevation="0dp"-->
-		<!--			android:orientation="vertical" />-->
-
 		<androidx.fragment.app.FragmentContainerView
 			android:id="@+id/autocomplete_fragment"
 			android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
@@ -76,7 +67,7 @@
 		android:id="@+id/bottomAppBar"
 		style="@style/Widget.MaterialComponents.BottomAppBar.PrimarySurface"
 		android:layout_width="match_parent"
-		android:layout_height="55dp"
+		android:layout_height="65dp"
 		android:layout_gravity="bottom"
 		android:backgroundTint="#151515"
 		app:fabAlignmentMode="end"
@@ -88,10 +79,13 @@
 			android:id="@+id/toolbar"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:layout_marginLeft="50dp"
+			android:layout_marginLeft="100dp"
 			app:title="Search for a City"
 			app:titleCentered="true"
 			app:titleTextColor="@color/white" />
-
 	</com.google.android.material.bottomappbar.BottomAppBar>
+
+	<include
+		android:id="@+id/dialog_settings"
+		layout="@layout/dialog_settings" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

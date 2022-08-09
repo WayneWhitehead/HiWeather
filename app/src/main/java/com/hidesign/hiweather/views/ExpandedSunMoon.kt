@@ -25,19 +25,19 @@ class ExpandedSunMoon : BottomSheetDialogFragment() {
         firebaseAnalytics = Firebase.analytics
 
         binding.Sunrise.text =
-            DateUtils.getDateTime("HH:mm", (weatherDaily.sunrise)!!.toLong(), timeZone)
+            DateUtils.getDateTime("HH:mm", (weatherDaily.sunrise).toLong(), timeZone)
         binding.Sunset.text =
-            DateUtils.getDateTime("HH:mm", (weatherDaily.sunset)!!.toLong(), timeZone)
+            DateUtils.getDateTime("HH:mm", (weatherDaily.sunset).toLong(), timeZone)
         binding.hoursOfSunlight.text =
-            DateUtils.getHours(weatherDaily.sunrise!!.toLong(), weatherDaily.sunset!!.toLong())
+            DateUtils.getHours(weatherDaily.sunrise.toLong(), weatherDaily.sunset.toLong())
 
         binding.Moonrise.text =
-            DateUtils.getDateTime("HH:mm", (weatherDaily.moonrise)!!.toLong(), timeZone)
-        binding.moonPhase.setImageResource(getMoonIcon(weatherDaily.moonPhase!!))
+            DateUtils.getDateTime("HH:mm", (weatherDaily.moonrise).toLong(), timeZone)
+        binding.moonPhase.setImageResource(getMoonIcon(weatherDaily.moonPhase))
         binding.Moonset.text =
-            DateUtils.getDateTime("HH:mm", (weatherDaily.moonset)!!.toLong(), timeZone)
+            DateUtils.getDateTime("HH:mm", (weatherDaily.moonset).toLong(), timeZone)
         binding.hoursOfMoonlight.text =
-            DateUtils.getHours(weatherDaily.moonrise!!.toLong(), weatherDaily.moonset!!.toLong())
+            DateUtils.getHours(weatherDaily.moonrise.toLong(), weatherDaily.moonset.toLong())
 
         binding.nativeAd.addView(AdUtil.setupAds(requireContext(), AdUtil.bottomSheetId))
         return binding.root

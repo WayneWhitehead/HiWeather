@@ -1,14 +1,20 @@
 package com.hidesign.hiweather.views
 
 import android.Manifest
+import android.content.Context
 import android.location.Address
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -20,15 +26,18 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
+import com.hidesign.hiweather.services.APIWorker
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.Constants.getAPIKey
+import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.LocationUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
@@ -67,6 +76,10 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                     mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
                     true
                 }
+                R.id.action_settings -> {
+                    setupSettingsView()
+                    true
+                }
                 else -> false
             }
         }
@@ -92,6 +105,95 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         super.onStart()
         checkLocation()
         binding.AdView.addView(AdUtil.setupAds(this, AdUtil.appBarId))
+    }
+
+    private fun setupSettingsView() {
+        binding.dialogSettings.settingsCard.visibility = View.VISIBLE
+        binding.dialogSettings.close.setOnClickListener {
+            binding.dialogSettings.settingsCard.visibility = View.GONE
+        }
+
+        ArrayAdapter.createFromResource(this,
+            R.array.temperature_units,
+            R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.dialogSettings.tempUnit.adapter = adapter
+        }
+
+        ArrayAdapter.createFromResource(this, R.array.refresh_interval, R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.dialogSettings.refreshInterval.adapter = adapter
+        }
+
+        binding.dialogSettings.tempUnit.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parentView: AdapterView<*>?,
+                    selectedItemView: View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    updateValues(resources.getStringArray(R.array.temperature_units)[position],
+                        resources.getStringArray(R.array.temperature_units),
+                        Constants.temperatureUnit)
+                }
+
+                override fun onNothingSelected(parentView: AdapterView<*>?) {
+                    // your code here
+                }
+            }
+        binding.dialogSettings.refreshInterval.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parentView: AdapterView<*>?,
+                    selectedItemView: View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    updateValues(resources.getStringArray(R.array.refresh_interval)[position],
+                        resources.getStringArray(R.array.refresh_interval),
+                        Constants.refreshInterval)
+                }
+
+                override fun onNothingSelected(parentView: AdapterView<*>?) {
+                    // your code here
+                }
+            }
+
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        val posTemp = sharedPref.getInt(Constants.temperatureUnit, 0)
+        val posRefresh = sharedPref.getInt(Constants.refreshInterval, 0)
+        binding.dialogSettings.tempUnit.setSelection(posTemp)
+        binding.dialogSettings.refreshInterval.setSelection(posRefresh)
+        updateValues(resources.getStringArray(R.array.temperature_units)[posTemp],
+            resources.getStringArray(R.array.temperature_units),
+            Constants.temperatureUnit)
+        updateValues(resources.getStringArray(R.array.refresh_interval)[posRefresh],
+            resources.getStringArray(R.array.refresh_interval),
+            Constants.refreshInterval)
+    }
+
+    private fun updateValues(item: String, values: Array<String>, preference: String) {
+        for ((pos, value) in values.withIndex()) {
+            if (item == value) {
+                val sharedPref = getPreferences(Context.MODE_PRIVATE)
+                with(sharedPref.edit()) {
+                    putInt(preference, pos)
+                    apply()
+                }
+                val timeValue = DateUtils.getRefreshInterval(this)
+                val periodicWorkRequest = PeriodicWorkRequest.Builder(APIWorker::class.java,
+                    timeValue,
+                    TimeUnit.MINUTES,
+                    timeValue,
+                    TimeUnit.MINUTES).build()
+                WorkManager.getInstance(this).enqueueUniquePeriodicWork("APIWorker",
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    periodicWorkRequest)
+            }
+        }
     }
 
     private fun checkLocation() {

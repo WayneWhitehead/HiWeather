@@ -2,14 +2,25 @@
 	<string name="app_name">HiWeather</string>
 	<string name="cloud_cover">Cloud Cover</string>
 	<string name="winddirectionicon">WindDirectionIcon</string>
-	<string name="km_h">m/s</string>
-	<string name="sunrise">Sunrise</string>
-	<string name="sunset">Sunset</string>
 	<string name="today_s_date">Today\'s Date</string>
 	<string name="title_activity_weather">WeatherActivity</string>
 	<string name="daily_forecast">7 Day Forecast</string>
 	<string name="hourly_forecast">24 Hour Forecast</string>
 	<string name="forecast">Forecast</string>
+
+	<string-array name="temperature_units">
+		<item>Celsius</item>
+		<item>Fahrenheit</item>
+		<item>Kelvin</item>
+	</string-array>
+
+	<string-array name="refresh_interval">
+		<item>1 Hour</item>
+		<item>3 Hours</item>
+		<item>6 Hours</item>
+		<item>12 Hours</item>
+		<item>24 Hours</item>
+	</string-array>
 
 	<!--Template Weather Strings-->
 	<string name="template_current_temp">21°</string>
@@ -97,34 +108,52 @@
 		<item>100</item>
 		<item>140</item>
 	</integer-array>
-
-	<string name="dew_point">Dew Point</string>
-	<string name="pressure">Pressure</string>
-	<string name="visibility">Visibility</string>
+	<string name="air_quality">Air Quality</string>
 	<string name="air_item_value">{0}µg/m³</string>
-	<string name="visibility_0_m">{0}Km</string>
-	<string name="uv_index_0">UV Index {0}</string>
-	<string name="pressure_0_mbar">{0}hPa</string>
-	<string name="dew_point_0_c">{0}°</string>
+
+	//Pressure
+	<string name="pressure">Pressure</string>
+	<string name="_0_hpa">{0}hPa</string>
+	<string name="pressure_0_hpa">Pressure {0}hPa</string>
+	//Visibility
+	<string name="visibility">Visibility</string>
+	<string name="_0_m">{0}Km</string>
+	<string name="visibility_0_m">Visibility {0}Km</string>
+	//Dew Point
+	<string name="dew_point">Dew Point</string>
+	<string name="dew_point_0_c">Dew Point {0}°</string>
+	//Humidity
+	<string name="humidity">Humidity</string>
+	<string name="humidity_0">Humidity {0}%</string>
+	//Precipitation
+	<string name="precipitation">Precipitation</string>
 	<string name="precipitation_0">Precipitation {0}%</string>
+	//Sun + Moon
+	<string name="today">Today</string>
+	<string name="moonrise">Moonrise</string>
+	<string name="moonset">Moonset</string>
+	<string name="sunrise">Sunrise</string>
+	<string name="sunset">Sunset</string>
+	<string name="empty_time">--:--</string>
+
+	<string name="uv_index">UV Index</string>
+	<string name="uv_index_0">UV Index {0}</string>
+	<string name="uv_template">{0}</string>
+
 	<string name="real_feel_0_c">Real Feel {0}°</string>
 	<string name="_0">{0}</string>
 	<string name="_0_c">{0}°</string>
 	<string name="_0_p">{0}%</string>
 	<string name="low_0_c">Low {0}°</string>
 	<string name="high_0_c">High {0}°</string>
-	<string name="humidity_0">Humidity {0}%</string>
 
-	<string name="precipitation">Precipitation </string>
-	<string name="cloudiness">Cloudiness </string>
-	<string name="humidity">Humidity </string>
-	<string name="today">Today</string>
-	<string name="moonrise">Moonrise</string>
-	<string name="moonset">Moonset</string>
-	<string name="empty_time">--:--</string>
-	<string name="air_quality">Air Quality</string>
+	<string name="km_h">m/s</string>
+
+	<string name="cloudiness">Cloudiness</string>
 	<string name="app_widget_description">See your current weather data on your home-screen! \n
 		Updates once an hour on the hour
 	</string>
+	<string name="location">Location</string>
+	<string name="settings">Settings</string>
 
 </resources>

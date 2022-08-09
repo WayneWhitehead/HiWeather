@@ -6,7 +6,13 @@
 	<item
 		android:id="@+id/action_location"
 		android:icon="@drawable/precision"
+		android:orderInCategory="2"
+		android:title="@string/location"
+		app:showAsAction="ifRoom" />
+	<item
+		android:id="@+id/action_settings"
+		android:icon="@drawable/setting"
 		android:orderInCategory="1"
-		android:title="Location"
+		android:title="@string/settings"
 		app:showAsAction="always" />
 </menu>

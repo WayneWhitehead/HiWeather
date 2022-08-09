@@ -10,29 +10,29 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.room.Room
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.AppWidgetTarget
 import com.bumptech.glide.request.transition.Transition
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
+import com.google.gson.Gson
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.database.WeatherDatabase
+import com.hidesign.hiweather.model.DbModel
 import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.model.WeatherWidgetModel
-import com.hidesign.hiweather.network.ApiClient
+import com.hidesign.hiweather.services.APIWorker
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtils
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.text.MessageFormat
-import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 open class WeatherWidget : AppWidgetProvider() {
-    private val REFRESH = "refreshButtonClick"
     private val myTrace = Firebase.performance.newTrace("WidgetRefreshed")
 
     override fun onUpdate(
@@ -45,9 +45,30 @@ open class WeatherWidget : AppWidgetProvider() {
         }
     }
 
+    override fun onEnabled(context: Context) {
+        val timeValue = DateUtils.getRefreshInterval(context)
+        val periodicWorkRequest = PeriodicWorkRequest.Builder(APIWorker::class.java,
+            timeValue,
+            TimeUnit.MINUTES,
+            timeValue,
+            TimeUnit.MINUTES).build()
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork("APIWorker",
+            ExistingPeriodicWorkPolicy.REPLACE,
+            periodicWorkRequest)
+    }
+
+    override fun onDisabled(context: Context) {
+        WorkManager.getInstance(context).cancelAllWork()
+    }
+
     override fun onReceive(context: Context?, intent: Intent) {
         super.onReceive(context, intent)
-        if (REFRESH == intent.action) {
+        if (Constants.refresh == intent.action) {
+            myTrace.start()
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            updateAppWidget(context!!, appWidgetManager, intent.getIntExtra("appWidgetId", 0))
+        }
+        if (Constants.auto_update == intent.action) {
             myTrace.start()
             val appWidgetManager = AppWidgetManager.getInstance(context)
             updateAppWidget(context!!, appWidgetManager, intent.getIntExtra("appWidgetId", 0))
@@ -70,68 +91,25 @@ open class WeatherWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
     ) {
-        var weatherContent: WeatherWidgetModel
         val db = Room.databaseBuilder(context, WeatherDatabase::class.java, "Weather")
             .allowMainThreadQueries().fallbackToDestructiveMigration().build()
-        val widgetDao = db.widgetDao()
+        val widgetDao = db.weatherDao()
         if (widgetDao.getAll().isNotEmpty()) {
-            weatherContent = widgetDao.getAll().last()
-            val difference =
-                Calendar.getInstance().timeInMillis - (weatherContent.dt!!.toLong() * 1000)
-            if (difference > 1) {
-                val sharedPref =
-                    context.getSharedPreferences(Constants.preferences, Context.MODE_PRIVATE)
-                if (sharedPref.getFloat(Constants.latitude, 0F) != 0F) {
-                    val apiKey = Constants.getAPIKey(context, Constants.openWeatherKey)
-                    ApiClient().apiService!!.getOneCallWidget(
-                        sharedPref.getFloat(Constants.latitude, 0F).toDouble(),
-                        sharedPref.getFloat(Constants.longitude, 0F).toDouble(),
-                        "minutely", apiKey, "metric")!!
-                        .enqueue(object : Callback<OneCallResponse?> {
-                            override fun onResponse(
-                                call: Call<OneCallResponse?>,
-                                response: Response<OneCallResponse?>,
-                            ) {
-                                if (response.isSuccessful) {
-                                    weatherContent =
-                                        WeatherUtils.createWidgetModel(response.body()!!)
-                                    var found = false
-                                    db.widgetDao().getAll().forEach {
-                                        if (it.dt == weatherContent.dt) {
-                                            found = true
-                                        }
-                                    }
-                                    if (!found) {
-                                        updateViews(context,
-                                            weatherContent,
-                                            appWidgetManager,
-                                            appWidgetId)
-                                        return
-                                    }
-                                } else {
-                                    return
-                                }
-                            }
-
-                            override fun onFailure(call: Call<OneCallResponse?>, t: Throwable) {
-                                return
-                            }
-                        })
-                }
-            }
-            updateViews(context, weatherContent, appWidgetManager, appWidgetId)
-            return
-        } else {
-            return
+            val weatherContent = widgetDao.getAll().last()
+            updateViews(context,
+                weatherContent,
+                appWidgetManager,
+                appWidgetId)
         }
     }
 
-    fun updateViews(
+    private fun updateViews(
         context: Context,
-        weatherHourly: WeatherWidgetModel,
+        weather: DbModel,
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int,
     ) {
+        val weatherContent = Gson().fromJson(weather.content, OneCallResponse::class.java)
         val views = RemoteViews(context.packageName, R.layout.weather_widget)
 
         val awt: AppWidgetTarget =
@@ -142,37 +120,36 @@ open class WeatherWidget : AppWidgetProvider() {
                 }
             }
         Glide.with(context.applicationContext).asBitmap().load(WeatherUtils.getWeatherIconUrl(
-            weatherHourly.icon!!)).apply(RequestOptions().override(30, 30)).into(awt)
+            weatherContent.current.weather[0].icon)).apply(RequestOptions().override(30, 30))
+            .into(awt)
 
-        views.setTextViewText(R.id.date,
-            DateUtils.getDateTime("d MMMM HH:mm",
-                weatherHourly.dt?.toLong()!!,
-                weatherHourly.timezone!!))
-        val currentTemp = weatherHourly.temp?.roundToInt() ?: 0
+        views.setTextViewText(R.id.date, DateUtils.getDateTime("d MMMM HH:mm",
+            weatherContent.current.dt.toLong(),
+            weatherContent.timezone))
+        val currentTemp = weatherContent.current.temp.roundToInt()
         views.setTextViewText(R.id.current_temp,
             MessageFormat.format(context.getString(R.string._0_c), currentTemp))
-        val realFeel = (weatherHourly.feelsLike ?: 0.0).roundToInt()
+        val realFeel = weatherContent.current.feelsLike.roundToInt()
         views.setTextViewText(R.id.real_feel_temp,
             MessageFormat.format(context.getString(R.string.real_feel_0_c), realFeel))
-        val uvi = (weatherHourly.uvi ?: 0.0).roundToInt()
+        val uvi = weatherContent.current.uvi.roundToInt()
         views.setTextViewText(R.id.uv_index,
             MessageFormat.format(context.getString(R.string.uv_index_0), uvi))
-
-        val precipitation = ((weatherHourly.pop ?: 0.0) * 100)
+        val precipitation = (weatherContent.hourly[0].pop * 100)
         views.setTextViewText(R.id.precipitation,
             MessageFormat.format(context.getString(R.string._0_p), precipitation))
-        val humidity = weatherHourly.humidity ?: 0
+        val humidity = weatherContent.current.humidity
         views.setTextViewText(R.id.humidity,
             MessageFormat.format(context.getString(R.string._0_p), humidity))
-        val cloudiness = (weatherHourly.clouds) ?: 0
+        val cloudiness = (weatherContent.current.clouds)
         views.setTextViewText(R.id.cloudiness,
             MessageFormat.format(context.getString(R.string._0_p), cloudiness))
 
         views.setOnClickPendingIntent(R.id.layout,
-            getPendingSelfIntent(context, REFRESH, appWidgetId))
+            getPendingSelfIntent(context, Constants.refresh, appWidgetId))
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
         myTrace.stop()
-        Log.e("WeatherWidget", "updateViews: ")
+        Log.d("WeatherWidget", "updateViews")
     }
 }

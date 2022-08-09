@@ -2,6 +2,7 @@ package com.hidesign.hiweather.views
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.os.Bundle
 import android.transition.Slide
 import android.transition.TransitionManager
@@ -21,20 +22,17 @@ import com.bumptech.glide.Glide
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.adapter.DailyRecyclerAdapter
 import com.hidesign.hiweather.adapter.HourlyRecyclerAdapter
 import com.hidesign.hiweather.database.WeatherDatabase
 import com.hidesign.hiweather.databinding.FragmentWeatherBinding
-import com.hidesign.hiweather.model.AirPollutionResponse
-import com.hidesign.hiweather.model.Daily
-import com.hidesign.hiweather.model.Hourly
-import com.hidesign.hiweather.model.OneCallResponse
+import com.hidesign.hiweather.model.*
 import com.hidesign.hiweather.network.WeatherViewModel
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.hidesign.hiweather.util.DateUtils
-import com.hidesign.hiweather.util.DialogUtil
 import com.hidesign.hiweather.util.WeatherUtils
 import com.hidesign.hiweather.util.WeatherUtils.getWeatherIconUrl
 import com.hidesign.hiweather.views.WeatherActivity.Companion.uAddress
@@ -78,6 +76,15 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
     override fun onStart() {
         super.onStart()
         weatherViewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
+        weatherViewModel.oneCallResponse.observe(requireActivity()) { response ->
+            weather = response
+            updateWidget(weather)
+            onWeatherSuccess()
+        }
+        weatherViewModel.airPollutionResponse.observe(requireActivity()) { response ->
+            airPollution = response
+            onAirPollutionSuccess()
+        }
         firebaseAnalytics = Firebase.analytics
         db = Room.databaseBuilder(requireContext(), WeatherDatabase::class.java, "Weather")
             .allowMainThreadQueries()
@@ -116,29 +123,20 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             binding.dateHeader.date.text = formattedDate
             launch {
                 val apiKey = getAPIKey(requireContext(), Constants.openWeatherKey)
-                val oneCallResponse = weatherViewModel.getOneCallWeather(apiKey)
-                val airPollutionResponse = weatherViewModel.getAirPollution(apiKey)
+
+                val sharedPref = requireActivity().getPreferences(Context.MODE_PRIVATE)
+                val posUnit = sharedPref.getInt(Constants.temperatureUnit, 0)
+                var unit = "metric"
+                for ((pos, value) in resources.getStringArray(R.array.temperature_units)
+                    .withIndex()) {
+                    if (posUnit == pos) {
+                        unit = value.lowercase()
+                    }
+                }
+                weatherViewModel.getOneCallWeather(apiKey, unit)
+                weatherViewModel.getAirPollution(apiKey)
 
                 binding.swipeLayout.isRefreshing = false
-
-                if (oneCallResponse?.isSuccessful!!) {
-                    weather = oneCallResponse.body()!!
-                    updateWidget()
-                    onWeatherSuccess()
-                } else {
-                    DialogUtil.displayErrorDialog(requireContext(),
-                        oneCallResponse.code(),
-                        oneCallResponse.message())
-                }
-
-                if (airPollutionResponse?.isSuccessful!!) {
-                    airPollution = airPollutionResponse.body()!!
-                    onAirPollutionSuccess()
-                } else {
-                    DialogUtil.displayErrorDialog(requireContext(),
-                        airPollutionResponse.code(),
-                        airPollutionResponse.message())
-                }
             }.join()
         }
     }
@@ -176,12 +174,11 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.currentExtraCard.cloudiness.text =
             MessageFormat.format(getString(R.string._0_p), (weather.daily[0].clouds))
         binding.currentExtraCard.dewPoint.text =
-            MessageFormat.format(getString(R.string.dew_point_0_c),
-                weather.current.dewPoint.roundToInt())
+            MessageFormat.format(getString(R.string._0_c), weather.current.dewPoint.roundToInt())
         binding.currentExtraCard.pressure.text =
-            MessageFormat.format(getString(R.string.pressure_0_mbar), weather.current.pressure)
+            MessageFormat.format(getString(R.string._0_hpa), weather.current.pressure)
         binding.currentExtraCard.visibility.text =
-            MessageFormat.format(getString(R.string.visibility_0_m),
+            MessageFormat.format(getString(R.string._0_m),
                 weather.current.visibility / 1000)
         //endregion Current Extra Card
 
@@ -296,22 +293,18 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
             .showNow(parentFragmentManager, Constants.airItemScreeName)
     }
 
-    private fun updateWidget() {
-        var found = false
-        db.widgetDao().getAll().forEach {
-            if (it.dt == weather.hourly[0].dt) {
-                found = true
-            }
-        }
-        if (!found) {
-            val current = WeatherUtils.createWidgetModel(weather)
-            db.widgetDao().insertAll(current)
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            for (appWidgetId in appWidgetManager.getAppWidgetIds(ComponentName(requireContext(),
-                WeatherWidget::class.java))) {
-                appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId,
-                    R.layout.weather_widget)
-            }
+    private fun updateWidget(weather: OneCallResponse) {
+        val gson = Gson()
+        val jsonWeather: String = gson.toJson(weather)
+        val db = Room.databaseBuilder(requireContext(), WeatherDatabase::class.java, "Weather")
+            .allowMainThreadQueries().fallbackToDestructiveMigration().build()
+        val weatherDao = db.weatherDao()
+        weatherDao.insertAll(DbModel(0, jsonWeather))
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        for (appWidgetId in appWidgetManager.getAppWidgetIds(ComponentName(requireContext(),
+            WeatherWidget::class.java))) {
+            appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId,
+                R.layout.weather_widget)
         }
     }
 
@@ -323,12 +316,21 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.currentCard.currentContent.slideVisibility(false)
         binding.currentCard.currentShimmer.slideVisibility(true)
         binding.currentCard.currentShimmer.stopShimmer()
+
+        binding.hourlyForecast.rvForecast.slideVisibility(false)
+        binding.hourlyForecast.rvForecast.addItemDecoration(DividerItemDecoration(requireContext(),
+            LinearLayoutManager.HORIZONTAL))
+        binding.hourlyForecast.forecastShimmer.slideVisibility(true)
+        binding.hourlyForecast.forecastShimmer.stopShimmer()
+
         binding.currentExtraCard.currentExtraContent.slideVisibility(false)
         binding.currentExtraCard.currentExtraShimmer.slideVisibility(true)
         binding.currentExtraCard.currentExtraShimmer.stopShimmer()
+
         binding.windCard.windContent.slideVisibility(false)
         binding.windCard.windShimmer.slideVisibility(true)
         binding.windCard.windShimmer.stopShimmer()
+
         binding.sunCard.sunContent.slideVisibility(false)
         binding.sunCard.sunShimmer.slideVisibility(true)
         binding.sunCard.sunShimmer.stopShimmer()
@@ -336,9 +338,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.dailyForecast.rvForecast.slideVisibility(false)
         binding.dailyForecast.rvForecast.addItemDecoration(DividerItemDecoration(requireContext(),
             LinearLayoutManager.HORIZONTAL))
-        binding.hourlyForecast.rvForecast.slideVisibility(false)
-        binding.hourlyForecast.rvForecast.addItemDecoration(DividerItemDecoration(requireContext(),
-            LinearLayoutManager.HORIZONTAL))
+        binding.dailyForecast.forecastShimmer.slideVisibility(true)
+        binding.dailyForecast.forecastShimmer.stopShimmer()
+
         isFetching = false
         val activity = requireActivity() as WeatherActivity
         activity.binding.linearProgress.visibility = View.INVISIBLE
@@ -354,9 +356,15 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.currentCard.currentContent.slideVisibility(true)
         binding.currentCard.currentShimmer.slideVisibility(false)
         binding.currentCard.currentShimmer.startShimmer()
+
+        binding.hourlyForecast.rvForecast.slideVisibility(true)
+        binding.hourlyForecast.forecastShimmer.slideVisibility(false)
+        binding.hourlyForecast.forecastShimmer.startShimmer()
+
         binding.currentExtraCard.currentExtraContent.slideVisibility(true)
         binding.currentExtraCard.currentExtraShimmer.slideVisibility(false)
         binding.currentExtraCard.currentExtraShimmer.startShimmer()
+
         binding.airCard.airContent.slideVisibility(true)
         binding.airCard.airShimmer.slideVisibility(false)
         binding.airCard.airShimmer.startShimmer()
@@ -368,7 +376,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         binding.sunCard.sunShimmer.startShimmer()
 
         binding.dailyForecast.rvForecast.slideVisibility(true)
-        binding.hourlyForecast.rvForecast.slideVisibility(true)
+        binding.dailyForecast.forecastShimmer.slideVisibility(false)
+        binding.dailyForecast.forecastShimmer.startShimmer()
+
         isFetching = true
     }
 
@@ -385,7 +395,7 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         }
         TransitionManager.beginDelayedTransition(this.parent as ViewGroup, transition)
         if (hide) {
-            this.visibility = View.GONE
+            this.visibility = View.INVISIBLE
         } else {
             this.visibility = View.VISIBLE
         }
