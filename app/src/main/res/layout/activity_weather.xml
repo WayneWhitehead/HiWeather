@@ -27,10 +27,13 @@
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_below="@id/AdView"
-			android:background="@color/backgroundDark" />
+			android:name="com.hidesign.hiweather.views.WeatherFragment"
+			android:background="@color/backgroundDark"
+			tools:layout="@layout/fragment_weather" />
 
 		<androidx.fragment.app.FragmentContainerView
 			android:id="@+id/autocomplete_fragment"
+			tools:layout="@layout/places_autocomplete_fragment"
 			android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -84,8 +87,4 @@
 			app:titleCentered="true"
 			app:titleTextColor="@color/white" />
 	</com.google.android.material.bottomappbar.BottomAppBar>
-
-	<include
-		android:id="@+id/dialog_settings"
-		layout="@layout/dialog_settings" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

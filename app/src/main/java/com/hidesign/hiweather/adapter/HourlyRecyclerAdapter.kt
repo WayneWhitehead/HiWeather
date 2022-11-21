@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.util.DateUtils
@@ -38,6 +39,7 @@ class HourlyRecyclerAdapter internal constructor(
             MessageFormat.format("{0}%", (weatherArrayList[position].pop * 100))
         Glide.with(holder.itemView)
             .load(getWeatherIconUrl(weatherArrayList[position].weather[0].icon))
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(holder.icon)
     }
 

@@ -10,7 +10,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.room.Room
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -33,6 +34,7 @@ import com.hidesign.hiweather.network.WeatherViewModel
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.hidesign.hiweather.util.DateUtils
+import com.hidesign.hiweather.util.LocationUtil
 import com.hidesign.hiweather.util.WeatherUtils
 import com.hidesign.hiweather.util.WeatherUtils.getWeatherIconUrl
 import com.hidesign.hiweather.views.WeatherActivity.Companion.uAddress
@@ -89,9 +91,9 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
         db = Room.databaseBuilder(requireContext(), WeatherDatabase::class.java, "Weather")
             .allowMainThreadQueries()
             .fallbackToDestructiveMigration().build()
-        launch {
-            fetchContent()
-        }
+//        launch {
+//            fetchContent()
+//        }
     }
 
     override fun onResume() {
@@ -110,9 +112,13 @@ class WeatherFragment : Fragment(), CoroutineScope, LifecycleObserver {
     suspend fun fetchContent() {
         coroutineScope {
             if (uAddress == null) {
-                Toast.makeText(requireContext(),
-                    "Something went wrong trying to get the location \n Please try again.",
-                    Toast.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, R.string.location_error, Snackbar.LENGTH_SHORT)
+                    .setAction("RETRY") {
+                        launch {
+                            uAddress =
+                                LocationUtil.getLocation(requireActivity() as AppCompatActivity)
+                        }
+                    }.show()
                 binding.swipeLayout.isRefreshing = false
                 return@coroutineScope
             }

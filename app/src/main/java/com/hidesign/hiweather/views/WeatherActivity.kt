@@ -4,16 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.location.Address
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
@@ -21,6 +16,9 @@ import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -30,14 +28,13 @@ import com.hidesign.hiweather.services.APIWorker
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.Constants.getAPIKey
-import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.LocationUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
@@ -54,7 +51,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
             checkLocation()
         } else {
             binding.linearProgress.visibility = View.INVISIBLE
-            Log.e("TAG", "onActivityResult: PERMISSION DENIED")
+            Timber.tag("TAG").e("onActivityResult: PERMISSION DENIED")
         }
     }
 
@@ -77,7 +74,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                     true
                 }
                 R.id.action_settings -> {
-                    setupSettingsView()
+                    SettingsDialog(this, this).show()
                     true
                 }
                 else -> false
@@ -90,6 +87,27 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         (binding.toolbar as View).setOnClickListener {
             binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input)
                 .performClick()
+        }
+        WorkManager.getInstance(this).cancelAllWork()
+        launch {
+            val sharedPref = getPreferences(Context.MODE_PRIVATE)
+            APIWorker.createWorkManagerInstance(this@WeatherActivity,
+                sharedPref.getInt(Constants.refreshInterval, 0))
+            Timber.tag("TAG").d("onCreate: WORKER STARTED")
+        }
+
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
+                    AppUpdateType.IMMEDIATE)
+            ) {
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    AppUpdateType.IMMEDIATE,
+                    this,
+                    Constants.app_update)
+            }
         }
     }
 
@@ -107,101 +125,12 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         binding.AdView.addView(AdUtil.setupAds(this, AdUtil.appBarId))
     }
 
-    private fun setupSettingsView() {
-        binding.dialogSettings.settingsCard.visibility = View.VISIBLE
-        binding.dialogSettings.close.setOnClickListener {
-            binding.dialogSettings.settingsCard.visibility = View.GONE
-        }
-
-        ArrayAdapter.createFromResource(this,
-            R.array.temperature_units,
-            R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.dialogSettings.tempUnit.adapter = adapter
-        }
-
-        ArrayAdapter.createFromResource(this, R.array.refresh_interval, R.layout.simple_spinner_item
-        ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.dialogSettings.refreshInterval.adapter = adapter
-        }
-
-        binding.dialogSettings.tempUnit.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parentView: AdapterView<*>?,
-                    selectedItemView: View?,
-                    position: Int,
-                    id: Long,
-                ) {
-                    updateValues(resources.getStringArray(R.array.temperature_units)[position],
-                        resources.getStringArray(R.array.temperature_units),
-                        Constants.temperatureUnit)
-                }
-
-                override fun onNothingSelected(parentView: AdapterView<*>?) {
-                    // your code here
-                }
-            }
-        binding.dialogSettings.refreshInterval.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parentView: AdapterView<*>?,
-                    selectedItemView: View?,
-                    position: Int,
-                    id: Long,
-                ) {
-                    updateValues(resources.getStringArray(R.array.refresh_interval)[position],
-                        resources.getStringArray(R.array.refresh_interval),
-                        Constants.refreshInterval)
-                }
-
-                override fun onNothingSelected(parentView: AdapterView<*>?) {
-                    // your code here
-                }
-            }
-
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val posTemp = sharedPref.getInt(Constants.temperatureUnit, 0)
-        val posRefresh = sharedPref.getInt(Constants.refreshInterval, 0)
-        binding.dialogSettings.tempUnit.setSelection(posTemp)
-        binding.dialogSettings.refreshInterval.setSelection(posRefresh)
-        updateValues(resources.getStringArray(R.array.temperature_units)[posTemp],
-            resources.getStringArray(R.array.temperature_units),
-            Constants.temperatureUnit)
-        updateValues(resources.getStringArray(R.array.refresh_interval)[posRefresh],
-            resources.getStringArray(R.array.refresh_interval),
-            Constants.refreshInterval)
-    }
-
-    private fun updateValues(item: String, values: Array<String>, preference: String) {
-        for ((pos, value) in values.withIndex()) {
-            if (item == value) {
-                val sharedPref = getPreferences(Context.MODE_PRIVATE)
-                with(sharedPref.edit()) {
-                    putInt(preference, pos)
-                    apply()
-                }
-                val timeValue = DateUtils.getRefreshInterval(this)
-                val periodicWorkRequest = PeriodicWorkRequest.Builder(APIWorker::class.java,
-                    timeValue,
-                    TimeUnit.MINUTES,
-                    timeValue,
-                    TimeUnit.MINUTES).build()
-                WorkManager.getInstance(this).enqueueUniquePeriodicWork("APIWorker",
-                    ExistingPeriodicWorkPolicy.REPLACE,
-                    periodicWorkRequest)
-            }
-        }
-    }
-
     private fun checkLocation() {
         if (LocationUtil.verifyPermissions(this)) {
             val activity = this
             launch {
-                val address = LocationUtil.getLocation(activity)
-                displayFragment(address)
+                uAddress = LocationUtil.getLocation(activity)
+                displayFragment(uAddress)
             }
         } else {
             mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -213,15 +142,12 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private fun displayFragment(address: Address?) {
         binding.bottomAppBar.performShow()
         if (address != null) {
-            uAddress = address
             binding.toolbar.title = address.locality ?: ""
             val list = supportFragmentManager.fragments
             for (frag in list) {
-                if (frag.tag == "f1") {
-                    val fragment =
-                        supportFragmentManager.findFragmentByTag("f1") as WeatherFragment
+                if (frag is WeatherFragment) {
                     launch {
-                        fragment.fetchContent()
+                        frag.fetchContent()
                     }
                     return
                 }

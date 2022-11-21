@@ -25,6 +25,7 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:paddingVertical="20dp"
+				android:background="#33000000"
 				android:orientation="vertical">
 
 				<LinearLayout
@@ -49,11 +50,11 @@
 							android:textSize="32sp"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
-							android:textColor="@android:color/black" />
+							android:textColor="@color/sun_and_moon_text" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@android:color/black"
+							android:textColor="@color/sun_and_moon_text"
 							android:textSize="18sp"
 							android:text="@string/sunrise"/>
 
@@ -72,11 +73,11 @@
 							android:textSize="32sp"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
-							android:textColor="@android:color/black" />
+							android:textColor="@color/sun_and_moon_text" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@android:color/black"
+							android:textColor="@color/sun_and_moon_text"
 							android:textSize="18sp"
 							android:text="@string/sunset"/>
 
@@ -89,7 +90,7 @@
 					android:layout_height="wrap_content"
 					android:gravity="center"
 					android:textSize="24sp"
-					android:textColor="@color/black"
+					android:textColor="@color/white"
 					android:textStyle="bold"
 					android:text="@string/template_sun_and_moon_duration" />
 
@@ -99,20 +100,14 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginHorizontal="20dp"
-				android:layout_marginBottom="2dp"
-				app:dividerColor="@color/white" />
-
-			<com.google.android.material.divider.MaterialDivider
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginHorizontal="20dp"
-				app:dividerColor="@color/black" />
+				app:dividerColor="@color/sun_and_moon_text" />
 
 			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:paddingVertical="20dp"
-				android:layout_marginBottom="10dp"
+				android:background="#33000000"
+				android:paddingTop="20dp"
+				android:paddingBottom="30dp"
 				android:orientation="vertical">
 
 				<LinearLayout
@@ -121,7 +116,7 @@
 					android:layout_height="wrap_content"
 					android:gravity="center"
 					android:theme="@style/Theme.MaterialComponents.DayNight"
-					android:orientation="horizontal" >
+					android:orientation="horizontal">
 
 					<LinearLayout
 						android:layout_width="wrap_content"
@@ -134,14 +129,14 @@
 							android:id="@+id/Moonrise"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@color/moon_text"
+							android:textColor="@color/sun_and_moon_text"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textSize="32sp" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@color/moon_text"
+							android:textColor="@color/sun_and_moon_text"
 							android:textSize="18sp"
 							android:text="@string/moonrise"/>
 
@@ -151,7 +146,7 @@
 						android:layout_width="50dp"
 						android:layout_height="50dp"
 						android:src="@drawable/full_moon"
-						app:tint="@color/moon_text"
+						app:tint="@color/sun_and_moon_text"
 						android:contentDescription="@null" />
 					<LinearLayout
 						android:layout_width="wrap_content"
@@ -164,14 +159,14 @@
 							android:id="@+id/Moonset"
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@color/moon_text"
+							android:textColor="@color/sun_and_moon_text"
 							android:textStyle="bold"
 							android:text="@string/empty_time"
 							android:textSize="32sp" />
 						<TextView
 							android:layout_width="wrap_content"
 							android:layout_height="wrap_content"
-							android:textColor="@color/moon_text"
+							android:textColor="@color/sun_and_moon_text"
 							android:textSize="18sp"
 							android:text="@string/moonset"/>
 
@@ -186,7 +181,7 @@
 					android:text="@string/template_sun_and_moon_duration"
 					android:textSize="24sp"
 					android:textStyle="bold"
-					android:textColor="@color/moon_text" />
+					android:textColor="@color/sun_and_moon_text" />
 			</LinearLayout>
 		</LinearLayout>
 

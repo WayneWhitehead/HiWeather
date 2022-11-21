@@ -10,8 +10,7 @@
 		android:layout_height="wrap_content"
 		android:layout_gravity="center"
 		android:layout_marginHorizontal="20dp"
-		android:visibility="visible"
-		app:cardBackgroundColor="@color/colorAccentDark"
+		app:cardBackgroundColor="@android:color/system_accent1_500"
 		app:cardCornerRadius="20dp"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintTop_toTopOf="parent">
@@ -26,25 +25,26 @@
 				style="@style/TextAppearance.AppCompat.Title"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:layout_marginHorizontal="20dp"
 				android:padding="5dp"
 				android:text="@string/settings"
-				android:textColor="@color/white"
+				android:textColor="@android:color/system_accent2_50"
+				app:layout_constraintBottom_toBottomOf="@id/close"
 				app:layout_constraintEnd_toStartOf="@id/close"
 				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintBottom_toBottomOf="@id/close"
 				app:layout_constraintTop_toTopOf="@id/close" />
 
 			<ImageButton
 				android:id="@+id/close"
 				android:layout_width="48dp"
 				android:layout_height="48dp"
-				android:padding="10dp"
 				android:background="#005E161A"
 				android:contentDescription="@null"
-				app:layout_constraintEnd_toEndOf="parent"
+				android:padding="10dp"
 				android:src="@drawable/cancel"
+				app:layout_constraintEnd_toEndOf="parent"
 				app:layout_constraintTop_toTopOf="parent"
-				app:tint="@android:color/white" />
+				app:tint="@android:color/system_accent2_50" />
 
 			<com.google.android.material.textfield.TextInputLayout
 				android:id="@+id/temp_unit"
@@ -52,16 +52,17 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
-				android:background="@android:color/white"
+				android:background="@android:color/system_accent2_500"
 				android:hint="@string/temperature"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toBottomOf="@id/title">
 
 				<AutoCompleteTextView
-					android:id="@+id/temp_unit_input"
+					android:id="@id/temp_unit_input"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:background="@color/colorAccentDark"
-					android:hint="@null"
+					android:hint="@string/temperature"
 					android:inputType="none"
 					android:labelFor="@id/temp_unit" />
 
@@ -73,17 +74,18 @@
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginTop="10dp"
-				android:background="@color/white"
+				android:background="@android:color/system_accent2_500"
 				android:hint="@string/refresh_interval"
 				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
 				app:layout_constraintTop_toBottomOf="@id/temp_unit">
 
 				<AutoCompleteTextView
 					android:id="@+id/refresh_interval_input"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
-					android:background="@color/colorAccentDark"
-					android:hint="@null"
+					android:background="@android:color/system_accent2_800"
 					android:inputType="none"
 					android:labelFor="@id/refresh_interval" />
 

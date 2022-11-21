@@ -34,7 +34,7 @@
 		<item>#272727</item>
 	</array>
 
-	<color name="moon_text">#F3F3F3</color>
+	<color name="sun_and_moon_text">#E6FFFFFF</color>
 	<color name="current_card_text">@color/black</color>
 	<color name="white">#FFFFFF</color>
 	<color name="black">#000000</color>

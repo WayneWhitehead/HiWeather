@@ -1,4 +1,9 @@
 <resources>
+
+	<!--	network strings-->
+	<string name="location_error" formatted="true">Something went wrong trying to get the location \n\nPlease try again.</string>
+
+
 	<string name="app_name">HiWeather</string>
 	<string name="cloud_cover">Cloud Cover</string>
 	<string name="winddirectionicon">WindDirectionIcon</string>
@@ -155,5 +160,7 @@
 	</string>
 	<string name="location">Location</string>
 	<string name="settings">Settings</string>
+	<string name="temperature">Temperature</string>
+	<string name="refresh_interval">Refresh Interval</string>
 
 </resources>

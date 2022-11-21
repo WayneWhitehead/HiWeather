@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.room.Room
@@ -28,6 +27,7 @@ import com.hidesign.hiweather.services.APIWorker
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtils
+import timber.log.Timber
 import java.text.MessageFormat
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
@@ -123,7 +123,7 @@ open class WeatherWidget : AppWidgetProvider() {
             weatherContent.current.weather[0].icon)).apply(RequestOptions().override(30, 30))
             .into(awt)
 
-        views.setTextViewText(R.id.date, DateUtils.getDateTime("d MMMM HH:mm",
+        views.setTextViewText(R.id.date, DateUtils.getDateTime("dd/MM HH:mm",
             weatherContent.current.dt.toLong(),
             weatherContent.timezone))
         val currentTemp = weatherContent.current.temp.roundToInt()
@@ -150,6 +150,6 @@ open class WeatherWidget : AppWidgetProvider() {
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
         myTrace.stop()
-        Log.d("WeatherWidget", "updateViews")
+        Timber.tag("WeatherWidget").d("updateViews")
     }
 }

@@ -7,11 +7,11 @@ import android.content.pm.PackageManager
 object Constants {
 
     const val preferences = "userPreferences"
-    const val lastFetch = "LAST_FETCH"
     const val latitude = "userLatitude"
     const val longitude = "userLongitude"
     const val refresh = "refreshButtonClick"
     const val auto_update = "AUTO_UPDATE"
+    const val app_update = 100
 
     //AIR Constants
     const val airItemScreeName = "Air Quality Item"
@@ -27,14 +27,11 @@ object Constants {
     const val placesKey = "placesKey"
     const val openWeatherKey = "weatherKey"
     fun getAPIKey(context: Context, key: String): String {
-        val ai: ApplicationInfo = context.packageManager
-            .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+        val ai: ApplicationInfo = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
         val value = ai.metaData[key]
         return value.toString()
     }
 
-    //SETTINGS KEYS
-    const val background_work = "apiFetch"
     const val refreshInterval = "refreshInterval"
     const val temperatureUnit = "temperatureUnit"
 

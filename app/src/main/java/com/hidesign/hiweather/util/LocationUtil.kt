@@ -7,15 +7,16 @@ import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
 import kotlinx.coroutines.CompletableDeferred
+import timber.log.Timber
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -44,13 +45,12 @@ object LocationUtil {
     @SuppressLint("MissingPermission")
     suspend fun getLocation(activity: AppCompatActivity?): Address? {
         myTrace.start()
-        val fusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(activity!!)
+        val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity!!)
         locationRequest = LocationRequest.create().apply {
             interval = TimeUnit.SECONDS.toMillis(60)
             fastestInterval = TimeUnit.SECONDS.toMillis(30)
             maxWaitTime = TimeUnit.MINUTES.toMillis(2)
-            priority = LocationRequest.create().priority
+            priority = Priority.PRIORITY_HIGH_ACCURACY
         }
         val userAddress = CompletableDeferred<Address?>()
         fusedLocationProviderClient.lastLocation.addOnSuccessListener(activity) { location: Location? ->
@@ -75,7 +75,7 @@ object LocationUtil {
             addresses = geocoder.getFromLocation(latitude, longitude, 1)
         } catch (e: IOException) {
             e.printStackTrace()
-            Log.e("Tag", "Error getting Street Address: ")
+            Timber.tag("Tag").e("Error getting Street Address: ")
         }
         if (addresses != null) {
             return addresses[0]

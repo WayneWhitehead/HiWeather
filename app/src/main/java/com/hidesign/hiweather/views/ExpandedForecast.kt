@@ -90,7 +90,7 @@ class ExpandedForecast : BottomSheetDialogFragment() {
             binding.lowTemp.text = MessageFormat.format(getString(R.string.low_0_c), low)
 
             binding.currentTemp.visibility = View.GONE
-            binding.visibility.visibility = View.GONE
+            binding.visibilityView.visibility = View.GONE
         }
     }
 
