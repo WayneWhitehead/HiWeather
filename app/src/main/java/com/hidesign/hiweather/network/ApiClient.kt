@@ -13,7 +13,7 @@ class ApiClient {
 
     var apiService: WeatherApi? = null
     private var retrofit: Retrofit? = null
-    private val baseUrl = "https://api.openweathermap.org/data/2.5/"
+    private val baseUrl = "https://api.openweathermap.org/data/"
 
     init {
         val httpClient = OkHttpClient.Builder().apply {

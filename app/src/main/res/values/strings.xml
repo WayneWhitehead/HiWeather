@@ -162,5 +162,6 @@
 	<string name="settings">Settings</string>
 	<string name="temperature">Temperature</string>
 	<string name="refresh_interval">Refresh Interval</string>
+	<string name="title_activity_expanded_forecast_fragment">ExpandedForecastFragment</string>
 
 </resources>

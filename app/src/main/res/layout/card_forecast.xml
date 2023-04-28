@@ -71,6 +71,7 @@
 			android:orientation="horizontal"
 			app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
 			tools:itemCount="7"
+			android:clipToPadding="false"
 			tools:listitem="@layout/card_hourly_forecast_item" />
 	</RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

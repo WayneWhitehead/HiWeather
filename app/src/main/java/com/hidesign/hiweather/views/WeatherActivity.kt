@@ -34,12 +34,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
+import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
 class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
-    lateinit var binding: ActivityWeatherBinding
     private lateinit var autocompleteSupportFragment: AutocompleteSupportFragment
 
     private var job: Job = Job()
@@ -62,8 +61,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         setContentView(binding.root)
         firebaseAnalytics = Firebase.analytics
 
-        autocompleteSupportFragment =
-            (supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment?)!!
+        autocompleteSupportFragment = (supportFragmentManager.findFragmentById(R.id.autocomplete_fragment) as AutocompleteSupportFragment?)!!
         setupPlacesAutoComplete()
 
         binding.bottomAppBar.setOnMenuItemClickListener { menuItem ->
@@ -74,7 +72,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                     true
                 }
                 R.id.action_settings -> {
-                    SettingsDialog(this, this).show()
+                    SettingsDialog(this).show()
                     true
                 }
                 else -> false
@@ -99,9 +97,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         val appUpdateManager = AppUpdateManagerFactory.create(this)
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(
-                    AppUpdateType.IMMEDIATE)
-            ) {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
                     AppUpdateType.IMMEDIATE,
@@ -109,6 +105,11 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                     Constants.app_update)
             }
         }
+
+        binding.bottomAppBar.performShow()
+        supportFragmentManager.beginTransaction()
+            .add(binding.fragment.id, weatherFragment)
+            .commitNow()
     }
 
     override fun onResume() {
@@ -129,34 +130,11 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         if (LocationUtil.verifyPermissions(this)) {
             val activity = this
             launch {
-                uAddress = LocationUtil.getLocation(activity)
-                displayFragment(uAddress)
+                LocationUtil.getLocation(activity)
             }
         } else {
             mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-            binding.linearProgress.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun displayFragment(address: Address?) {
-        binding.bottomAppBar.performShow()
-        if (address != null) {
-            binding.toolbar.title = address.locality ?: ""
-            val list = supportFragmentManager.fragments
-            for (frag in list) {
-                if (frag is WeatherFragment) {
-                    launch {
-                        frag.fetchContent()
-                    }
-                    return
-                }
-            }
-            supportFragmentManager.beginTransaction()
-                .add(binding.fragment.id, WeatherFragment())
-                .commitNow()
-        } else {
-            binding.toolbar.title = "Enter an Address"
             binding.linearProgress.visibility = View.INVISIBLE
         }
     }
@@ -171,22 +149,44 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         autocompleteSupportFragment.setPlaceFields(listOf(Place.Field.NAME, Place.Field.LAT_LNG))
         autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onError(p0: Status) {
-                displayFragment(null)
+
             }
 
             override fun onPlaceSelected(place: Place) {
-                val address = Address(Locale.getDefault()).apply {
+                Address(Locale.getDefault()).apply {
                     latitude = place.latLng?.latitude ?: 0.0
                     longitude = place.latLng?.longitude ?: 0.0
                     locality = place.name
+                    uAddress = this
                 }
-                displayFragment(address)
             }
         })
     }
 
+    fun setFetchingContent() {
+        binding.linearProgress.visibility = View.VISIBLE
+    }
+
+    fun stopFetchingContent() {
+        binding.linearProgress.visibility = View.INVISIBLE
+    }
+
     companion object {
         const val TAG = "Weather Activity"
+        val weatherFragment: WeatherFragment = WeatherFragment()
+        lateinit var binding: ActivityWeatherBinding
         var uAddress: Address? = null
+            set(value) {
+                if (value != null) {
+                    field = value
+                    binding.toolbar.title = value.locality ?: ""
+                    CoroutineScope(Dispatchers.Main).launch {
+                        weatherFragment.fetchContent()
+                    }
+                } else {
+                    binding.toolbar.title = "Enter an Address"
+                    binding.linearProgress.visibility = View.INVISIBLE
+                }
+            }
     }
 }

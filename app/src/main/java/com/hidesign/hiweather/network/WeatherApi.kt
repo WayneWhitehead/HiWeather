@@ -9,7 +9,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface WeatherApi {
-    @GET("onecall")
+    @GET("3.0/onecall")
     suspend fun getOneCall(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
@@ -18,7 +18,7 @@ interface WeatherApi {
         @Query("units") units: String = "metric",
     ): Response<OneCallResponse?>?
 
-    @GET("onecall")
+    @GET("3.0/onecall")
     fun getOneCallWidget(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
@@ -27,7 +27,7 @@ interface WeatherApi {
         @Query("units") units: String = "metric",
     ): Call<OneCallResponse?>?
 
-    @GET("onecall/timemachine")
+    @GET("3.0/onecall/timemachine")
     suspend fun getOneCallHistory(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,
@@ -35,7 +35,7 @@ interface WeatherApi {
         @Query("appid") apiKey: String,
     ): Response<HistoricalWeather?>?
 
-    @GET("air_pollution")
+    @GET("2.5/air_pollution")
     suspend fun getAirPollution(
         @Query("lat") lat: Double,
         @Query("lon") lon: Double,

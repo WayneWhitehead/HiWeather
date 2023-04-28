@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
@@ -25,7 +24,7 @@
         <entry key="app/src/main/res/layout/card_air_response.xml" value="0.31252672082086363" />
         <entry key="app/src/main/res/layout/card_current.xml" value="0.5816062176165803" />
         <entry key="app/src/main/res/layout/card_current_extra.xml" value="0.45" />
-        <entry key="app/src/main/res/layout/card_daily_forecast_item.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/card_daily_forecast_item.xml" value="0.45" />
         <entry key="app/src/main/res/layout/card_forecast.xml" value="0.19375" />
         <entry key="app/src/main/res/layout/card_forecast_header.xml" value="0.375" />
         <entry key="app/src/main/res/layout/card_hourly_forecast_item.xml" value="0.375" />
@@ -35,10 +34,11 @@
         <entry key="app/src/main/res/layout/daily_forecast_item.xml" value="0.30928270042194095" />
         <entry key="app/src/main/res/layout/date_card.xml" value="0.30856901646264245" />
         <entry key="app/src/main/res/layout/date_header.xml" value="0.31338178708849934" />
+        <entry key="app/src/main/res/layout/dialog_settings.xml" value="0.4220032840722496" />
         <entry key="app/src/main/res/layout/exapnded_sun_moon.xml" value="0.375" />
         <entry key="app/src/main/res/layout/expanded_air_item.xml" value="0.31338178708849934" />
         <entry key="app/src/main/res/layout/expanded_forecast.xml" value="0.335" />
-        <entry key="app/src/main/res/layout/expanded_sun_moon.xml" value="0.31324786324786325" />
+        <entry key="app/src/main/res/layout/expanded_sun_moon.xml" value="0.375" />
         <entry key="app/src/main/res/layout/forecast_header.xml" value="0.45" />
         <entry key="app/src/main/res/layout/forecast_item.xml" value="0.3758974358974359" />
         <entry key="app/src/main/res/layout/fragment_air_item.xml" value="0.335" />
@@ -58,6 +58,8 @@
         <entry key="app/src/main/res/layout/placeholder_card_current_extra.xml" value="0.31338178708849934" />
         <entry key="app/src/main/res/layout/placeholder_card_sun.xml" value="0.335" />
         <entry key="app/src/main/res/layout/placeholder_card_wind.xml" value="0.31338178708849934" />
+        <entry key="app/src/main/res/layout/placeholder_forecast.xml" value="0.2851851851851852" />
+        <entry key="app/src/main/res/layout/simple_spinner_item.xml" value="0.26944444444444443" />
         <entry key="app/src/main/res/layout/splash_activity.xml" value="0.3758974358974359" />
         <entry key="app/src/main/res/layout/weather_fragment.xml" value="0.31338178708849934" />
         <entry key="app/src/main/res/layout/weather_widget.xml" value="0.5697969543147208" />
@@ -109,7 +111,7 @@
       </value>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

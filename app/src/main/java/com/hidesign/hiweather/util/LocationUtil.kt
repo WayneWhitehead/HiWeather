@@ -10,11 +10,13 @@ import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.fragment.app.FragmentActivity
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.perf.ktx.performance
+import com.hidesign.hiweather.views.WeatherActivity.Companion.uAddress
 import kotlinx.coroutines.CompletableDeferred
 import timber.log.Timber
 import java.io.IOException
@@ -43,7 +45,7 @@ object LocationUtil {
     }
 
     @SuppressLint("MissingPermission")
-    suspend fun getLocation(activity: AppCompatActivity?): Address? {
+    suspend fun getLocation(activity: FragmentActivity?) {
         myTrace.start()
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity!!)
         locationRequest = LocationRequest.create().apply {
@@ -65,7 +67,7 @@ object LocationUtil {
                 userAddress.complete(getAddress(activity, location.latitude, location.longitude))
             }
         }
-        return userAddress.await()
+        uAddress = userAddress.await()
     }
 
     private fun getAddress(context: Context, latitude: Double, longitude: Double): Address? {

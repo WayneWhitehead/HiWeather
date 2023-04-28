@@ -123,5 +123,4 @@ class APIWorker(context: Context, workerParams: WorkerParameters) : Worker(conte
                 getWorkRequest(timeValue))
         }
     }
-
 }

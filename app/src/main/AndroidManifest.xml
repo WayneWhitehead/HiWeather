@@ -1,53 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:dist="http://schemas.android.com/apk/distribution">
+    xmlns:dist="http://schemas.android.com/apk/distribution" >
 
-	<dist:module dist:instant="true" />
+    <dist:module dist:instant="true" />
 
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-	<uses-permission android:name="android.permission.INTERNET" />
-	<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-	<application
-		android:allowBackup="true"
-		android:hardwareAccelerated="true"
-		android:icon="@mipmap/ic_launcher"
-		android:label="@string/app_name"
-		android:networkSecurityConfig="@xml/network_security_config"
-		android:roundIcon="@mipmap/ic_launcher_round"
-		android:supportsRtl="true"
-		android:theme="@style/AppTheme">
-		<receiver
-			android:name=".views.WeatherWidget"
-			android:exported="false">
-			<intent-filter>
-				<action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-			</intent-filter>
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".ExpandedForecastFragment"
+            android:exported="false"
+            android:label="@string/title_activity_expanded_forecast_fragment"
+            android:theme="@style/AppTheme" >
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
 
-			<meta-data
-				android:name="android.appwidget.provider"
-				android:resource="@xml/weather_widget_info" />
-		</receiver>
+        <receiver
+            android:name=".views.WeatherWidget"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
 
-		<activity
-			android:name=".views.WeatherActivity"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/weather_widget_info" />
+        </receiver>
 
-		<meta-data
-			android:name="com.google.android.gms.ads.APPLICATION_ID"
-			android:value="${ADMOB_APP_KEY}" />
-		<meta-data
-			android:name="placesKey"
-			android:value="${PLACES_KEY}" />
-		<meta-data
-			android:name="weatherKey"
-			android:value="${OPENWEATHER_KEY}" />
-	</application>
+        <activity
+            android:name=".views.WeatherActivity"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${ADMOB_APP_KEY}" />
+        <meta-data
+            android:name="placesKey"
+            android:value="${PLACES_KEY}" />
+        <meta-data
+            android:name="weatherKey"
+            android:value="${OPENWEATHER_KEY}" />
+    </application>
+
 </manifest>
