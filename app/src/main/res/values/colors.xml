@@ -9,13 +9,15 @@
 	<color name="colorSurface">@color/colorPrimary</color>
 
 	<!--    Cards-->
+	<color name="current_card_text">@color/black</color>
 	<color name="green_card">#8FDD93</color>
 	<color name="green_card_shimmer">#138100</color>
 	<color name="forecast_card">#B8B8B8</color>
 	<color name="forecast_card_content">#FFFFFF</color>
 	<color name="expanded_forecast_card">#3E3E3E</color>
 	<color name="wind_card_items">#031B43</color>
-	<color name="current_extra_card">#FF6666</color>
+	<color name="current_extra_card">#174488</color>
+	<color name="current_extra_text">@color/white</color>
 	<color name="sunShimmer">#BEFF0033</color>
 
 	<!--    Air Quality Colors-->
@@ -34,8 +36,8 @@
 		<item>#272727</item>
 	</array>
 
-	<color name="sun_and_moon_text">#E6FFFFFF</color>
-	<color name="current_card_text">@color/black</color>
+	<color name="sun_text">@color/black</color>
+	<color name="moon_text">@color/white</color>
 	<color name="white">#FFFFFF</color>
 	<color name="black">#000000</color>
 	<color name="backgroundDark">#000</color>

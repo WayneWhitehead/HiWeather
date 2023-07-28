@@ -15,9 +15,10 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_gravity="top"
-		app:shimmer_base_color="#A30000"
+		app:shimmer_base_color="@color/current_card_text"
 		app:shimmer_colored="true"
-		app:shimmer_highlight_color="#A30000"
+		app:shimmer_highlight_color="#003CA3"
+		app:shimmer_auto_start="true"
 		shimmer:duration="800">
 
 		<LinearLayout
@@ -37,8 +38,8 @@
 		android:id="@+id/current_extra_content"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:orientation="horizontal"
 		android:paddingTop="15dp"
+		android:visibility="gone"
 		android:layout_marginHorizontal="10dp"
 		android:paddingBottom="35dp">
 
@@ -63,7 +64,8 @@
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
-					android:src="@drawable/rain" />
+					android:src="@drawable/rain"
+					app:tint="@color/current_extra_text" />
 
 				<TextView
 					android:layout_width="wrap_content"
@@ -72,7 +74,7 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/precipitation"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp" />
 
 				<TextView
@@ -82,7 +84,7 @@
 					android:layout_gravity="center"
 					android:maxWidth="150dp"
 					android:text="@null"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp"
 					android:textStyle="bold" />
 			</LinearLayout>
@@ -99,7 +101,8 @@
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
-					android:src="@drawable/humidity" />
+					android:src="@drawable/humidity"
+					app:tint="@color/current_extra_text" />
 
 				<TextView
 					android:layout_width="wrap_content"
@@ -108,7 +111,7 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/humidity"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp" />
 
 				<TextView
@@ -116,7 +119,7 @@
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
 					android:layout_gravity="center"
-					android:textColor="@android:color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp"
 					android:textStyle="bold" />
 			</LinearLayout>
@@ -133,7 +136,8 @@
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
-					android:src="@drawable/precipitation" />
+					android:src="@drawable/precipitation"
+					app:tint="@color/current_extra_text" />
 
 				<TextView
 					android:layout_width="wrap_content"
@@ -142,7 +146,7 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/cloudiness"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp" />
 
 				<TextView
@@ -152,7 +156,7 @@
 					android:layout_gravity="center"
 					android:maxWidth="150dp"
 					android:text="@null"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp"
 					android:textStyle="bold" />
 			</LinearLayout>
@@ -165,7 +169,7 @@
 			android:paddingHorizontal="5dp"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
-			app:dividerColor="@color/black" />
+			app:dividerColor="@color/current_extra_text" />
 
 		<LinearLayout
 			android:layout_width="wrap_content"
@@ -188,7 +192,8 @@
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
-					android:src="@drawable/dew_point" />
+					android:src="@drawable/dew_point"
+					app:tint="@color/current_extra_text" />
 
 				<TextView
 					android:layout_width="wrap_content"
@@ -197,7 +202,7 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/dew_point"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp" />
 
 				<TextView
@@ -207,7 +212,7 @@
 					android:layout_gravity="center"
 					android:maxWidth="150dp"
 					android:text="@null"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp"
 					android:textStyle="bold" />
 			</LinearLayout>
@@ -224,7 +229,8 @@
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
-					android:src="@drawable/pressure" />
+					android:src="@drawable/pressure"
+					app:tint="@color/current_extra_text" />
 
 				<TextView
 					android:layout_width="wrap_content"
@@ -233,7 +239,7 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/pressure"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp" />
 
 				<TextView
@@ -243,7 +249,7 @@
 					android:layout_gravity="center"
 					android:maxWidth="150dp"
 					android:text="@null"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp"
 					android:textStyle="bold" />
 			</LinearLayout>
@@ -260,7 +266,8 @@
 					android:layout_gravity="center"
 					android:layout_marginHorizontal="4dp"
 					android:contentDescription="@null"
-					android:src="@drawable/visibility" />
+					android:src="@drawable/visibility"
+					app:tint="@color/current_extra_text" />
 
 				<TextView
 					android:layout_width="wrap_content"
@@ -269,7 +276,7 @@
 					android:maxWidth="150dp"
 					android:paddingEnd="5dp"
 					android:text="@string/visibility"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp" />
 
 				<TextView
@@ -279,7 +286,7 @@
 					android:layout_gravity="center"
 					android:maxWidth="150dp"
 					android:text="@null"
-					android:textColor="@color/black"
+					android:textColor="@color/current_extra_text"
 					android:textSize="15sp"
 					android:textStyle="bold" />
 			</LinearLayout>

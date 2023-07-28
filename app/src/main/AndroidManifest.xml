@@ -19,15 +19,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name=".ExpandedForecastFragment"
-            android:exported="false"
-            android:label="@string/title_activity_expanded_forecast_fragment"
-            android:theme="@style/AppTheme" >
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
 
         <receiver
             android:name=".views.WeatherWidget"
@@ -43,7 +34,8 @@
 
         <activity
             android:name=".views.WeatherActivity"
-            android:exported="true" >
+            android:exported="true"
+            android:screenOrientation="userPortrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

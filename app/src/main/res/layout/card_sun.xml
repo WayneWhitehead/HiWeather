@@ -21,6 +21,7 @@
 		app:shimmer_colored="true"
 		app:shimmer_base_color="@color/sunShimmer"
 		app:shimmer_highlight_color="@color/sunShimmer"
+		app:shimmer_auto_start="true"
 		shimmer:duration="800">
 
 		<LinearLayout
@@ -50,6 +51,7 @@
 		android:gravity="center"
 		android:elevation="5dp"
 		android:orientation="horizontal"
+		android:visibility="gone"
 		android:theme="@style/Theme.MaterialComponents.DayNight">
 
 		<LinearLayout

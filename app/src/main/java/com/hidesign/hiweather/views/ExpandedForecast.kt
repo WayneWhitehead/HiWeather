@@ -41,8 +41,9 @@ class ExpandedForecast : BottomSheetDialogFragment() {
     override fun onStart() {
         super.onStart()
         firebaseAnalytics = Firebase.analytics
+    }
 
-        val date = weatherHourly?.dt?.toLong() ?: weatherDaily?.dt?.toLong() ?: 0
+    private fun setNeutralForecast() {
         val image = getWeatherIconUrl(weatherHourly?.weather?.get(0)?.icon
             ?: weatherDaily?.weather?.get(0)?.icon ?: "")
         Glide.with(this)
@@ -50,8 +51,7 @@ class ExpandedForecast : BottomSheetDialogFragment() {
             .into(binding.skiesImage)
 
         val realFeel = (weatherDaily?.feelsLike?.day ?: weatherHourly?.feelsLike)?.roundToInt() ?: 0
-        binding.realFeelTemp.text =
-            MessageFormat.format(getString(R.string.real_feel_0_c), realFeel)
+        binding.realFeelTemp.text = MessageFormat.format(getString(R.string.real_feel_0_c), realFeel)
         val precipitation = ((weatherDaily?.pop ?: weatherHourly?.pop)?.roundToInt() ?: 0) * 100
         binding.precipitation.text = MessageFormat.format(getString(R.string._0_p), precipitation)
         val humidity = weatherHourly?.humidity ?: weatherDaily?.humidity ?: 0
@@ -69,29 +69,29 @@ class ExpandedForecast : BottomSheetDialogFragment() {
         val windDirection = weatherHourly?.windDeg ?: weatherDaily?.windDeg ?: 0
         binding.WindDirectionDegrees.rotation = (windDirection - 270).toFloat()
         binding.WindDirectionText.text = getWindDegreeText(windDirection)
+    }
 
+    private fun setHourlyForecast() {
+        val date = weatherHourly?.dt?.toLong() ?: weatherDaily?.dt?.toLong() ?: 0
+        binding.date.text = DateUtils.getDateTime("HH:00", date, timezone)
+        val currentTemp = weatherHourly?.temp?.roundToInt() ?: 0
+        binding.currentTemp.text = MessageFormat.format(getString(R.string._0_c), currentTemp)
+        val visibility = weatherHourly?.visibility ?: 0
+        binding.visibility.text = MessageFormat.format(getString(R.string._0_m), visibility / 1000)
 
-        if (weatherHourly != null) {
-            binding.date.text = DateUtils.getDateTime("HH:00", date, timezone)
-            val currentTemp = weatherHourly?.temp?.roundToInt() ?: 0
-            binding.currentTemp.text = MessageFormat.format(getString(R.string._0_c), currentTemp)
-            val visibility = weatherHourly?.visibility ?: 0
-            binding.visibility.text =
-                MessageFormat.format(getString(R.string._0_m), visibility / 1000)
+        binding.temps.visibility = View.GONE
+    }
 
-            binding.temps.visibility = View.GONE
-        }
-        if (weatherDaily != null) {
-            binding.date.text =
-                DateUtils.getDayOfWeekText(DateUtils.getDateTime("u", date, timezone))
-            val high = weatherDaily?.temp?.max?.roundToInt() ?: 0
-            binding.highTemp.text = MessageFormat.format(getString(R.string.high_0_c), high)
-            val low = weatherDaily?.temp?.min?.roundToInt() ?: 0
-            binding.lowTemp.text = MessageFormat.format(getString(R.string.low_0_c), low)
+    private fun setDailyForecast() {
+        val date = weatherHourly?.dt?.toLong() ?: weatherDaily?.dt?.toLong() ?: 0
+        binding.date.text = DateUtils.getDayOfWeekText(DateUtils.getDateTime("u", date, timezone))
+        val high = weatherDaily?.temp?.max?.roundToInt() ?: 0
+        binding.highTemp.text = MessageFormat.format(getString(R.string.high_0_c), high)
+        val low = weatherDaily?.temp?.min?.roundToInt() ?: 0
+        binding.lowTemp.text = MessageFormat.format(getString(R.string.low_0_c), low)
 
-            binding.currentTemp.visibility = View.GONE
-            binding.visibilityView.visibility = View.GONE
-        }
+        binding.currentTemp.visibility = View.GONE
+        binding.visibilityView.visibility = View.GONE
     }
 
     override fun onResume() {
@@ -100,26 +100,37 @@ class ExpandedForecast : BottomSheetDialogFragment() {
             this.putString(FirebaseAnalytics.Event.SCREEN_VIEW, TAG)
             firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, this)
         }
+
+        setNeutralForecast()
+        if (weatherDaily != null) {
+            setDailyForecast()
+        } else if (weatherHourly != null) {
+            setHourlyForecast()
+        }
     }
 
     companion object {
         const val TAG = "Forecast BottomSheet"
+        private val expandedForecast = ExpandedForecast()
 
-        @JvmStatic
-        fun newInstance(daily: Daily, tz: String) =
-            ExpandedForecast().apply {
+        fun getInstance(daily: Daily, tz: String): ExpandedForecast {
+            return expandedForecast.apply {
                 arguments = Bundle().apply {
                     weatherDaily = daily
+                    weatherHourly = null
                     timezone = tz
                 }
             }
+        }
 
-        fun newInstance(hourly: Hourly, tz: String) =
-            ExpandedForecast().apply {
+        fun getInstance(hourly: Hourly, tz: String): ExpandedForecast {
+            return expandedForecast.apply {
                 arguments = Bundle().apply {
                     weatherHourly = hourly
+                    weatherDaily = null
                     timezone = tz
                 }
             }
+        }
     }
 }

@@ -56,17 +56,6 @@
 		app:layout_behavior="com.google.android.material.floatingactionbutton.FloatingActionButton$Behavior"
 		app:srcCompat="@drawable/quantum_ic_search_grey600_24" />
 
-	<com.google.android.material.progressindicator.LinearProgressIndicator
-		android:id="@+id/linear_progress"
-		android:layout_width="match_parent"
-		android:layout_height="3dp"
-		android:layout_gravity="bottom"
-		android:elevation="4dp"
-		android:indeterminate="true"
-		android:visibility="visible"
-		app:indicatorColor="@color/colorPrimaryLight"
-		app:layout_anchor="@id/bottomAppBar" />
-
 	<com.google.android.material.bottomappbar.BottomAppBar
 		android:id="@+id/bottomAppBar"
 		style="@style/Widget.MaterialComponents.BottomAppBar.PrimarySurface"

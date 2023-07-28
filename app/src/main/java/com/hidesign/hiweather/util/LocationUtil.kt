@@ -48,12 +48,9 @@ object LocationUtil {
     suspend fun getLocation(activity: FragmentActivity?) {
         myTrace.start()
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity!!)
-        locationRequest = LocationRequest.create().apply {
-            interval = TimeUnit.SECONDS.toMillis(60)
-            fastestInterval = TimeUnit.SECONDS.toMillis(30)
-            maxWaitTime = TimeUnit.MINUTES.toMillis(2)
-            priority = Priority.PRIORITY_HIGH_ACCURACY
-        }
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, TimeUnit.SECONDS.toMillis(60))
+            .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(2))
+            .build()
         val userAddress = CompletableDeferred<Address?>()
         fusedLocationProviderClient.lastLocation.addOnSuccessListener(activity) { location: Location? ->
             if (location != null) {

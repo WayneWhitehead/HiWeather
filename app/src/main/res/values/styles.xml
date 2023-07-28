@@ -24,6 +24,15 @@
 		<item name="android:windowIsFloating">true</item>
 	</style>
 
+	<style name="AppTheme.BottomSheetSunMoon" parent="Theme.Design.Light.BottomSheetDialog">
+		<item name="android:windowCloseOnTouchOutside">true</item>
+		<item name="android:windowIsTranslucent">true</item>
+		<item name="android:windowContentOverlay">@null</item>
+		<item name="android:colorBackground">#00000000</item>
+		<item name="android:windowFrame">@null</item>
+		<item name="android:windowIsFloating">true</item>
+	</style>
+
 	<style name="AppTheme.Picker" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
 		<item name="android:textColorPrimary">@android:color/white</item>
 		<item name="android:textSize">20sp</item>

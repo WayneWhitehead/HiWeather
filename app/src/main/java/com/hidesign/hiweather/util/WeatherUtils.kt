@@ -1,20 +1,22 @@
 package com.hidesign.hiweather.util
 
+import android.content.Context
+import androidx.core.content.ContextCompat
 import com.hidesign.hiweather.R
 
 object WeatherUtils {
 
     fun getMoonIcon(id: Double): Int {
         return when (id) {
-            in 0.0..0.1 -> R.drawable.new_moon
+            in 0.0..0.1 -> R.drawable.full_moon
             in 0.11..0.19 -> R.drawable.waxing_moon_2
             in 0.2..0.3 -> R.drawable.first_quarter_moon
             in 0.31..0.39 -> R.drawable.waxing_moon
-            in 0.4..0.6 -> R.drawable.full_moon
+            in 0.4..0.6 -> R.drawable.new_moon
             in 0.61..0.69 -> R.drawable.waning_moon
             in 0.7..0.8 -> R.drawable.last_quarter_moon
             in 0.81..0.89 -> R.drawable.waning_moon_2
-            in 0.9..1.0 -> R.drawable.new_moon
+            in 0.9..1.0 -> R.drawable.full_moon
             else -> R.drawable.full_moon
         }
     }
@@ -70,5 +72,15 @@ object WeatherUtils {
             5 -> "Very Poor"
             else -> "Unknown"
         }
+    }
+
+    fun getAirQualityColour(index: Int, context: Context): Int {
+        return ContextCompat.getColor(context, when (index) {
+            1 -> R.color.airIndex1
+            2 -> R.color.airIndex2
+            3 -> R.color.airIndex3
+            4 -> R.color.airIndex4
+            else -> R.color.airIndex5
+        })
     }
 }

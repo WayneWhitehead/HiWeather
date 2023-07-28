@@ -2,9 +2,7 @@ package com.hidesign.hiweather.model
 
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class OneCallResponse(
     @SerializedName("current")
     var current: Current,
@@ -21,8 +19,8 @@ data class OneCallResponse(
     @SerializedName("timezone_offset")
     var timezoneOffset: Int,
     @SerializedName("alerts")
-    var alerts: List<Alerts>,
-)
+    var alerts: List<Alerts>
+): java.io.Serializable
 
 data class Current(
     @SerializedName("dt")
@@ -55,7 +53,7 @@ data class Current(
     var windGust: Double,
     @SerializedName("wind_speed")
     var windSpeed: Double,
-)
+): java.io.Serializable
 
 data class Weather(
     @SerializedName("description")
@@ -66,7 +64,7 @@ data class Weather(
     @PrimaryKey var weatherId: Int,
     @SerializedName("main")
     var main: String,
-)
+): java.io.Serializable
 
 data class Daily(
     @SerializedName("clouds")
@@ -107,7 +105,9 @@ data class Daily(
     var windGust: Double,
     @SerializedName("wind_speed")
     var windSpeed: Double,
-)
+    @SerializedName("summary")
+    var summary: String
+): java.io.Serializable
 
 data class Hourly(
     @SerializedName("clouds")
@@ -138,7 +138,7 @@ data class Hourly(
     var windGust: Double,
     @SerializedName("wind_speed")
     var windSpeed: Double,
-)
+): java.io.Serializable
 
 data class Alerts(
     @SerializedName("sender_name")
@@ -151,7 +151,7 @@ data class Alerts(
     var end: Long,
     @SerializedName("description")
     var description: String,
-)
+): java.io.Serializable
 
 data class Temp(
     @SerializedName("day")
@@ -166,7 +166,7 @@ data class Temp(
     var morn: Double,
     @SerializedName("night")
     var night: Double,
-)
+): java.io.Serializable
 
 data class FeelsLike(
     @SerializedName("day")
@@ -177,4 +177,4 @@ data class FeelsLike(
     var morn: Double,
     @SerializedName("night")
     var night: Double,
-)
+): java.io.Serializable

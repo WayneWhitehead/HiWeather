@@ -9,7 +9,9 @@ object Constants {
     const val preferences = "userPreferences"
     const val latitude = "userLatitude"
     const val longitude = "userLongitude"
+    const val location_json = "location_json"
     const val refresh = "refreshButtonClick"
+    const val app_open = "widgetAppOpen"
     const val auto_update = "AUTO_UPDATE"
     const val app_update = 100
 

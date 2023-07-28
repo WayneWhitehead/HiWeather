@@ -21,7 +21,7 @@
 			android:background="@color/background" />
 
 		<View
-			android:layout_width="140dp"
+			android:layout_width="60dp"
 			android:layout_height="80dp"
 			android:layout_margin="5dp"
 			android:background="@color/background" />
@@ -49,7 +49,7 @@
 
 	<View
 		android:id="@+id/feel"
-		android:layout_width="80dp"
+		android:layout_width="140dp"
 		android:layout_height="16dp"
 		android:layout_below="@id/all"
 		android:layout_centerHorizontal="true"
@@ -61,7 +61,7 @@
 		android:background="@color/background" />
 
 	<View
-		android:layout_width="140dp"
+		android:layout_width="180dp"
 		android:layout_height="16dp"
 		android:layout_below="@id/feel"
 		android:layout_centerHorizontal="true"

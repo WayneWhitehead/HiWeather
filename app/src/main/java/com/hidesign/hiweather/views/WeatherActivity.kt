@@ -6,22 +6,22 @@ import android.location.Address
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleObserver
-import androidx.work.WorkManager
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
-import com.google.android.libraries.places.api.model.TypeFilter
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.google.gson.Gson
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.databinding.ActivityWeatherBinding
 import com.hidesign.hiweather.services.APIWorker
@@ -37,6 +37,7 @@ import timber.log.Timber
 import java.util.Locale
 import kotlin.coroutines.CoroutineContext
 
+
 class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var autocompleteSupportFragment: AutocompleteSupportFragment
@@ -44,12 +45,10 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     private var job: Job = Job()
     override val coroutineContext: CoroutineContext get() = Dispatchers.Main + job
 
-    private val mPermissionResult = registerForActivityResult(RequestPermission()) { result ->
+    private val mPermissionResult = registerForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
         if (result) {
-            binding.linearProgress.visibility = View.VISIBLE
             checkLocation()
         } else {
-            binding.linearProgress.visibility = View.INVISIBLE
             Timber.tag("TAG").e("onActivityResult: PERMISSION DENIED")
         }
     }
@@ -57,7 +56,6 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityWeatherBinding.inflate(layoutInflater)
-        binding.linearProgress.visibility = View.VISIBLE
         setContentView(binding.root)
         firebaseAnalytics = Firebase.analytics
 
@@ -67,7 +65,6 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
         binding.bottomAppBar.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_location -> {
-                    mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
                     true
                 }
@@ -79,20 +76,12 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
             }
         }
         binding.searchFAB.setOnClickListener {
-            binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                .performClick()
+            binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input).performClick()
         }
         (binding.toolbar as View).setOnClickListener {
-            binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input)
-                .performClick()
+            binding.autocompleteFragment.findViewById<EditText>(R.id.places_autocomplete_search_input).performClick()
         }
-        WorkManager.getInstance(this).cancelAllWork()
-        launch {
-            val sharedPref = getPreferences(Context.MODE_PRIVATE)
-            APIWorker.createWorkManagerInstance(this@WeatherActivity,
-                sharedPref.getInt(Constants.refreshInterval, 0))
-            Timber.tag("TAG").d("onCreate: WORKER STARTED")
-        }
+        APIWorker.createWorkManagerInstance(this@WeatherActivity)
 
         val appUpdateManager = AppUpdateManagerFactory.create(this)
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
@@ -100,8 +89,8 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
-                    AppUpdateType.IMMEDIATE,
                     this,
+                    AppUpdateOptions.defaultOptions(AppUpdateType.IMMEDIATE),
                     Constants.app_update)
             }
         }
@@ -133,9 +122,7 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                 LocationUtil.getLocation(activity)
             }
         } else {
-            mPermissionResult.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            mPermissionResult.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-            binding.linearProgress.visibility = View.INVISIBLE
+            mPermissionResult.launch(Manifest.permission_group.LOCATION)
         }
     }
 
@@ -145,11 +132,10 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                 getAPIKey(applicationContext, Constants.placesKey))
         }
 
-        autocompleteSupportFragment.setTypeFilter(TypeFilter.CITIES)
         autocompleteSupportFragment.setPlaceFields(listOf(Place.Field.NAME, Place.Field.LAT_LNG))
         autocompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onError(p0: Status) {
-
+                Timber.tag(TAG).e("onError: ")
             }
 
             override fun onPlaceSelected(place: Place) {
@@ -161,14 +147,6 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                 }
             }
         })
-    }
-
-    fun setFetchingContent() {
-        binding.linearProgress.visibility = View.VISIBLE
-    }
-
-    fun stopFetchingContent() {
-        binding.linearProgress.visibility = View.INVISIBLE
     }
 
     companion object {
@@ -183,9 +161,23 @@ class WeatherActivity : AppCompatActivity(), LifecycleObserver, CoroutineScope {
                     CoroutineScope(Dispatchers.Main).launch {
                         weatherFragment.fetchContent()
                     }
+                    weatherFragment.activity?.getPreferences(Context.MODE_PRIVATE)?.edit().apply {
+                        this?.putString(Constants.location_json, Gson().toJson(value))
+                        this?.apply()
+                    }
                 } else {
                     binding.toolbar.title = "Enter an Address"
-                    binding.linearProgress.visibility = View.INVISIBLE
+                }
+            }
+            get() {
+                return if (field == null) {
+                    val json = weatherFragment.activity?.getPreferences(Context.MODE_PRIVATE)?.getString(Constants.location_json, null)
+                    if (json != null) {
+                        field = Gson().fromJson(json, Address::class.java)
+                    }
+                    field
+                } else {
+                    field
                 }
             }
     }

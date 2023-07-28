@@ -7,7 +7,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:layout_marginHorizontal="20dp"
-	android:backgroundTint="@color/green_card"
+	app:cardBackgroundColor="@color/backgroundDark"
 	android:minHeight="220dp"
 	app:cardElevation="30dp">
 
@@ -20,6 +20,7 @@
 		app:shimmer_base_color="@color/green_card_shimmer"
 		app:shimmer_colored="true"
 		app:shimmer_highlight_color="@color/green_card_shimmer"
+		app:shimmer_auto_start="true"
 		shimmer:duration="800">
 
 		<LinearLayout
@@ -41,6 +42,7 @@
 		android:paddingHorizontal="20dp"
 		android:paddingTop="10dp"
 		android:paddingBottom="20dp"
+		android:visibility="gone"
 		android:orientation="horizontal">
 
 		<LinearLayout
