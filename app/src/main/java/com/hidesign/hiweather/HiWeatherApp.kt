@@ -1,26 +1,26 @@
 package com.hidesign.hiweather
 
 import android.app.Application
-import android.util.Log
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import javax.inject.Inject
 
-class HiWeatherApp : Application(), Configuration.Provider {
+@HiltAndroidApp
+class HiWeatherApp : Application(), Configuration.Provider  {
 
-    override fun getWorkManagerConfiguration(): Configuration {
-        return if (BuildConfig.DEBUG) {
-            Configuration.Builder()
-                .setMinimumLoggingLevel(Log.DEBUG)
-                .build()
-        } else {
-            Configuration.Builder()
-                .setMinimumLoggingLevel(Log.ERROR)
-                .build()
-        }
-    }
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    override fun getWorkManagerConfiguration() =
+        Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     override fun onCreate() {
         super.onCreate()
+
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }

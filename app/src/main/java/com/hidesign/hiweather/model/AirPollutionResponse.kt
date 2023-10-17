@@ -1,23 +1,22 @@
 package com.hidesign.hiweather.model
 
 
-import androidx.room.Embedded
 import com.google.gson.annotations.SerializedName
 
 data class AirPollutionResponse(
     @SerializedName("coord")
-    @Embedded var coord: Coord,
+    var coord: Coord? = null,
     @SerializedName("list")
-    @Embedded var list: List<DefaultAir>,
+    var list: List<DefaultAir> = listOf()
 )
 
 data class DefaultAir(
     @SerializedName("components")
-    @Embedded var components: Components,
+    var components: Components,
     @SerializedName("dt")
     var dt: Int,
     @SerializedName("main")
-    @Embedded var main: Main,
+    var main: Main,
 )
 
 data class Main(

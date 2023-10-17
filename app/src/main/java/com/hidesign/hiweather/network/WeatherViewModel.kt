@@ -1,18 +1,22 @@
 package com.hidesign.hiweather.network
 
 import android.content.Context
+import android.location.Address
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.AirPollutionResponse
 import com.hidesign.hiweather.model.OneCallResponse
 import com.hidesign.hiweather.util.Constants
-import com.hidesign.hiweather.views.WeatherActivity.Companion.uAddress
-import retrofit2.Response
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 
-class WeatherViewModel : ViewModel() {
+@HiltViewModel
+class WeatherViewModel @Inject constructor(private val weatherRepository: WeatherRepository) : ViewModel() {
+
+    private val _uiState = MutableLiveData<NetworkStatus>()
+    val uiState: MutableLiveData<NetworkStatus> get() = _uiState
 
     private val _oneCallResponse = MutableLiveData<OneCallResponse>()
     val oneCallResponse: LiveData<OneCallResponse> get() = _oneCallResponse
@@ -20,62 +24,43 @@ class WeatherViewModel : ViewModel() {
     private val _airPollutionResponse = MutableLiveData<AirPollutionResponse>()
     val airPollutionResponse: LiveData<AirPollutionResponse> get() = _airPollutionResponse
 
-    suspend fun getOneCallWeather(context: Context) {
-        val apiClient = getApiClient()
+    suspend fun getOneCallWeather(context: Context, uAddress: Address?) {
+        _uiState.value = NetworkStatus.LOADING
+        if (uAddress == null || !uAddress.hasLatitude() || !uAddress.hasLongitude()) return
+        val response = weatherRepository.getWeather(
+            uAddress.latitude,
+            uAddress.longitude,
+            Constants.getUnit(context))
 
-        val response = apiClient?.getOneCall(
-            uAddress!!.latitude,
-            uAddress!!.longitude,
-            "minutely",
-            getAPIKey(context),
-            getUnit(context))
-
-        if (response!!.isSuccessful) {
+        if (response.body() != null) {
             _oneCallResponse.value = response.body()
+        } else {
+            _uiState.value = NetworkStatus.ERROR
         }
     }
 
-    suspend fun getBackgroundWeather(context: Context): Response<OneCallResponse?>? {
-        val apiClient = getApiClient()
+    suspend fun getAirPollution(uAddress: Address?) {
+        _uiState.value = NetworkStatus.LOADING
+        if (uAddress == null || !uAddress.hasLatitude() || !uAddress.hasLongitude()) return
+        val response = weatherRepository.getAirPollution(uAddress.latitude, uAddress.longitude)
 
-        return apiClient?.getOneCall(
-            uAddress!!.latitude,
-            uAddress!!.longitude,
-            "minutely",
-            getAPIKey(context),
-            getUnit(context))
-    }
-
-    suspend fun getAirPollution(context: Context) {
-        val apiClient = getApiClient()
-        val response = apiClient?.getAirPollution(uAddress!!.latitude, uAddress!!.longitude, getAPIKey(context))
-
-        if (response!!.isSuccessful) {
+        if (response.body() != null) {
             _airPollutionResponse.value = response.body()
+        } else {
+            _uiState.value = NetworkStatus.ERROR
         }
     }
 
-    private fun getUnit(context: Context): String {
-        val sharedPref = context.getSharedPreferences(Constants.preferences, Context.MODE_PRIVATE)
-        val posUnit = sharedPref.getInt(Constants.temperatureUnit, 0)
-        var unit = "celsius"
-        for ((pos, value) in context.resources.getStringArray(R.array.temperature_units).withIndex()) {
-            if (posUnit == pos) {
-                unit = value.lowercase()
-            }
-        }
-        return when (unit) {
-            "celsius" -> "metric"
-            "fahrenheit" -> "imperial"
-            "kelvin" -> ""
-            else -> "metric"
-        }
+    fun updateUIState(status: NetworkStatus) {
+        _uiState.value = status
     }
-
-    private fun getAPIKey(context: Context): String {
-        return Constants.getAPIKey(context, Constants.openWeatherKey)
-    }
-
-    private fun getApiClient() = ApiClient().apiService
 }
+
+enum class NetworkStatus {
+    LOADING,
+    SUCCESS,
+    ERROR
+}
+
+
 

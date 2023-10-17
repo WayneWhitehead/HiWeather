@@ -1,18 +1,13 @@
 package com.hidesign.hiweather.services
 
-import android.Manifest
-import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.ViewModelProvider
-import androidx.room.Room
+import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -21,74 +16,82 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.perf.ktx.performance
 import com.google.gson.Gson
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.database.WeatherDatabase
-import com.hidesign.hiweather.model.DbModel
 import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.network.WeatherViewModel
+import com.hidesign.hiweather.network.WeatherRepository
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.views.WeatherWidget
-import timber.log.Timber
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.scopes.ViewModelScoped
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 
-class APIWorker(private val context: Context, workerParams: WorkerParameters) : CoroutineWorker(context, workerParams) {
 
-    private val myTrace = Firebase.performance.newTrace("APIWorker")
+@HiltWorker
+class APIWorker @AssistedInject constructor(
+    @Assisted val context: Context,
+    @Assisted workerParams: WorkerParameters,
+    @ViewModelScoped val weatherRepository: WeatherRepository,
+) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        myTrace.start()
-        val weatherViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(context as Application)
-            .create(WeatherViewModel::class.java)
+        val pref = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE)
+        val lat = pref.getString(Constants.LATITUDE, "0.0")?.toDouble() ?: 0.0
+        val lon = pref.getString(Constants.LONGITUDE, "0.0")?.toDouble() ?: 0.0
+        val locality = pref.getString(Constants.LOCALITY, "") ?: ""
+        val units = Constants.getUnit(context)
 
-        val response = weatherViewModel.getBackgroundWeather(context)
-        if (response != null && response.isSuccessful) {
-            updateWidget(response.body()!!, context)
+        val response = mutableStateOf(OneCallResponse())
+        response.value = weatherRepository.getWeather(lat, lon, units).body()!!
 
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channelId = "channelId"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(channelId, "BackgroundNotifications", importance)
-            notificationManager.createNotificationChannel(channel)
+        //Post value to preferences
+        val prefs = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE)
+        prefs.edit().putString(Constants.WEATHER_RESPONSE, Gson().toJson(response.value)).apply()
+        updateWidget(context)
 
-            val builder = NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.airwaves)
-                .setContentTitle(response.body()!!.current.weather[0].description)
-                .setContentText("Content")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+        val notificationId = 1
+        val channelId = "my_channel_id"
+        val channelName = "Background Weather"
+        val channelImportance = NotificationManager.IMPORTANCE_DEFAULT
 
-            with(NotificationManagerCompat.from(context)) {
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                    notify(1, builder.build())
-                }
-            }
-            myTrace.stop()
-            return Result.success()
+        val notificationChannel = NotificationChannel(channelId, channelName, channelImportance)
+        notificationChannel.description = "Notifications for background weather updates"
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(notificationChannel)
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setContentTitle("${response.value.current?.temp?.roundToInt()}° in $locality")
+            .setContentText(response.value.daily[0].summary)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .build()
+
+        if (notificationManager.areNotificationsEnabled()) {
+            notificationManager.notify(notificationId, notification)
         } else {
-            myTrace.stop()
-            return Result.failure()
+            //Request permission
         }
+        return Result.success()
     }
 
     companion object {
         private const val WORK_NAME = "com.hidesign.hiweather.services.APIWorker"
 
-        private fun getWorkRequest(repeatInterval: Long): PeriodicWorkRequest {
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-
-            return PeriodicWorkRequestBuilder<APIWorker>(repeatInterval, TimeUnit.MINUTES)
-                .setConstraints(constraints)
-                .addTag(WORK_NAME)
-                .build()
+        fun initWorker(context: Context) {
+            val workManager = WorkManager.getInstance(context)
+            workManager.cancelAllWork()
+            workManager.enqueueUniquePeriodicWork(
+                WORK_NAME,
+                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
+                getWorkRequest(context)
+            )
         }
 
-        fun createWorkManagerInstance(context: Context) {
-            val repeatInterval = context.getSharedPreferences(Constants.preferences, Context.MODE_PRIVATE)
-                .getInt(Constants.refreshInterval, 0)
+        private fun getWorkRequest(context: Context): PeriodicWorkRequest {
+            val pref = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE)
+            val repeatInterval = pref.getInt(Constants.REFRESH_INTERVAL, 0)
             val timeValue = when (repeatInterval) {
                 0 -> 1L
                 1 -> 3L
@@ -97,28 +100,21 @@ class APIWorker(private val context: Context, workerParams: WorkerParameters) : 
                 4 -> 24L
                 else -> 1L
             }
-            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-                WORK_NAME,
-                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
-                getWorkRequest(timeValue)
-            )
-            Timber.d("WorkManager instance created")
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+
+            return PeriodicWorkRequestBuilder<APIWorker>(timeValue, TimeUnit.HOURS)
+                .setConstraints(constraints)
+                .addTag(WORK_NAME)
+                .build()
         }
 
-        fun updateWidget(weather: OneCallResponse, context: Context) {
-            val widgetTrace = Firebase.performance.newTrace("WidgetUpdate")
-            widgetTrace.start()
-
-            val jsonWeather: String = Gson().toJson(weather)
-            val db = Room.databaseBuilder(context, WeatherDatabase::class.java, "Weather")
-                .allowMainThreadQueries().fallbackToDestructiveMigration().build()
-            val weatherDao = db.weatherDao()
-            weatherDao.insertAll(DbModel(0, jsonWeather))
+        fun updateWidget(context: Context) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             for (appWidgetId in appWidgetManager.getAppWidgetIds(ComponentName(context, WeatherWidget::class.java))) {
                 appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetId, R.layout.weather_widget)
             }
-            widgetTrace.stop()
         }
     }
 }

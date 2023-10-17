@@ -1,25 +1,24 @@
 package com.hidesign.hiweather.model
 
-import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 data class OneCallResponse(
     @SerializedName("current")
-    var current: Current,
+    var current: Current? = null,
     @SerializedName("daily")
-    var daily: List<Daily>,
+    var daily: List<Daily> = listOf(),
     @SerializedName("hourly")
-    var hourly: List<Hourly>,
+    var hourly: List<Hourly> = listOf(),
     @SerializedName("lat")
-    var lat: Double,
+    var lat: Double = 0.0,
     @SerializedName("lon")
-    var lon: Double,
+    var lon: Double = 0.0,
     @SerializedName("timezone")
-    var timezone: String,
+    var timezone: String = "",
     @SerializedName("timezone_offset")
-    var timezoneOffset: Int,
+    var timezoneOffset: Int = 0,
     @SerializedName("alerts")
-    var alerts: List<Alerts>
+    var alerts: List<Alerts> = listOf(),
 ): java.io.Serializable
 
 data class Current(
@@ -61,7 +60,7 @@ data class Weather(
     @SerializedName("icon")
     var icon: String,
     @SerializedName("id")
-    @PrimaryKey var weatherId: Int,
+    var weatherId: Int,
     @SerializedName("main")
     var main: String,
 ): java.io.Serializable
@@ -142,7 +141,7 @@ data class Hourly(
 
 data class Alerts(
     @SerializedName("sender_name")
-    var sender_name: String,
+    var senderName: String,
     @SerializedName("event")
     var event: String,
     @SerializedName("start")

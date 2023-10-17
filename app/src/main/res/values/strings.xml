@@ -1,167 +1,167 @@
 <resources>
 
-	<!--	network strings-->
-	<string name="location_error" formatted="true">Something went wrong trying to get the location \n\nPlease try again.</string>
+    <!--	network strings-->
+    <string name="app_name">HiWeather</string>
+    <string name="cloud_cover">Cloud Cover</string>
+    <string name="winddirectionicon">WindDirectionIcon</string>
+    <string name="today_s_date">Today\'s Date</string>
+    <string name="title_activity_weather">WeatherActivity</string>
+    <string name="daily_forecast">7 Day Forecast</string>
+    <string name="hourly_forecast">24 Hour Forecast</string>
+    <string name="forecast">Forecast</string>
 
+    <string-array name="temperature_units">
+        <item>Celsius</item>
+        <item>Fahrenheit</item>
+        <item>Kelvin</item>
+    </string-array>
 
-	<string name="app_name">HiWeather</string>
-	<string name="cloud_cover">Cloud Cover</string>
-	<string name="winddirectionicon">WindDirectionIcon</string>
-	<string name="today_s_date">Today\'s Date</string>
-	<string name="title_activity_weather">WeatherActivity</string>
-	<string name="daily_forecast">7 Day Forecast</string>
-	<string name="hourly_forecast">24 Hour Forecast</string>
-	<string name="forecast">Forecast</string>
+    <string-array name="refresh_interval">
+        <item>1 Hour</item>
+        <item>3 Hours</item>
+        <item>6 Hours</item>
+        <item>12 Hours</item>
+        <item>24 Hours</item>
+    </string-array>
 
-	<string-array name="temperature_units">
-		<item>Celsius</item>
-		<item>Fahrenheit</item>
-		<item>Kelvin</item>
-	</string-array>
+    <!--Template Weather Strings-->
+    <string name="template_current_temp">21°</string>
+    <string name="template_real_feel">Real Feel 23°</string>
+    <string name="template_uv_index_with_name">UV Index 5</string>
+    <string name="template_precipitation">45%</string>
+    <string name="template_humidity">30%</string>
+    <string name="template_dew_point">14°</string>
+    <string name="template_uv_index">3</string>
+    <string name="template_wind_speed">4.3</string>
+    <string name="template_wind_direction">N</string>
+    <string name="template_sun_and_moon_duration">12 Hours and 0 Minutes</string>
 
-	<string-array name="refresh_interval">
-		<item>1 Hour</item>
-		<item>3 Hours</item>
-		<item>6 Hours</item>
-		<item>12 Hours</item>
-		<item>24 Hours</item>
-	</string-array>
+    <string-array name="airTitles">
+        <item>Nitrogen Dioxide(NO₂)</item>
+        <item>Ozone(O₃)</item>
+        <item>Coarse Particle Matter(PM₁₀)</item>
+        <item>Fine Particle Matter(PM₂₅)</item>
+        <item>Carbon Monoxide(CO)</item>
+        <item>Ammonia(NH₃)</item>
+        <item>Sulphur Dioxide(SO₂)</item>
+    </string-array>
+    <string-array name="airStrings">
+        <item>Good</item>
+        <item>Moderate</item>
+        <item>Unhealthy for \nSensitive Groups</item>
+        <item>Unhealthy</item>
+        <item>Very Unhealthy</item>
+        <item>Hazardous</item>
+    </string-array>
+    <integer-array name="airNoTwoValues">
+        <item>50</item>
+        <item>100</item>
+        <item>200</item>
+        <item>400</item>
+        <item>500</item>
+    </integer-array>
+    <integer-array name="airPMTenValues">
+        <item>25</item>
+        <item>50</item>
+        <item>90</item>
+        <item>180</item>
+        <item>360</item>
+    </integer-array>
+    <integer-array name="airOThreeValues">
+        <item>60</item>
+        <item>120</item>
+        <item>180</item>
+        <item>240</item>
+        <item>360</item>
+    </integer-array>
+    <integer-array name="airPMTwoFiveValues">
+        <item>15</item>
+        <item>30</item>
+        <item>55</item>
+        <item>110</item>
+        <item>220</item>
+    </integer-array>
+    <integer-array name="airSoTwoValues">
+        <item>40</item>
+        <item>80</item>
+        <item>380</item>
+        <item>800</item>
+        <!--		<item>1600</item>-->
+    </integer-array>
+    <integer-array name="airCoValues">
+        <item>1000</item>
+        <item>2000</item>
+        <item>10000</item>
+        <item>17000</item>
+        <!--		<item>34000</item>-->
+    </integer-array>
 
-	<!--Template Weather Strings-->
-	<string name="template_current_temp">21°</string>
-	<string name="template_real_feel">Real Feel 23°</string>
-	<string name="template_uv_index_with_name">UV Index 5</string>
-	<string name="template_precipitation">45%</string>
-	<string name="template_humidity">30%</string>
-	<string name="template_dew_point">14°</string>
-	<string name="template_uv_index">3</string>
-	<string name="template_wind_speed">4.3</string>
-	<string name="template_wind_direction">N</string>
-	<string name="template_sun_and_moon_duration">12 Hours and 0 Minutes</string>
+    <string-array name="airNHThreeStrings">
+        <item>Detectable by smell</item>
+        <item>Uncomfortable, breathing support required</item>
+        <item>Maximum exposure limit</item>
+        <item>Irritated eyes, throat and mucous membranes</item>
+        <item>Moderate eye irritation, no long-term effect in exposures of less than 2 hours</item>
+    </string-array>
+    <integer-array name="airNHThreeValues">
+        <item>25</item>
+        <item>30</item>
+        <item>50</item>
+        <item>100</item>
+        <item>140</item>
+    </integer-array>
+    <string name="air_quality">Air Quality</string>
+    <string name="air_item_value">{0}µg/m³</string>
 
-	<string-array name="airTitles">
-		<item>Nitrogen Dioxide(NO₂)</item>
-		<item>Ozone(O₃)</item>
-		<item>Coarse Particle Matter(PM₁₀)</item>
-		<item>Fine Particle Matter(PM₂₅)</item>
-		<item>Carbon Monoxide(CO)</item>
-		<item>Ammonia(NH₃)</item>
-		<item>Sulphur Dioxide(SO₂)</item>
-	</string-array>
-	<string-array name="airStrings">
-		<item>Good</item>
-		<item>Moderate</item>
-		<item>Unhealthy for \nSensitive Groups</item>
-		<item>Unhealthy</item>
-		<item>Very Unhealthy</item>
-		<item>Hazardous</item>
-	</string-array>
-	<integer-array name="airNoTwoValues">
-		<item>50</item>
-		<item>100</item>
-		<item>200</item>
-		<item>400</item>
-		<item>500</item>
-	</integer-array>
-	<integer-array name="airPMTenValues">
-		<item>25</item>
-		<item>50</item>
-		<item>90</item>
-		<item>180</item>
-		<item>360</item>
-	</integer-array>
-	<integer-array name="airOThreeValues">
-		<item>60</item>
-		<item>120</item>
-		<item>180</item>
-		<item>240</item>
-		<item>360</item>
-	</integer-array>
-	<integer-array name="airPMTwoFiveValues">
-		<item>15</item>
-		<item>30</item>
-		<item>55</item>
-		<item>110</item>
-		<item>220</item>
-	</integer-array>
-	<integer-array name="airSoTwoValues">
-		<item>40</item>
-		<item>80</item>
-		<item>380</item>
-		<item>800</item>
-		<!--		<item>1600</item>-->
-	</integer-array>
-	<integer-array name="airCoValues">
-		<item>1000</item>
-		<item>2000</item>
-		<item>10000</item>
-		<item>17000</item>
-		<!--		<item>34000</item>-->
-	</integer-array>
+    //Pressure
+    <string name="pressure">Pressure</string>
+    <string name="_0_hpa">{0}hPa</string>
+    <string name="pressure_0_hpa">Pressure {0}hPa</string>
+    //Visibility
+    <string name="visibility">Visibility</string>
+    <string name="_0_m">{0}Km</string>
+    <string name="visibility_0_m">Visibility {0}Km</string>
+    //Dew Point
+    <string name="dew_point">Dew Point</string>
+    <string name="dew_point_0_c">Dew Point {0}°</string>
+    //Humidity
+    <string name="humidity">Humidity</string>
+    <string name="humidity_0">Humidity {0}%</string>
+    //Precipitation
+    <string name="precipitation">Precipitation</string>
+    <string name="precipitation_0">Precipitation {0}%</string>
+    //Sun + Moon
+    <string name="today">Today</string>
+    <string name="moonrise">Moonrise</string>
+    <string name="moonset">Moonset</string>
+    <string name="sunrise">Sunrise</string>
+    <string name="sunset">Sunset</string>
+    <string name="empty_time">--:--</string>
 
-	<string-array name="airNHThreeStrings">
-		<item>Detectable by smell</item>
-		<item>Uncomfortable, breathing support required</item>
-		<item>Maximum exposure limit</item>
-		<item>Irritated eyes, throat and mucous membranes</item>
-		<item>Moderate eye irritation, no long-term effect in exposures of less than 2 hours</item>
-	</string-array>
-	<integer-array name="airNHThreeValues">
-		<item>25</item>
-		<item>30</item>
-		<item>50</item>
-		<item>100</item>
-		<item>140</item>
-	</integer-array>
-	<string name="air_quality">Air Quality</string>
-	<string name="air_item_value">{0}µg/m³</string>
+    <string name="uv_index">UV Index</string>
+    <string name="uv_index_0">UV Index {0}</string>
+    <string name="uv_template">{0}</string>
 
-	//Pressure
-	<string name="pressure">Pressure</string>
-	<string name="_0_hpa">{0}hPa</string>
-	<string name="pressure_0_hpa">Pressure {0}hPa</string>
-	//Visibility
-	<string name="visibility">Visibility</string>
-	<string name="_0_m">{0}Km</string>
-	<string name="visibility_0_m">Visibility {0}Km</string>
-	//Dew Point
-	<string name="dew_point">Dew Point</string>
-	<string name="dew_point_0_c">Dew Point {0}°</string>
-	//Humidity
-	<string name="humidity">Humidity</string>
-	<string name="humidity_0">Humidity {0}%</string>
-	//Precipitation
-	<string name="precipitation">Precipitation</string>
-	<string name="precipitation_0">Precipitation {0}%</string>
-	//Sun + Moon
-	<string name="today">Today</string>
-	<string name="moonrise">Moonrise</string>
-	<string name="moonset">Moonset</string>
-	<string name="sunrise">Sunrise</string>
-	<string name="sunset">Sunset</string>
-	<string name="empty_time">--:--</string>
+    <string name="real_feel_0_c">Real Feel {0}°</string>
+    <string name="_0">{0}</string>
+    <string name="_0_c">{0}°</string>
+    <string name="_0_p">{0}%</string>
+    <string name="low_0_c">Low {0}°</string>
+    <string name="high_0_c">High {0}°</string>
 
-	<string name="uv_index">UV Index</string>
-	<string name="uv_index_0">UV Index {0}</string>
-	<string name="uv_template">{0}</string>
+    <string name="km_h">m/s</string>
 
-	<string name="real_feel_0_c">Real Feel {0}°</string>
-	<string name="_0">{0}</string>
-	<string name="_0_c">{0}°</string>
-	<string name="_0_p">{0}%</string>
-	<string name="low_0_c">Low {0}°</string>
-	<string name="high_0_c">High {0}°</string>
+    <string name="cloudiness">Cloudiness</string>
+    <string name="cloudiness_0">Cloudiness {0}%</string>
 
-	<string name="km_h">m/s</string>
-
-	<string name="cloudiness">Cloudiness</string>
-	<string name="app_widget_description">See your current weather data on your home-screen! \n
+    <string name="app_widget_description">See your current weather data on your home-screen! \n
 		Updates once an hour on the hour
 	</string>
-	<string name="location">Location</string>
-	<string name="settings">Settings</string>
-	<string name="temperature">Temperature</string>
-	<string name="refresh_interval">Refresh Interval</string>
-	<string name="title_activity_expanded_forecast_fragment">ExpandedForecastFragment</string>
+    <string name="location">Location</string>
+    <string name="settings">Settings</string>
+    <string name="temperature">Temperature</string>
+    <string name="refresh_interval">Refresh Interval</string>
+    <string name="title_activity_expanded_forecast_fragment">ExpandedForecastFragment</string>
+    <string name="title_activity_main">MainActivity</string>
 
 </resources>

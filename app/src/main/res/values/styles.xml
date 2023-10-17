@@ -13,76 +13,9 @@
 		<item name="colorControlNormal">@color/white</item>
 	</style>
 
-	<style name="AppTheme.BottomSheet" parent="Theme.Design.Light.BottomSheetDialog">
-		<item name="android:windowCloseOnTouchOutside">true</item>
-		<item name="android:windowIsTranslucent">true</item>
-		<item name="android:windowContentOverlay">@null</item>
-		<item name="android:maxHeight">400dp</item>
-		<item name="android:height">400dp</item>
-		<item name="android:colorBackground">#D9000000</item>
-		<item name="android:windowFrame">@null</item>
-		<item name="android:windowIsFloating">true</item>
-	</style>
-
-	<style name="AppTheme.BottomSheetSunMoon" parent="Theme.Design.Light.BottomSheetDialog">
-		<item name="android:windowCloseOnTouchOutside">true</item>
-		<item name="android:windowIsTranslucent">true</item>
-		<item name="android:windowContentOverlay">@null</item>
-		<item name="android:colorBackground">#00000000</item>
-		<item name="android:windowFrame">@null</item>
-		<item name="android:windowIsFloating">true</item>
-	</style>
-
 	<style name="AppTheme.Picker" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
 		<item name="android:textColorPrimary">@android:color/white</item>
 		<item name="android:textSize">20sp</item>
 		<item name="colorControlNormal">#00000000</item>
-	</style>
-
-	<style name="WeatherCards" parent="Widget.MaterialComponents.CardView">
-		<item name="android:layout_marginTop">-20dp</item>
-		<item name="android:layout_marginHorizontal">10dp</item>
-		<item name="android:paddingTop">10dp</item>
-		<item name="android:paddingBottom">30dp</item>
-		<item name="android:layout_gravity">center</item>
-		<item name="cardCornerRadius">30dp</item>
-	</style>
-
-	<style name="airChips">
-		<item name="android:backgroundTint">@color/black</item>
-		<item name="android:textColor">@android:color/white</item>
-		<item name="android:textSize">12sp</item>
-		<item name="chipMinHeight">36dp</item>
-		<item name="android:layout_margin">6dp</item>
-	</style>
-
-	<style name="shimmerFrame">
-		<item name="android:layout_gravity">top</item>
-		<item name="android:orientation">vertical</item>
-		<item name="elevation">20dp</item>
-		<item name="android:visibility">gone</item>
-	</style>
-
-	<style name="Alert.Button.Error" parent="Widget.MaterialComponents.Button.TextButton">
-		<item name="backgroundTint">#00000000</item>
-		<item name="rippleColor">@color/colorPrimary</item>
-		<item name="android:textColor">@color/colorPrimaryLight</item>
-		<item name="android:textSize">14sp</item>
-	</style>
-
-	<style name="AppTheme.Dialogs.Error" parent="Theme.MaterialComponents.Dialog.Bridge">
-		<item name="buttonBarNeutralButtonStyle">@style/Alert.Button.Error</item>
-		<item name="buttonBarPositiveButtonStyle">@style/Alert.Button.Error</item>
-		<item name="buttonBarNegativeButtonStyle">@style/Alert.Button.Error</item>
-	</style>
-
-	<style name="Widget.HiWeather.AppWidget.Container" parent="android:Widget">
-		<item name="android:id">@android:id/background</item>
-		<item name="android:background">?android:attr/colorBackground</item>
-	</style>
-
-	<style name="Widget.HiWeather.AppWidget.InnerView" parent="android:Widget">
-		<item name="android:background">?android:attr/colorBackground</item>
-		<item name="android:textColor">?android:attr/textColorPrimary</item>
 	</style>
 </resources>

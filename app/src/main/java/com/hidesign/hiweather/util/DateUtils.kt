@@ -7,9 +7,13 @@ import java.util.TimeZone
 
 object DateUtils {
 
-    fun getHours(Start: Long, End: Long): String {
-        val d1 = Date(Start * 1000L)
-        val d2 = Date(End * 1000L)
+    const val RISE_SET_FORMAT = "HH:mm"
+    const val HOURLY_FORMAT = "HH:00"
+    const val DAILY_FORMAT = "u"
+
+    fun getHours(start: Long, end: Long): String {
+        val d1 = Date(start * 1000L)
+        val d2 = Date(end * 1000L)
         val differenceInTime = d2.time - d1.time
         var differenceInMinutes = ((differenceInTime / (1000 * 60)) % 60)
         var differenceInHours = ((differenceInTime / (1000 * 60 * 60)) % 24)
@@ -30,7 +34,8 @@ object DateUtils {
         return sdf.format(date)
     }
 
-    fun getDayOfWeekText(day: String): String {
+    fun getDayOfWeekText(pattern: String, timeInt: Long, timezone: String): String {
+        val day = getDateTime(pattern, timeInt, timezone)
         return when (day) {
             "1" -> {
                 "Monday"
