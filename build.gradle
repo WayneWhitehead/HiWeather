@@ -1,21 +1,26 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    ext {
+        agp_version = '8.1.2'
+        dagger_version = '2.48'
+    }
     repositories {
         google()
         gradlePluginPortal()
         mavenCentral()
+        mavenLocal()
         maven { url "https://maven.google.com" }
         maven { url "https://jitpack.io" }
     }
     dependencies {
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$dagger_version"
         classpath "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.21"
-        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"
+        classpath "com.android.tools.build:gradle:$agp_version"
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.google.gms:google-services:4.3.15'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.6'
-        classpath 'com.google.firebase:perf-plugin:1.4.2'
+        classpath 'com.google.gms:google-services:4.4.0'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
         classpath 'com.google.firebase:firebase-appdistribution-gradle:4.0.0'
     }
 }
@@ -24,11 +29,10 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
         maven { url 'https://jitpack.io' }
     }
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }
