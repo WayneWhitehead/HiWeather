@@ -259,7 +259,7 @@ fun ExpandForecast(daily: Daily? = null, hourly: Hourly? = null, timezone: Strin
                 ) {
                     val dewPoint = (hourly?.dewPoint ?: daily?.dewPoint)?.roundToInt() ?: 0
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.precipitation_0), dewPoint),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.dew_point_0_c), dewPoint),
                         image = painterResource(id = R.drawable.dew_point),
                         size = 16
                     )
