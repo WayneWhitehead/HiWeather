@@ -115,27 +115,18 @@ class MainActivity: ComponentActivity(){
         locationPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissionsResult ->
             if (permissionsResult.all { it.value }) {
                 locationUtil.getLastLocation(
-                    onSuccess = { location ->
-                        locationUtil.handleLocation(location,
-                            onSuccess = { address ->
-                                uAddress.value = address
-                                val pref = getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE)
-                                pref.edit().putString(Constants.LATITUDE, address.latitude.toString()).apply()
-                                pref.edit().putString(Constants.LONGITUDE, address.longitude.toString()).apply()
-                                pref.edit().putString(Constants.LOCALITY, address.locality).apply()
-                                CoroutineScope(Dispatchers.Main).launch {
-                                    weatherViewModel.getOneCallWeather(this@MainActivity, uAddress.value)
-                                    weatherViewModel.getAirPollution(uAddress.value)
-                                }
-                            },
-                            onFailure = {
-                                Timber.tag("Tag").e("Error getting Address: ")
-                            }
-                        )
+                    onSuccess = { address ->
+                        uAddress.value = address
+                        val pref = getSharedPreferences(Constants.PREFERENCES, MODE_PRIVATE)
+                        pref.edit().putString(Constants.LATITUDE, address.latitude.toString()).apply()
+                        pref.edit().putString(Constants.LONGITUDE, address.longitude.toString()).apply()
+                        pref.edit().putString(Constants.LOCALITY, address.locality).apply()
+                        CoroutineScope(Dispatchers.Main).launch {
+                            weatherViewModel.getOneCallWeather(uAddress.value, Constants.getUnit(this@MainActivity))
+                            weatherViewModel.getAirPollution(uAddress.value)
+                        }
                     },
-                    onFailure =  {
-                        Timber.tag("Tag").e("Error getting Location: ")
-                    }
+                    onFailure = { Timber.tag("Tag").e("Error getting Address: ") }
                 )
             } else {
                 weatherViewModel.updateUIState(NetworkStatus.ERROR)

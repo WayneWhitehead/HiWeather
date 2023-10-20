@@ -18,19 +18,28 @@ class LocationUtil(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun getLastLocation(onSuccess: (Location) -> Unit, onFailure: () -> Unit) {
-        locationProviderClient.lastLocation.addOnSuccessListener { lastLocation ->
-            onSuccess(lastLocation)
-        }.addOnFailureListener {
-            locationProviderClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener { currentLocation ->
-                onSuccess(currentLocation)
-            }.addOnFailureListener {
+    fun getLastLocation(onSuccess: (Address) -> Unit, onFailure: () -> Unit) {
+        locationProviderClient.lastLocation.addOnCompleteListener { lastLocation ->
+            if (lastLocation.isSuccessful && lastLocation.result != null) {
+                handleLocation(lastLocation.result, onSuccess, onFailure)
+            } else {
+                getCurrentLocation(onSuccess, onFailure)
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getCurrentLocation(onSuccess: (Address) -> Unit, onFailure: () -> Unit) {
+        locationProviderClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnCompleteListener { currentLocation ->
+            if (currentLocation.isSuccessful && currentLocation.result != null) {
+                handleLocation(currentLocation.result, onSuccess, onFailure)
+            } else {
                 onFailure()
             }
         }
     }
 
-    fun handleLocation(location: Location, onSuccess: (Address) -> Unit, onFailure: () -> Unit) {
+    private fun handleLocation(location: Location, onSuccess: (Address) -> Unit, onFailure: () -> Unit) {
         var address: Address? = null
         val geocoder = Geocoder(context, Locale.getDefault())
         try {
