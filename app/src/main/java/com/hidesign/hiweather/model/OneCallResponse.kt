@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class OneCallResponse(
     @SerializedName("current")
-    var current: Current? = null,
+    var current: Current? = Current(),
     @SerializedName("daily")
     var daily: List<Daily> = listOf(),
     @SerializedName("hourly")
@@ -23,35 +23,35 @@ data class OneCallResponse(
 
 data class Current(
     @SerializedName("dt")
-    var dt: Int,
+    var dt: Int = 0,
     @SerializedName("clouds")
-    var clouds: Int,
+    var clouds: Int = 0,
     @SerializedName("dew_point")
-    var dewPoint: Double,
+    var dewPoint: Double = 0.0,
     @SerializedName("feels_like")
-    var feelsLike: Double,
+    var feelsLike: Double = 0.0,
     @SerializedName("humidity")
-    var humidity: Int,
+    var humidity: Int = 0,
     @SerializedName("pressure")
-    var pressure: Int,
+    var pressure: Int = 0,
     @SerializedName("sunrise")
-    var sunrise: Int,
+    var sunrise: Int = 0,
     @SerializedName("sunset")
-    var sunset: Int,
+    var sunset: Int = 0,
     @SerializedName("temp")
-    var temp: Double,
+    var temp: Double = 0.0,
     @SerializedName("uvi")
-    var uvi: Double,
+    var uvi: Double = 0.0,
     @SerializedName("visibility")
-    var visibility: Int,
+    var visibility: Int = 0,
     @SerializedName("weather")
-    var weather: List<Weather>,
+    var weather: List<Weather> = listOf(),
     @SerializedName("wind_deg")
-    var windDeg: Int,
+    var windDeg: Int = 0,
     @SerializedName("wind_gust")
-    var windGust: Double,
+    var windGust: Double = 0.0,
     @SerializedName("wind_speed")
-    var windSpeed: Double,
+    var windSpeed: Double = 0.0,
 ): java.io.Serializable
 
 data class Weather(
