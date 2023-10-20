@@ -1,13 +1,11 @@
 package com.hidesign.hiweather.network
 
-import android.content.Context
 import android.location.Address
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.hidesign.hiweather.model.AirPollutionResponse
 import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -24,16 +22,17 @@ class WeatherViewModel @Inject constructor(private val weatherRepository: Weathe
     private val _airPollutionResponse = MutableLiveData<AirPollutionResponse>()
     val airPollutionResponse: LiveData<AirPollutionResponse> get() = _airPollutionResponse
 
-    suspend fun getOneCallWeather(context: Context, uAddress: Address?) {
+    suspend fun getOneCallWeather(uAddress: Address?, unit: String) {
         _uiState.value = NetworkStatus.LOADING
         if (uAddress == null || !uAddress.hasLatitude() || !uAddress.hasLongitude()) return
         val response = weatherRepository.getWeather(
             uAddress.latitude,
             uAddress.longitude,
-            Constants.getUnit(context))
+            unit)
 
         if (response.body() != null) {
             _oneCallResponse.value = response.body()
+            _uiState.value = NetworkStatus.SUCCESS
         } else {
             _uiState.value = NetworkStatus.ERROR
         }
@@ -46,6 +45,7 @@ class WeatherViewModel @Inject constructor(private val weatherRepository: Weathe
 
         if (response.body() != null) {
             _airPollutionResponse.value = response.body()
+            _uiState.value = NetworkStatus.SUCCESS
         } else {
             _uiState.value = NetworkStatus.ERROR
         }

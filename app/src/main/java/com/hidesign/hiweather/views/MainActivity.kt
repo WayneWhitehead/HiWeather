@@ -2,7 +2,6 @@ package com.hidesign.hiweather.views
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.location.Address
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -53,9 +52,7 @@ import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
@@ -169,7 +166,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
                         locality = place.name
                         uAddress.value = (this)
                         CoroutineScope(Dispatchers.Main).launch {
-                            weatherViewModel.getOneCallWeather(context, uAddress.value)
+                            weatherViewModel.getOneCallWeather(uAddress.value, Constants.getUnit(context))
                             weatherViewModel.getAirPollution(uAddress.value)
                         }
                     }
@@ -199,8 +196,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
         refreshing = uiState.value == NetworkStatus.LOADING,
         onRefresh = {
             runBlocking {
-                weatherViewModel.updateUIState(NetworkStatus.LOADING)
-                weatherViewModel.getOneCallWeather(context, uAddress.value)
+                weatherViewModel.getOneCallWeather(uAddress.value, Constants.getUnit(context))
                 weatherViewModel.getAirPollution(uAddress.value)
             }
         }
@@ -247,7 +243,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
                 Modifier
                     .pullRefresh(pullRefreshState)
                     .verticalScroll(rememberScrollState())) {
-                WeatherViews(weatherViewModel, uiState)
+                WeatherViews(weatherViewModel)
             }
             if (uiState.value == NetworkStatus.LOADING) {
                 LoadingScreen()
@@ -297,111 +293,102 @@ fun LoadingScreen() {
 }
 
 @Composable
-fun WeatherViews(weatherViewModel: WeatherViewModel, uiState: State<NetworkStatus?>) {
+fun WeatherViews(weatherViewModel: WeatherViewModel) {
     val weatherState = weatherViewModel.oneCallResponse.observeAsState()
     val airPollutionState = weatherViewModel.airPollutionResponse.observeAsState()
 
     ConstraintLayout(modifier = Modifier.height(1200.dp)) {
-            val (header, current, hourly, currentExtra, air, wind, sun, daily) = createRefs()
-            if (weatherState.value != null && airPollutionState.value != null) {
-                val weather = weatherState.value!!
-                val airPollution = airPollutionState.value!!
+        val (header, current, hourly, currentExtra, air, wind, sun, daily) = createRefs()
+        if (weatherState.value != null && airPollutionState.value != null) {
+            val weather = weatherState.value!!
+            val airPollution = airPollutionState.value!!
 
-                ForecastCard(
-                    Modifier
-                        .padding(10.dp)
-                        .constrainAs(daily) {
-                            top.linkTo(sun.bottom, (-20).dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                    weather,
-                    weather.daily.subList(1, 8)
-                )
-                CurrentExtraCard(
-                    Modifier.constrainAs(currentExtra) {
-                        top.linkTo(hourly.bottom, (-20).dp)
+            ForecastCard(
+                Modifier
+                    .padding(10.dp)
+                    .constrainAs(daily) {
+                        top.linkTo(sun.bottom, (-20).dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },
-                    weather
-                )
-                AirPollutionCard(
-                    Modifier.constrainAs(air) {
-                        top.linkTo(currentExtra.bottom, (-20).dp)
+                weather,
+                weather.daily.subList(1, 8)
+            )
+            CurrentExtraCard(
+                Modifier.constrainAs(currentExtra) {
+                    top.linkTo(hourly.bottom, (-20).dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                weather
+            )
+            AirPollutionCard(
+                Modifier.constrainAs(air) {
+                    top.linkTo(currentExtra.bottom, (-20).dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                airPollution
+            )
+            WindCard(
+                Modifier.constrainAs(wind) {
+                    top.linkTo(air.bottom, (-20).dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                weather.current!!
+            )
+            SunCard(
+                Modifier
+                    .padding(50.dp, 0.dp)
+                    .clickable { sunWeather.value = weather.daily[0] }
+                    .constrainAs(sun) {
+                        top.linkTo(wind.bottom, (-20).dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                    },
-                    airPollution
-                )
-                WindCard(
-                    Modifier.constrainAs(wind) {
-                        top.linkTo(air.bottom, (-20).dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
-                    weather.current!!
-                )
-                SunCard(
-                    Modifier
-                        .padding(50.dp, 0.dp)
-                        .clickable { sunWeather.value = weather.daily[0] }
-                        .constrainAs(sun) {
-                            top.linkTo(wind.bottom, (-20).dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                    daily = weather.daily[0],
-                    tz = weather.timezone,
-                    showHours = false,
-                )
-                CurrentCard(
-                    Modifier.constrainAs(current) {
-                        top.linkTo(header.bottom, (-20).dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
-                    weather
-                )
-                ForecastCard(
-                    Modifier
-                        .padding(10.dp)
-                        .constrainAs(hourly) {
-                            top.linkTo(current.bottom, (-45).dp)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        },
-                    weather,
-                    weather.hourly.subList(1,25)
-                )
-                LocationHeaderCard(
-                    Modifier.constrainAs(header) {
-                        top.linkTo(parent.top, 20.dp)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                )
-                if (airItemTitle.value != "") {
-                    AirQualityDialog(airPollution.list[0].components, airItemTitle)
+                },
+                daily = weather.daily[0],
+                tz = weather.timezone,
+                showHours = false,
+            )
+            CurrentCard(
+                Modifier.constrainAs(current) {
+                    top.linkTo(header.bottom, (-20).dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                weather
+            )
+            ForecastCard(
+                Modifier.padding(10.dp).constrainAs(hourly) {
+                    top.linkTo(current.bottom, (-45).dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                weather,
+                weather.hourly.subList(1,25)
+            )
+            LocationHeaderCard(
+                Modifier.constrainAs(header) {
+                    top.linkTo(parent.top, 20.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
                 }
-                if (sunWeather.value != null) {
-                    ExpandedSunMoon(sunWeather.value!!, weather.timezone)
-                }
-                if (forecastTimezone.value != null) {
-                    ExpandForecast(
-                        daily = forecastDaily.value,
-                        hourly = forecastHourly.value,
-                        timezone = forecastTimezone.value!!
-                    )
-                }
+            )
+            if (airItemTitle.value != "") {
+                AirQualityDialog(airPollution.list[0].components, airItemTitle)
+            }
+            if (sunWeather.value != null) {
+                ExpandedSunMoon(sunWeather.value!!, weather.timezone)
+            }
+            if (forecastTimezone.value != null) {
+                ExpandForecast(
+                    daily = forecastDaily.value,
+                    hourly = forecastHourly.value,
+                    timezone = forecastTimezone.value!!
+                )
             }
         }
-
-    if (uiState.value == NetworkStatus.LOADING) {
-        LaunchedEffect(key1 = true, block = {
-            delay(1000)
-            weatherViewModel.updateUIState(NetworkStatus.SUCCESS)
-        })
     }
 }
 
@@ -567,7 +554,7 @@ fun CurrentExtraCard(modifier: Modifier, weather: OneCallResponse) {
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     CurrentImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.precipitation_0), weather.current!!.dewPoint.roundToInt()),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.precipitation_0), weather.daily[0].pop.roundToInt()),
                         image = painterResource(id = R.drawable.rain),
                         size = 16
                     )
