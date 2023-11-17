@@ -105,14 +105,15 @@ import kotlin.math.roundToInt
 class MainActivity: ComponentActivity(){
 
     private val weatherViewModel: WeatherViewModel by viewModels()
-    private val locationUtil by lazy { LocationUtil(this) }
+    @Inject
+    lateinit var locationUtil: LocationUtil
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         locationPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissionsResult ->
             if (permissionsResult.all { it.value }) {
-                locationUtil.getLastLocation(
-                    onSuccess = { address ->
+                locationUtil.getLastLocation(object: LocationUtil.AddressCallback {
+                    override fun onSuccess(address: Address) {
                         uAddress.value = address
                         val pref = getSharedPreferences(Constants.PREFERENCES, MODE_PRIVATE)
                         pref.edit().putString(Constants.LATITUDE, address.latitude.toString()).apply()
@@ -122,9 +123,10 @@ class MainActivity: ComponentActivity(){
                             weatherViewModel.getOneCallWeather(uAddress.value, Constants.getUnit(this@MainActivity))
                             weatherViewModel.getAirPollution(uAddress.value)
                         }
-                    },
-                    onFailure = { Timber.tag("Tag").e("Error getting Address: ") }
-                )
+                    }
+
+                    override fun onFailure() { Timber.tag("Tag").e("Error getting Address: ") }
+                })
             } else {
                 weatherViewModel.updateUIState(NetworkStatus.ERROR)
             }
@@ -215,7 +217,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
                 }
                 IconButton(onClick = {
                     weatherViewModel.updateUIState(NetworkStatus.LOADING)
-                    locationPermissions.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+                    locationPermissions.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
                 }) {
                     Icon(Icons.Filled.MyLocation, contentDescription = "Get Location")
                 }

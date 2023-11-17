@@ -1,58 +1,57 @@
 package com.hidesign.hiweather.util
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Priority
 import timber.log.Timber
 import java.io.IOException
-import java.util.Locale
+import javax.inject.Inject
 
-class LocationUtil(private val context: Context) {
-
-    private val locationProviderClient by lazy {
-        LocationServices.getFusedLocationProviderClient(context)
-    }
+class LocationUtil @Inject constructor(private val locationProviderClient: FusedLocationProviderClient, private val geocoder: Geocoder) {
 
     @SuppressLint("MissingPermission")
-    fun getLastLocation(onSuccess: (Address) -> Unit, onFailure: () -> Unit) {
+    fun getLastLocation(callback: AddressCallback) {
         locationProviderClient.lastLocation.addOnCompleteListener { lastLocation ->
             if (lastLocation.isSuccessful && lastLocation.result != null) {
-                handleLocation(lastLocation.result, onSuccess, onFailure)
+                handleLocation(lastLocation.result, callback)
             } else {
-                getCurrentLocation(onSuccess, onFailure)
+                getCurrentLocation(callback)
             }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun getCurrentLocation(onSuccess: (Address) -> Unit, onFailure: () -> Unit) {
+    fun getCurrentLocation(callback: AddressCallback) {
         locationProviderClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnCompleteListener { currentLocation ->
             if (currentLocation.isSuccessful && currentLocation.result != null) {
-                handleLocation(currentLocation.result, onSuccess, onFailure)
+                handleLocation(currentLocation.result, callback)
             } else {
-                onFailure()
+                callback.onFailure()
             }
         }
     }
 
-    private fun handleLocation(location: Location, onSuccess: (Address) -> Unit, onFailure: () -> Unit) {
-        var address: Address? = null
-        val geocoder = Geocoder(context, Locale.getDefault())
+    fun handleLocation(location: Location, callback: AddressCallback) {
+        val address: Address?
         try {
             address = geocoder.getFromLocation(location.latitude, location.longitude, 1)?.get(0)
         } catch (e: IOException) {
-            e.printStackTrace()
             Timber.tag("Tag").e("Error getting Street Address: ")
+            callback.onFailure()
+            return
         }
-
         if (address != null) {
-            onSuccess(address)
+            callback.onSuccess(address)
         } else {
-            onFailure()
+            callback.onFailure()
         }
+    }
+
+    interface AddressCallback {
+        fun onSuccess(address: Address)
+        fun onFailure()
     }
 }

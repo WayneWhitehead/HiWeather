@@ -1,6 +1,8 @@
 package com.hidesign.hiweather.util
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import com.hidesign.hiweather.R
 
 object Constants {
@@ -29,6 +31,12 @@ object Constants {
     const val LATITUDE = "LATITUDE"
     const val LONGITUDE = "LONGITUDE"
     const val LOCALITY = "LOCALITY"
+
+    fun getAPIKey(context: Context, key: String): String {
+        val ai: ApplicationInfo = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+        val value = ai.metaData.getString(key, "")
+        return value.toString()
+    }
 
     fun getUnit(context: Context): String {
         val sharedPref = context.getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE)

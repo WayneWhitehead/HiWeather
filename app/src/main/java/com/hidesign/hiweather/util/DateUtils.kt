@@ -35,32 +35,20 @@ object DateUtils {
     }
 
     fun getDayOfWeekText(pattern: String, timeInt: Long, timezone: String): String {
-        val day = getDateTime(pattern, timeInt, timezone)
-        return when (day) {
-            "1" -> {
-                "Monday"
+        return try {
+            val day = getDateTime(pattern, timeInt, timezone)
+            when (day) {
+                "1" -> { "Monday" }
+                "2" -> { "Tuesday" }
+                "3" -> { "Wednesday" }
+                "4" -> { "Thursday" }
+                "5" -> { "Friday" }
+                "6" -> { "Saturday" }
+                "7" -> { "Sunday" }
+                else -> { "Unknown" }
             }
-            "2" -> {
-                "Tuesday"
-            }
-            "3" -> {
-                "Wednesday"
-            }
-            "4"-> {
-                "Thursday"
-            }
-            "5" -> {
-                "Friday"
-            }
-            "6" -> {
-                "Saturday"
-            }
-            "7" -> {
-                "Sunday"
-            }
-            else -> {
-                "Unknown"
-            }
+        } catch (e: Exception) {
+            "Unknown"
         }
     }
 }
