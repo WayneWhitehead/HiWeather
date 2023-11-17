@@ -75,7 +75,6 @@ import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.dagger.NetworkModule
 import com.hidesign.hiweather.model.Current
 import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.Hourly
@@ -84,6 +83,7 @@ import com.hidesign.hiweather.network.NetworkStatus
 import com.hidesign.hiweather.network.WeatherViewModel
 import com.hidesign.hiweather.services.APIWorker
 import com.hidesign.hiweather.util.Constants
+import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.hidesign.hiweather.util.Extensions.roundToDecimal
 import com.hidesign.hiweather.util.LocationUtil
 import com.hidesign.hiweather.util.WeatherUtils
@@ -99,6 +99,7 @@ import java.text.MessageFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -186,7 +187,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
         }
     }
     val launchMapInputOverlay = {
-        Places.initialize(context, NetworkModule.getAPIKey(context, Constants.PLACES_KEY))
+        Places.initialize(context, getAPIKey(context, Constants.PLACES_KEY))
         val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
         val intent = Autocomplete
             .IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
@@ -555,20 +556,20 @@ fun CurrentExtraCard(modifier: Modifier, weather: OneCallResponse) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    CurrentImageLabel(
+                    ForecastImageLabel(
                         forecastItem = MessageFormat.format(stringResource(id = R.string.precipitation_0), weather.daily[0].pop.roundToInt()),
                         image = painterResource(id = R.drawable.rain),
-                        size = 16
+                        size = 18
                     )
-                    CurrentImageLabel(
+                    ForecastImageLabel(
                         forecastItem = MessageFormat.format(stringResource(id = R.string.humidity_0), weather.current!!.humidity),
                         image = painterResource(id = R.drawable.precipitation),
-                        size = 16
+                        size = 18
                     )
-                    CurrentImageLabel(
+                    ForecastImageLabel(
                         forecastItem = MessageFormat.format(stringResource(id = R.string.cloudiness_0), weather.current!!.clouds),
                         image = painterResource(id = R.drawable.precipitation),
-                        size = 16
+                        size = 18
                     )
                 }
             }
@@ -577,20 +578,20 @@ fun CurrentExtraCard(modifier: Modifier, weather: OneCallResponse) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
-                    CurrentImageLabel(
+                    ForecastImageLabel(
                         forecastItem = MessageFormat.format(stringResource(id = R.string.dew_point_0_c), weather.current!!.dewPoint.roundToInt()),
                         image = painterResource(id = R.drawable.dew_point),
-                        size = 16
+                        size = 18
                     )
-                    CurrentImageLabel(
+                    ForecastImageLabel(
                         forecastItem = MessageFormat.format(stringResource(id = R.string.pressure_0_hpa), weather.current!!.pressure / 1000),
                         image = painterResource(id = R.drawable.pressure),
-                        size = 16
+                        size = 18
                     )
-                    CurrentImageLabel(
+                    ForecastImageLabel(
                         forecastItem = MessageFormat.format(stringResource(id = R.string.visibility_0_m), weather.current!!.visibility / 1000),
                         image = painterResource(id = R.drawable.visibility),
-                        size = 16
+                        size = 18
                     )
                 }
             }
