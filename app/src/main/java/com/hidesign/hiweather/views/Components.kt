@@ -47,31 +47,13 @@ fun LoadPicture(modifier: Modifier = Modifier, url: String, contentDescription: 
 }
 
 @Composable
-fun CurrentImageLabel(forecastItem: String, image: Painter, size: Int = 15) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        Image(
-            painter = image,
-            modifier = Modifier.size((size+2).dp),
-            colorFilter = ColorFilter.tint(Color.White),
-            contentDescription = "Precipitation icon"
-        )
-
-        Text(
-            text = forecastItem,
-            fontSize = size.sp,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
 fun ForecastImageLabel(forecastItem: String, image: Painter, size: Int = 15) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         Image(
             painter = image,
             modifier = Modifier.size(size.dp),
             colorFilter = ColorFilter.tint(Color.White),
-            contentDescription = "Precipitation icon"
+            contentDescription = "$forecastItem Icon"
         )
 
         Text(
@@ -89,7 +71,7 @@ fun ForecastIconLabel(forecastItem: String, icon: ImageVector, size: Int = 15) {
             imageVector = icon,
             modifier = Modifier.size(size.dp),
             colorFilter = ColorFilter.tint(Color.White),
-            contentDescription = "Precipitation icon"
+            contentDescription = "$forecastItem Icon"
         )
 
         Text(
