@@ -1,10 +1,9 @@
 package com.hidesign.hiweather.dagger
 
 import android.content.Context
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import com.hidesign.hiweather.network.WeatherApi
 import com.hidesign.hiweather.util.Constants
+import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.localebro.okhttpprofiler.OkHttpProfilerInterceptor
 import dagger.Module
 import dagger.Provides
@@ -19,12 +18,6 @@ import java.util.concurrent.TimeUnit
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    fun getAPIKey(context: Context, key: String): String {
-        val ai: ApplicationInfo = context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-        val value = ai.metaData.getString(key, "")
-        return value.toString()
-    }
 
     @Provides
     fun provideWeatherApiKey(context: Context): String {
