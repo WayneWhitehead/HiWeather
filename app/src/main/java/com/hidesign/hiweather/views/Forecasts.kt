@@ -15,14 +15,15 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Daily
 import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.model.OneCallResponse
+import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtils.getWeatherIconUrl
 import com.hidesign.hiweather.util.WeatherUtils.getWindDegreeText
@@ -50,15 +52,18 @@ import kotlin.math.roundToInt
 fun ForecastCard(modifier: Modifier, weather: OneCallResponse, items: List<Any>) {
     val title = if (items[0] is Hourly) stringResource(R.string.hourly_forecast) else stringResource(R.string.daily_forecast)
     val padding: PaddingValues = if (items[0] is Hourly) PaddingValues(10.dp) else PaddingValues(10.dp, 20.dp, 10.dp, 10.dp)
-    Card(modifier,
-        backgroundColor = Color(0xFF2B2B2B),
-        contentColor = Color.White,
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF2B2B2B),
+            contentColor = Color.White
+        ),
         shape = RoundedCornerShape(30.dp)
     ) {
         Column (horizontalAlignment = Alignment.CenterHorizontally)  {
             Text(modifier = Modifier.padding(padding),
                 text = title, fontSize = 28.sp, color = Color.White)
-            Divider(color = Color.White)
+            HorizontalDivider(color = Color.White)
 
             LazyRow(modifier = Modifier
                 .wrapContentHeight()
@@ -84,9 +89,11 @@ fun ForecastCard(modifier: Modifier, weather: OneCallResponse, items: List<Any>)
 @Composable
 fun HourlyItem(modifier: Modifier, hourly: Hourly, tz: String) {
     Column(
-        modifier.clickable {
-            forecastTimezone.value = tz
-            forecastHourly.value = hourly },
+        modifier
+            .clickable {
+                forecastTimezone.value = tz
+                forecastHourly.value = hourly
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ForecastHeader(value = DateUtils.getDateTime(DateUtils.HOURLY_FORMAT, hourly.dt.toLong(), tz))
@@ -156,16 +163,13 @@ fun ForecastHeader(value: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpandForecast(daily: Daily? = null, hourly: Hourly? = null, timezone: String) {
+fun ExpandForecast(daily: Daily? = null, hourly: Hourly? = null, timezone: String, onDismissRequest: () -> Unit) {
     ModalBottomSheet(
-        containerColor = Color(0xFF3E3E3E),
+        containerColor = Color(0xFA000000),
         contentColor = Color.White,
         sheetState = rememberModalBottomSheetState(),
-        onDismissRequest = {
-            forecastDaily.value = null
-            forecastHourly.value = null
-            forecastTimezone.value = null
-        }) {
+        onDismissRequest = onDismissRequest
+    ) {
         val image = getWeatherIconUrl(hourly?.weather?.get(0)?.icon ?: daily?.weather?.get(0)?.icon ?: "")
         val date = if (hourly != null) DateUtils.getDateTime(DateUtils.HOURLY_FORMAT, hourly.dt.toLong(), timezone) else DateUtils.getDayOfWeekText(DateUtils.DAILY_FORMAT, daily?.dt?.toLong() ?: 0, timezone)
         val realFeel = (daily?.feelsLike?.day ?: hourly?.feelsLike)?.roundToInt() ?: 0
@@ -284,6 +288,8 @@ fun ExpandForecast(daily: Daily? = null, hourly: Hourly? = null, timezone: Strin
                     )
                 }
             }
+
+            AdViewComposable(modifier = Modifier, adUnitId = AdUtil.BOTTOM_SHEET_AD)
         }
     }
 }
@@ -293,7 +299,8 @@ fun ExpandedForecastHeader(image: String, date: String) {
     Card(
         modifier = Modifier.wrapContentHeight(),
         shape = RoundedCornerShape(45.dp),
-        elevation = 5.dp
+        elevation = CardDefaults.elevatedCardElevation(5.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFA0E0D0D))
     ) {
         Row(
             modifier = Modifier.padding(end = 40.dp),
@@ -317,8 +324,8 @@ fun ExpandedForecastHeader(image: String, date: String) {
 fun ExpandedHourlyCurrent(currentTemp: String, realFeelTemp: String) {
     Card(
         shape = RoundedCornerShape(30.dp),
-        elevation = 10.dp,
-        backgroundColor = Color(0xFF191919)
+        elevation = CardDefaults.elevatedCardElevation(10.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1F))
     ) {
         Column(
             modifier = Modifier
@@ -344,8 +351,8 @@ fun ExpandedHourlyCurrent(currentTemp: String, realFeelTemp: String) {
 fun ExpandedDailyCurrent(highTemp: String, lowTemp: String, realFeelTemp: String) {
     Card(
         shape = RoundedCornerShape(30.dp),
-        elevation = 10.dp,
-        backgroundColor = Color(0xFF191919)
+        elevation = CardDefaults.elevatedCardElevation(10.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF19191A))
     ) {
         Column(
             modifier = Modifier

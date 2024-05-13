@@ -12,15 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +34,7 @@ import com.hidesign.hiweather.R
 import com.hidesign.hiweather.databinding.ExpandedAirItemBinding
 import com.hidesign.hiweather.model.AirPollutionResponse
 import com.hidesign.hiweather.model.Components
+import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.Extensions.roundToDecimal
 import com.hidesign.hiweather.util.WeatherUtils
@@ -58,8 +59,10 @@ fun AirPollutionCard(
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(10.dp, 0.dp),
-        backgroundColor = Color(backgroundColor),
-        contentColor = Color.White,
+        colors = CardDefaults.cardColors(
+            containerColor = Color(backgroundColor),
+            contentColor = Color.Black
+        ),
         shape = RoundedCornerShape(30.dp)
     ) {
         Row(modifier = Modifier
@@ -129,9 +132,9 @@ fun AirPollutionCard(
 @Composable
 fun AirQualityButton(title: String, airText: String, airValue: Double) {
     TextButton(
-        onClick = { airItemTitle.value = title },
+        onClick = { airItemTitle = title },
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.Black,
+            containerColor = Color.Black,
             contentColor = Color.White
         ),
         shape = RoundedCornerShape(10.dp)
@@ -146,13 +149,13 @@ fun AirQualityButton(title: String, airText: String, airValue: Double) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AirQualityDialog(c: Components, dialogTitle: MutableState<String>) {
+fun AirQualityDialog(c: Components, onDismissRequest: () -> Unit) {
     val context = LocalContext.current
 
     ModalBottomSheet(
         containerColor = Color(0xD9000000),
         sheetState = rememberModalBottomSheetState(),
-        onDismissRequest = { dialogTitle.value = "" }
+        onDismissRequest = onDismissRequest
     ) {
         AndroidViewBinding(
             ExpandedAirItemBinding::inflate,
@@ -167,7 +170,7 @@ fun AirQualityDialog(c: Components, dialogTitle: MutableState<String>) {
             }
 
             for ((pos, item) in context.resources.getStringArray(R.array.airTitles).withIndex()) {
-                if (item == dialogTitle.value) {
+                if (item == airItemTitle) {
                     this.airPicker.value = pos
                 }
             }
@@ -178,6 +181,8 @@ fun AirQualityDialog(c: Components, dialogTitle: MutableState<String>) {
                 updateValues(context, context.resources.getStringArray(R.array.airTitles)[newVal], c, this)
             }
         }
+
+        AdViewComposable(modifier = Modifier, adUnitId = AdUtil.BOTTOM_SHEET_AD)
     }
 }
 

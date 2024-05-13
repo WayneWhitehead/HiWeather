@@ -1,25 +1,36 @@
 package com.hidesign.hiweather.views.ui.theme
 
 import android.app.Activity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColors(
+private val DarkColorScheme = darkColorScheme(
     primary = colorPrimary,
     secondary = colorAccent,
 
     background = colorAccentDark,
-    surface = Color(0xFFFFFBFE),
+    surface = colorAccentDark,
+
     onPrimary = Color.White,
     onSecondary = Color.White,
+
     onBackground = Color.White,
-    onSurface = Color(0xFF1C1B1F),
+    onSurface = Color.White,
+)
+
+private val shapes = Shapes(
+    small = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(8.dp),
+    large = RoundedCornerShape(0.dp)
 )
 
 @Composable
@@ -34,7 +45,8 @@ fun HiWeatherTheme(content: @Composable () -> Unit) {
     }
 
     MaterialTheme(
-        colors = DarkColorScheme,
+        colorScheme = DarkColorScheme,
+        shapes = shapes,
         content = content
     )
 }

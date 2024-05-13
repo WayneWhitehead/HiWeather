@@ -57,4 +57,5 @@ object Constants {
 
     const val REFRESH_INTERVAL = "refreshInterval"
     const val TEMPERATURE_UNIT = "temperatureUnit"
+    const val NOTIFICATION_ENABLED = "notificationEnabled"
 }

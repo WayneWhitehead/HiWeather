@@ -1,17 +1,16 @@
 package com.hidesign.hiweather.views
 
-import android.Manifest
 import android.app.Activity
 import android.location.Address
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,30 +30,32 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FabPosition
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -77,182 +78,161 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Current
 import com.hidesign.hiweather.model.Daily
+import com.hidesign.hiweather.model.ErrorType
 import com.hidesign.hiweather.model.Hourly
 import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.network.NetworkStatus
+import com.hidesign.hiweather.model.UIStatus
 import com.hidesign.hiweather.network.WeatherViewModel
 import com.hidesign.hiweather.services.APIWorker
+import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.hidesign.hiweather.util.Extensions.roundToDecimal
-import com.hidesign.hiweather.util.LocationUtil
+import com.hidesign.hiweather.util.PermissionUtil
 import com.hidesign.hiweather.util.WeatherUtils
 import com.hidesign.hiweather.views.ui.theme.HiWeatherTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import timber.log.Timber
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import javax.inject.Inject
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class MainActivity: ComponentActivity(){
 
+    private lateinit var permissionUtil: PermissionUtil
     private val weatherViewModel: WeatherViewModel by viewModels()
-    @Inject
-    lateinit var locationUtil: LocationUtil
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        locationPermissions = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissionsResult ->
-            if (permissionsResult.all { it.value }) {
-                locationUtil.getLastLocation(object: LocationUtil.AddressCallback {
-                    override fun onSuccess(address: Address) {
-                        uAddress.value = address
-                        val pref = getSharedPreferences(Constants.PREFERENCES, MODE_PRIVATE)
-                        pref.edit().putString(Constants.LATITUDE, address.latitude.toString()).apply()
-                        pref.edit().putString(Constants.LONGITUDE, address.longitude.toString()).apply()
-                        pref.edit().putString(Constants.LOCALITY, address.locality).apply()
-                        CoroutineScope(Dispatchers.Main).launch {
-                            weatherViewModel.getOneCallWeather(uAddress.value, Constants.getUnit(this@MainActivity))
-                            weatherViewModel.getAirPollution(uAddress.value)
-                        }
-                    }
-
-                    override fun onFailure() { Timber.tag("Tag").e("Error getting Address: ") }
-                })
-            } else {
-                weatherViewModel.updateUIState(NetworkStatus.ERROR)
+        permissionUtil = PermissionUtil(context = this).apply {
+            onPermissionGranted = {
+                weatherViewModel.fetchWeather(context = this@MainActivity)
+            }
+            onPermissionDenied = {
+                weatherViewModel.updateUIState(UIStatus.Error(ErrorType.LOCATION_PERMISSION_ERROR))
             }
         }
-        locationPermissions.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
-        APIWorker.initWorker(this)
 
         setContent {
             HiWeatherTheme {
-                WeatherScreen(weatherViewModel)
+                WeatherScreen(weatherViewModel, permissionUtil)
             }
+        }
+
+        if (permissionUtil.hasLocationPermissions(this)) {
+            weatherViewModel.fetchWeather(context = this)
+        } else {
+            permissionUtil.requestLocationPermissions()
+        }
+
+        if (!permissionUtil.hasNotificationPermission(this)) {
+            permissionUtil.requestNotificationPermission()
         }
     }
 }
 
-private lateinit var locationPermissions: ActivityResultLauncher<Array<String>>
-private var uAddress = mutableStateOf(Address(Locale.getDefault()))
-val airItemTitle = mutableStateOf("")
-val showSettings = mutableStateOf(false)
-
-val sunWeather: MutableState<Daily?> = mutableStateOf(null)
+var airItemTitle by mutableStateOf("")
 val forecastTimezone: MutableState<String?> = mutableStateOf(null)
 val forecastDaily: MutableState<Daily?> = mutableStateOf(null)
 val forecastHourly: MutableState<Hourly?> = mutableStateOf(null)
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun WeatherScreen(weatherViewModel: WeatherViewModel) {
+fun WeatherScreen(weatherViewModel: WeatherViewModel, permissionUtil: PermissionUtil) {
     val context = LocalContext.current
-    val uiState = weatherViewModel.uiState.observeAsState()
+    val uiState by weatherViewModel.uiState.observeAsState()
+    val uAddress by weatherViewModel.lastUsedAddress.observeAsState()
+    var showSettings by remember { mutableStateOf(false) }
+
     val intentLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { activityResult ->
         when (activityResult.resultCode) {
             Activity.RESULT_OK -> {
                 activityResult.data?.let {
                     val place = Autocomplete.getPlaceFromIntent(it)
-                    Address(Locale.getDefault()).apply {
+                    val address = Address(Locale.getDefault()).apply {
                         latitude = place.latLng?.latitude ?: 0.0
                         longitude = place.latLng?.longitude ?: 0.0
                         locality = place.name
-                        uAddress.value = (this)
-                        CoroutineScope(Dispatchers.Main).launch {
-                            weatherViewModel.getOneCallWeather(uAddress.value, Constants.getUnit(context))
-                            weatherViewModel.getAirPollution(uAddress.value)
-                        }
                     }
+                    weatherViewModel.fetchWeather(address, context)
                 }
             }
             AutocompleteActivity.RESULT_ERROR -> {
-                weatherViewModel.updateUIState(NetworkStatus.ERROR)
+                weatherViewModel.updateUIState(UIStatus.Error(ErrorType.PLACES_ERROR))
             }
             Activity.RESULT_CANCELED -> {
                 runBlocking {
                     delay(500)
-                    weatherViewModel.updateUIState(NetworkStatus.SUCCESS)
+                    weatherViewModel.updateUIState(UIStatus.Success)
                 }
             }
         }
     }
-    val launchMapInputOverlay = {
-        Places.initialize(context, getAPIKey(context, Constants.PLACES_KEY))
-        val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
-        val intent = Autocomplete
-            .IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
-            .build(context)
-        intentLauncher.launch(intent)
-    }
-
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = uiState.value == NetworkStatus.LOADING,
-        onRefresh = {
-            runBlocking {
-                weatherViewModel.getOneCallWeather(uAddress.value, Constants.getUnit(context))
-                weatherViewModel.getAirPollution(uAddress.value)
-            }
-        }
-    )
 
     Scaffold(
         bottomBar = {
-            BottomAppBar(
-                cutoutShape = RoundedCornerShape(50.dp),
-                backgroundColor = MaterialTheme.colors.background,
-            ){
-                IconButton(onClick = {
-                    showSettings.value = true
-                }) {
+            BottomAppBar {
+                IconButton(onClick = { showSettings = true }) {
                     Icon(Icons.Filled.Settings, contentDescription = "Settings")
                 }
-                IconButton(onClick = {
-                    weatherViewModel.updateUIState(NetworkStatus.LOADING)
-                    locationPermissions.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION))
-                }) {
+                IconButton(onClick = { weatherViewModel.fetchWeather(context = context) }) {
                     Icon(Icons.Filled.MyLocation, contentDescription = "Get Location")
                 }
                 Text(
-                    text = uAddress.value.locality ?: "",
-                    modifier = Modifier.padding(10.dp)
+                    text = uAddress?.locality ?: "",
+                    modifier = Modifier.padding(horizontal = 10.dp)
                 )
             }
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { launchMapInputOverlay() },
+                onClick = { Places.initialize(context, getAPIKey(context, Constants.PLACES_KEY))
+                    val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
+                    val intent = Autocomplete
+                        .IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
+                        .build(context)
+                    intentLauncher.launch(intent)
+                },
                 shape = RoundedCornerShape(50.dp),
-                backgroundColor = MaterialTheme.colors.secondary
+                containerColor = MaterialTheme.colorScheme.secondary
             ) {
                 Icon(Icons.Filled.Search, "Search")
             }
         },
-        isFloatingActionButtonDocked = true,
-        floatingActionButtonPosition = FabPosition.End,
-        backgroundColor = Color.Black
+        floatingActionButtonPosition = FabPosition.EndOverlay,
+        containerColor = Color.Black
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            Column(
-                Modifier
-                    .pullRefresh(pullRefreshState)
-                    .verticalScroll(rememberScrollState())) {
-                WeatherViews(weatherViewModel)
+            when (uiState) {
+                UIStatus.Success -> {
+                    Column(
+                        Modifier.align(Alignment.Center)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        WeatherViews(weatherViewModel)
+                    }
+                }
+                is UIStatus.Error -> {
+                    ErrorScreen((uiState as UIStatus.Error).type, permissionUtil)
+                }
+                UIStatus.Loading -> {
+                    LoadingScreen()
+                }
+                null -> {}
             }
-            if (uiState.value == NetworkStatus.LOADING) {
-                LoadingScreen()
-            }
-            if (showSettings.value) {
-                SettingsDialog()
+        }
+
+        SettingsDialog(showSettings) {
+            showSettings = false
+            if (it) {
+                APIWorker.initWorker(context)
+            } else {
+                APIWorker.cancelWorker(context)
             }
         }
     }
@@ -261,21 +241,19 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
 @Composable
 fun LoadingScreen() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0x4D000000)),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
             Modifier.size(100.dp),
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colorScheme.secondary,
             strokeWidth = 20.dp
         )
         CircularProgressIndicator(
             Modifier
                 .size(120.dp)
                 .rotate(45f),
-            color = MaterialTheme.colors.primary,
+            color = MaterialTheme.colorScheme.primary,
             strokeWidth = 20.dp
         )
         CircularProgressIndicator(
@@ -296,20 +274,79 @@ fun LoadingScreen() {
 }
 
 @Composable
+fun ErrorScreen(error: ErrorType, permissionUtil: PermissionUtil) {
+    val context = LocalContext.current
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(Modifier.padding(horizontal = 20.dp).align(Alignment.Center)) {
+            Icon(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .size(70.dp),
+                imageVector = error.icon,
+                tint = Color.White,
+                contentDescription = "Error Icon"
+            )
+
+            HorizontalDivider(color = Color.White, modifier = Modifier.padding(0.dp, 20.dp))
+
+            Text(
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                text = error.message,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+            )
+
+            when(error) {
+                ErrorType.LOCATION_PERMISSION_ERROR -> {
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        text = "This app needs location permissions to work properly. Please enable the permissions in the app settings.",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    TextButton(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = { permissionUtil.showRationaleAndRequestPermissions(context) }
+                    ) {
+                        Text("Grant Permission")
+                    }
+                }
+                else -> {}
+            }
+
+            HorizontalDivider(color = Color.White, modifier = Modifier.padding(0.dp, 10.dp))
+        }
+    }
+}
+
+@Composable
 fun WeatherViews(weatherViewModel: WeatherViewModel) {
-    val weatherState = weatherViewModel.oneCallResponse.observeAsState()
-    val airPollutionState = weatherViewModel.airPollutionResponse.observeAsState()
+    val weatherState by weatherViewModel.oneCallResponse.observeAsState()
+    val airPollutionState by weatherViewModel.airPollutionResponse.observeAsState()
+    val sunWeather: MutableState<Daily?> = remember { mutableStateOf(null) }
 
     ConstraintLayout(modifier = Modifier.height(1200.dp)) {
-        val (header, current, hourly, currentExtra, air, wind, sun, daily) = createRefs()
-        if (weatherState.value != null && airPollutionState.value != null) {
-            val weather = weatherState.value!!
-            val airPollution = airPollutionState.value!!
+        val (ad, header, current, hourly, currentExtra, air, wind, sun, daily) = createRefs()
+        if (weatherState != null && airPollutionState != null) {
+            val weather = weatherState!!
+            val airPollution = airPollutionState!!
+
+            AdViewComposable(
+                Modifier.constrainAs(ad) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+                AdUtil.APP_BAR_AD
+            )
 
             ForecastCard(
-                Modifier
-                    .padding(10.dp)
-                    .constrainAs(daily) {
+                Modifier.padding(10.dp).constrainAs(daily) {
                         top.linkTo(sun.bottom, (-20).dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
@@ -342,14 +379,13 @@ fun WeatherViews(weatherViewModel: WeatherViewModel) {
                 weather.current!!
             )
             SunCard(
-                Modifier
-                    .padding(50.dp, 0.dp)
+                Modifier.padding(50.dp, 0.dp)
                     .clickable { sunWeather.value = weather.daily[0] }
                     .constrainAs(sun) {
                         top.linkTo(wind.bottom, (-20).dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                },
+                    },
                 daily = weather.daily[0],
                 tz = weather.timezone,
                 showHours = false,
@@ -364,32 +400,41 @@ fun WeatherViews(weatherViewModel: WeatherViewModel) {
             )
             ForecastCard(
                 Modifier.padding(10.dp).constrainAs(hourly) {
-                    top.linkTo(current.bottom, (-45).dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
+                        top.linkTo(current.bottom, (-45).dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
                 weather,
                 weather.hourly.subList(1,25)
             )
             LocationHeaderCard(
                 Modifier.constrainAs(header) {
-                    top.linkTo(parent.top, 20.dp)
+                    top.linkTo(ad.bottom, 20.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
             )
-            if (airItemTitle.value != "") {
-                AirQualityDialog(airPollution.list[0].components, airItemTitle)
+
+            if (airItemTitle != "") {
+                AirQualityDialog(airPollution.list[0].components) {
+                    airItemTitle = ""
+                }
             }
             if (sunWeather.value != null) {
-                ExpandedSunMoon(sunWeather.value!!, weather.timezone)
+                ExpandedSunMoon(sunWeather.value!!, weather.timezone) {
+                    sunWeather.value = null
+                }
             }
             if (forecastTimezone.value != null) {
                 ExpandForecast(
                     daily = forecastDaily.value,
                     hourly = forecastHourly.value,
                     timezone = forecastTimezone.value!!
-                )
+                ) {
+                    forecastDaily.value = null
+                    forecastHourly.value = null
+                    forecastTimezone.value = null
+                }
             }
         }
     }
@@ -399,8 +444,10 @@ fun WeatherViews(weatherViewModel: WeatherViewModel) {
 fun LocationHeaderCard(modifier: Modifier) {
     Card(
         modifier = modifier.wrapContentSize(),
-        backgroundColor = MaterialTheme.colors.secondary,
-        contentColor = Color.White,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondary,
+            contentColor = Color.White
+        ),
         shape = RoundedCornerShape(30.dp)
     ) {
         val df = SimpleDateFormat("d MMMM HH:mm", Locale.getDefault())
@@ -422,8 +469,10 @@ fun CurrentCard(modifier: Modifier, weather: OneCallResponse) {
             .padding(5.dp, 0.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
-        backgroundColor = Color.White,
-        contentColor = Color.Black,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+            contentColor = Color.Black
+        ),
         shape = RoundedCornerShape(30.dp)
     ) {
         val context = LocalContext.current
@@ -503,7 +552,7 @@ fun CurrentCard(modifier: Modifier, weather: OneCallResponse) {
                     fontSize = 16.sp
                 )
 
-                Divider(
+                HorizontalDivider(
                     Modifier
                         .width(20.dp)
                         .padding(5.dp, 0.dp),
@@ -543,8 +592,10 @@ fun CurrentExtraCard(modifier: Modifier, weather: OneCallResponse) {
             .wrapContentWidth()
             .wrapContentHeight()
             .padding(10.dp, 0.dp),
-        backgroundColor = Color(0xFF174488),
-        contentColor = Color.White,
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF174488),
+            contentColor = Color.White
+        ),
         shape = RoundedCornerShape(30.dp)
     ) {
         LazyVerticalGrid(
@@ -605,7 +656,10 @@ fun WindCard(modifier: Modifier, current: Current) {
         modifier = modifier
             .padding(65.dp, 0.dp)
             .wrapContentSize(),
-        backgroundColor = Color.White,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+            contentColor = Color.Black
+        ),
         shape = RoundedCornerShape(30.dp)
     ) {
         Box (Modifier.height(100.dp)) {

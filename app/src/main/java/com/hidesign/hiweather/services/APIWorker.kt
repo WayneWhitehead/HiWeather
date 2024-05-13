@@ -2,10 +2,14 @@ package com.hidesign.hiweather.services
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
+import android.location.Address
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.Constraints
@@ -25,6 +29,7 @@ import com.hidesign.hiweather.views.WeatherWidget
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.scopes.ViewModelScoped
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -43,14 +48,32 @@ class APIWorker @AssistedInject constructor(
         val locality = pref.getString(Constants.LOCALITY, "") ?: ""
         val units = Constants.getUnit(context)
 
-        val response = mutableStateOf(OneCallResponse())
-        response.value = weatherRepository.getWeather(lat, lon, units).body()!!
+        var response by mutableStateOf(OneCallResponse())
+        val weatherResponse = weatherRepository.getWeather(
+            address = Address(Locale.getDefault()).apply {
+                latitude = lat
+                longitude = lon
+            },
+            unit = units
+        )
+        weatherResponse.onSuccess {
+            if (it != null) {
+                response = it
+            }
+        }
+        weatherResponse.onFailure {
+            return Result.failure()
+        }
 
-        //Post value to preferences
         val prefs = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE)
-        prefs.edit().putString(Constants.WEATHER_RESPONSE, Gson().toJson(response.value)).apply()
+        prefs.edit().putString(Constants.WEATHER_RESPONSE, Gson().toJson(response)).apply()
         updateWidget(context)
 
+        createOrUpdateNotification(locality, response)
+        return Result.success()
+    }
+
+    private fun createOrUpdateNotification(locality: String, response: OneCallResponse) {
         val notificationId = 1
         val channelId = "my_channel_id"
         val channelName = "Background Weather"
@@ -62,18 +85,22 @@ class APIWorker @AssistedInject constructor(
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(notificationChannel)
 
+        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
         val notification = NotificationCompat.Builder(context, channelId)
-            .setContentTitle("${response.value.current?.temp?.roundToInt()}° in $locality")
-            .setContentText(response.value.daily[0].summary)
+            .setContentTitle("${response.current?.temp?.roundToInt()}° in $locality")
+            .setContentText(response.daily[0].summary)
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
             .build()
 
         if (notificationManager.areNotificationsEnabled()) {
             notificationManager.notify(notificationId, notification)
         } else {
-            //Request permission
+            notificationManager.cancel(notificationId)
         }
-        return Result.success()
     }
 
     companion object {
@@ -87,6 +114,11 @@ class APIWorker @AssistedInject constructor(
                 ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,
                 getWorkRequest(context)
             )
+        }
+
+        fun cancelWorker(context: Context) {
+            val workManager = WorkManager.getInstance(context)
+            workManager.cancelAllWorkByTag(WORK_NAME)
         }
 
         private fun getWorkRequest(context: Context): PeriodicWorkRequest {

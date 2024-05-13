@@ -1,5 +1,6 @@
 package com.hidesign.hiweather.views
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,11 +11,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Text
-import androidx.compose.material3.Divider
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.model.Daily
+import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtils.getMoonIcon
 
@@ -42,7 +46,9 @@ fun SunCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = t
         content = {
             Box(Modifier.background(sunGradient)) {
                 Column(
-                    Modifier.padding(20.dp).fillMaxWidth(),
+                    Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -65,7 +71,9 @@ fun MoonCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = 
         content = {
             Box(Modifier.background(moonGradient)) {
                 Column(
-                    Modifier.padding(20.dp).fillMaxWidth(),
+                    Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -93,10 +101,14 @@ fun SunMoonCard(modifier: Modifier, content: @Composable () -> Unit, color: Colo
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
-        backgroundColor = Color.Transparent,
-        contentColor = color,
-        content = content
-    )
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent,
+            contentColor = color
+        ),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.background)
+    ){
+        content()
+    }
 }
 
 @Composable
@@ -123,16 +135,17 @@ fun VisibleHoursText(hours: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpandedSunMoon(daily: Daily, timezone: String) {
+fun ExpandedSunMoon(daily: Daily, timezone: String, onDismissRequest: () -> Unit = {}) {
     ModalBottomSheet(
         modifier = Modifier.padding(0.dp, 0.dp , 0.dp, 20.dp),
         containerColor = Color(0xD9000000),
         sheetState = rememberModalBottomSheetState(),
-        onDismissRequest = { sunWeather.value = null }
+        onDismissRequest = onDismissRequest
     ) {
         SunCard(Modifier.padding(30.dp, 0.dp), daily = daily, tz = timezone)
-        Divider(Modifier.padding(0.dp, 15.dp), color = Color.White)
+        HorizontalDivider(Modifier.padding(0.dp, 15.dp), color = Color.White)
         MoonCard(Modifier.padding(30.dp, 0.dp), daily = daily, tz = timezone)
-        Divider(Modifier.padding(0.dp, 20.dp), color = Color.Transparent)
+        HorizontalDivider(Modifier.padding(0.dp, 20.dp), color = Color.Transparent)
+        AdViewComposable(modifier = Modifier, adUnitId = AdUtil.BOTTOM_SHEET_AD)
     }
 }

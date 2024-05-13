@@ -6,7 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,10 +20,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.rememberAsyncImagePainter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.hidesign.hiweather.util.AdUtil
 
 @Composable
 fun LoadPicture(modifier: Modifier = Modifier, url: String, contentDescription: String = "", contentScale: ContentScale = ContentScale.Fit) {
@@ -80,4 +82,14 @@ fun ForecastIconLabel(forecastItem: String, icon: ImageVector, size: Int = 15) {
             color = Color.White
         )
     }
+}
+
+@Composable
+fun AdViewComposable(modifier: Modifier, adUnitId: String) {
+    AndroidView(
+        modifier = modifier,
+        factory = { ctx ->
+            AdUtil.setupAds(ctx, adUnitId)
+        }
+    )
 }
