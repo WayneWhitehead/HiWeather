@@ -3,8 +3,12 @@ package com.hidesign.hiweather.util
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.hidesign.hiweather.R
+import com.hidesign.hiweather.data.model.FeelsLike
+import com.hidesign.hiweather.data.model.Temp
+import com.hidesign.hiweather.data.model.Components
+import kotlin.math.roundToInt
 
-object WeatherUtils {
+object WeatherUtil {
 
     fun getMoonIcon(id: Double): Int {
         return when (id) {
@@ -50,6 +54,19 @@ object WeatherUtils {
         return base + icon + suffix
     }
 
+    fun getComponentList(c: Components): List<Double> {
+        return listOf(
+            c.co,
+            c.nh3,
+            c.no,
+            c.no2,
+            c.o3,
+            c.pm10,
+            c.pm25,
+            c.so2
+        )
+    }
+
     fun getCurrentActiveSeriesItem(valueArray: IntArray, current: Float): Int {
         return when (current) {
             in 0F..valueArray[0].toFloat() -> 0
@@ -72,6 +89,26 @@ object WeatherUtils {
             5 -> "Very Poor"
             else -> "Unknown"
         }
+    }
+
+    fun getTempOfDay(currentHour: Int, temp: Temp): Int {
+        return when (currentHour) {
+            in 0..6 -> temp.night
+            in 6..12 -> temp.morn
+            in 12..18 -> temp.day
+            in 18..24 -> temp.eve
+            else -> temp.day
+        }.roundToInt()
+    }
+
+    fun getFeelsLikeOfDay(currentHour: Int, temp: FeelsLike): Int {
+        return when (currentHour) {
+            in 0..6 -> temp.night
+            in 6..12 -> temp.morn
+            in 12..18 -> temp.day
+            in 18..24 -> temp.eve
+            else -> temp.day
+        }.roundToInt()
     }
 
     fun getAirQualityColour(index: Int, context: Context): Int {

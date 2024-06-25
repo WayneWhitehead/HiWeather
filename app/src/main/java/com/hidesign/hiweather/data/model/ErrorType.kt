@@ -1,10 +1,7 @@
-package com.hidesign.hiweather.model
+package com.hidesign.hiweather.data.model
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ErrorOutline
-import androidx.compose.material.icons.outlined.LocationDisabled
-import androidx.compose.material.icons.outlined.LocationSearching
-import androidx.compose.material.icons.outlined.WrongLocation
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class ErrorType(val message: String, val icon: ImageVector) {

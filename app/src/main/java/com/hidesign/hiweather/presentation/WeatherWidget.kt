@@ -1,4 +1,4 @@
-package com.hidesign.hiweather.views
+package com.hidesign.hiweather.presentation
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
@@ -15,10 +15,10 @@ import com.bumptech.glide.request.target.AppWidgetTarget
 import com.bumptech.glide.request.transition.Transition
 import com.google.gson.Gson
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.model.OneCallResponse
+import com.hidesign.hiweather.data.model.OneCallResponse
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.DateUtils
-import com.hidesign.hiweather.util.WeatherUtils
+import com.hidesign.hiweather.util.WeatherUtil
 import timber.log.Timber
 import java.text.MessageFormat
 import kotlin.math.roundToInt
@@ -100,24 +100,24 @@ open class WeatherWidget : AppWidgetProvider() {
                 views.setViewVisibility(R.id.image, View.VISIBLE)
             }
         }
-        Glide.with(context.applicationContext).asBitmap().load(WeatherUtils.getWeatherIconUrl(
-            weatherContent.current!!.weather[0].icon)).apply(RequestOptions().override(30, 30))
+        Glide.with(context.applicationContext).asBitmap().load(WeatherUtil.getWeatherIconUrl(
+            weatherContent.current.weather[0].icon)).apply(RequestOptions().override(30, 30))
             .into(awt)
 
         views.setTextViewText(R.id.date, DateUtils.getDateTime("dd/MM HH:mm",
-            weatherContent.current!!.dt.toLong(),
+            weatherContent.current.dt.toLong(),
             weatherContent.timezone))
-        val currentTemp = weatherContent.current!!.temp.roundToInt()
+        val currentTemp = weatherContent.current.temp.roundToInt()
         views.setTextViewText(R.id.current_temp, MessageFormat.format(context.getString(R.string._0_c), currentTemp))
-        val realFeel = weatherContent.current!!.feelsLike.roundToInt()
+        val realFeel = weatherContent.current.feelsLike.roundToInt()
         views.setTextViewText(R.id.real_feel_temp, MessageFormat.format(context.getString(R.string.real_feel_0_c), realFeel))
-        val uvi = weatherContent.current!!.uvi.roundToInt()
+        val uvi = weatherContent.current.uvi.roundToInt()
         views.setTextViewText(R.id.uv_index, MessageFormat.format(context.getString(R.string.uv_index_0), uvi))
         val precipitation = (weatherContent.hourly[0].pop * 100)
         views.setTextViewText(R.id.precipitation, MessageFormat.format(context.getString(R.string._0_p), precipitation))
-        val humidity = weatherContent.current!!.humidity
+        val humidity = weatherContent.current.humidity
         views.setTextViewText(R.id.humidity, MessageFormat.format(context.getString(R.string._0_p), humidity))
-        val cloudiness = (weatherContent.current!!.clouds)
+        val cloudiness = (weatherContent.current.clouds)
         views.setTextViewText(R.id.cloudiness, MessageFormat.format(context.getString(R.string._0_p), cloudiness))
         views.setOnClickPendingIntent(R.id.layout, PendingIntent.getActivity(
             context,

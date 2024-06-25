@@ -1,4 +1,4 @@
-package com.hidesign.hiweather.model
+package com.hidesign.hiweather.data.model
 
 
 import com.google.gson.annotations.SerializedName

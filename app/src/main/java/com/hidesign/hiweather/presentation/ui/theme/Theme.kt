@@ -1,4 +1,4 @@
-package com.hidesign.hiweather.views.ui.theme
+package com.hidesign.hiweather.presentation.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.shape.RoundedCornerShape

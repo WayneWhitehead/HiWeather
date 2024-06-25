@@ -1,4 +1,4 @@
-package com.hidesign.hiweather.views
+package com.hidesign.hiweather.presentation
 
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -66,23 +65,7 @@ fun ForecastImageLabel(forecastItem: String, image: Painter, size: Int = 15) {
     }
 }
 
-@Composable
-fun ForecastIconLabel(forecastItem: String, icon: ImageVector, size: Int = 15) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        Image(
-            imageVector = icon,
-            modifier = Modifier.size(size.dp),
-            colorFilter = ColorFilter.tint(Color.White),
-            contentDescription = "$forecastItem Icon"
-        )
 
-        Text(
-            text = forecastItem,
-            fontSize = size.sp,
-            color = Color.White
-        )
-    }
-}
 
 @Composable
 fun AdViewComposable(modifier: Modifier, adUnitId: String) {

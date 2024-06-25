@@ -10,20 +10,6 @@
     <string name="hourly_forecast">24 Hour Forecast</string>
     <string name="forecast">Forecast</string>
 
-    <string-array name="temperature_units">
-        <item>Celsius</item>
-        <item>Fahrenheit</item>
-        <item>Kelvin</item>
-    </string-array>
-
-    <string-array name="refresh_interval">
-        <item>1 Hour</item>
-        <item>3 Hours</item>
-        <item>6 Hours</item>
-        <item>12 Hours</item>
-        <item>24 Hours</item>
-    </string-array>
-
     <!--Template Weather Strings-->
     <string name="template_current_temp">21°</string>
     <string name="template_real_feel">Real Feel 23°</string>
@@ -36,15 +22,6 @@
     <string name="template_wind_direction">N</string>
     <string name="template_sun_and_moon_duration">12 Hours and 0 Minutes</string>
 
-    <string-array name="airTitles">
-        <item>Nitrogen Dioxide(NO₂)</item>
-        <item>Ozone(O₃)</item>
-        <item>Coarse Particle Matter(PM₁₀)</item>
-        <item>Fine Particle Matter(PM₂₅)</item>
-        <item>Carbon Monoxide(CO)</item>
-        <item>Ammonia(NH₃)</item>
-        <item>Sulphur Dioxide(SO₂)</item>
-    </string-array>
     <string-array name="airStrings">
         <item>Good</item>
         <item>Moderate</item>
@@ -53,6 +30,14 @@
         <item>Very Unhealthy</item>
         <item>Hazardous</item>
     </string-array>
+
+    <integer-array name="airNoValues">
+        <item>0</item>
+        <item>2</item>
+        <item>3</item>
+        <item>3</item>
+        <item>30</item>
+    </integer-array>
     <integer-array name="airNoTwoValues">
         <item>50</item>
         <item>100</item>

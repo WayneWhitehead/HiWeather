@@ -1,61 +1,27 @@
-package com.hidesign.hiweather.views
+package com.hidesign.hiweather.presentation
 
+import android.Manifest
 import android.app.Activity
 import android.location.Address
-import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -70,27 +36,25 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.fragment.app.FragmentActivity
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import com.hidesign.hiweather.BuildConfig
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.model.Current
-import com.hidesign.hiweather.model.Daily
-import com.hidesign.hiweather.model.ErrorType
-import com.hidesign.hiweather.model.Hourly
-import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.model.UIStatus
-import com.hidesign.hiweather.network.WeatherViewModel
+import com.hidesign.hiweather.data.model.*
+import com.hidesign.hiweather.presentation.components.AirPollutionCard
+import com.hidesign.hiweather.presentation.components.ForecastCard
+import com.hidesign.hiweather.presentation.components.SolarCard
+import com.hidesign.hiweather.presentation.dialog.*
+import com.hidesign.hiweather.presentation.ui.theme.HiWeatherTheme
 import com.hidesign.hiweather.services.APIWorker
 import com.hidesign.hiweather.util.AdUtil
-import com.hidesign.hiweather.util.Constants
-import com.hidesign.hiweather.util.Constants.getAPIKey
 import com.hidesign.hiweather.util.Extensions.roundToDecimal
-import com.hidesign.hiweather.util.PermissionUtil
-import com.hidesign.hiweather.util.WeatherUtils
-import com.hidesign.hiweather.views.ui.theme.HiWeatherTheme
+import com.hidesign.hiweather.util.WeatherUtil
+import com.permissionx.guolindev.PermissionX
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -98,52 +62,62 @@ import java.text.MessageFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.TimeZone
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
-class MainActivity: ComponentActivity(){
+class MainActivity: FragmentActivity(){
 
-    private lateinit var permissionUtil: PermissionUtil
     private val weatherViewModel: WeatherViewModel by viewModels()
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        permissionUtil = PermissionUtil(context = this).apply {
-            onPermissionGranted = {
-                weatherViewModel.fetchWeather(context = this@MainActivity)
-            }
-            onPermissionDenied = {
-                weatherViewModel.updateUIState(UIStatus.Error(ErrorType.LOCATION_PERMISSION_ERROR))
-            }
-        }
-
         setContent {
             HiWeatherTheme {
-                WeatherScreen(weatherViewModel, permissionUtil)
+                WeatherScreen(weatherViewModel, this)
             }
         }
+        requestPermission(listOf(PermissionX.permission.POST_NOTIFICATIONS, Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
 
-        if (permissionUtil.hasLocationPermissions(this)) {
-            weatherViewModel.fetchWeather(context = this)
-        } else {
-            permissionUtil.requestLocationPermissions()
-        }
-
-        if (!permissionUtil.hasNotificationPermission(this)) {
-            permissionUtil.requestNotificationPermission()
-        }
+    fun requestPermission(permissions: List<String>) {
+        PermissionX.init(this)
+            .permissions(permissions)
+            .onExplainRequestReason { scope, deniedList ->
+                if (deniedList.contains(Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                    run {
+                        scope.showRequestReasonDialog(
+                            deniedList,
+                            "Core fundamental are based on these permissions",
+                            "OK",
+                            "Cancel"
+                        )
+                    }
+                }
+            }
+            .onForwardToSettings { scope, deniedList ->
+                scope.showForwardToSettingsDialog(deniedList, "You need to allow necessary permissions in Settings manually", "OK", "Cancel")
+            }
+            .request { allGranted, grantedList, deniedList ->
+                grantedList.forEach {
+                    if (it == Manifest.permission.ACCESS_COARSE_LOCATION) {
+                        weatherViewModel.fetchWeather()
+                    }
+                }
+                deniedList.forEach {
+                    when (it) {
+                        Manifest.permission.ACCESS_COARSE_LOCATION -> {
+                            weatherViewModel.updateUIState(UIStatus.Error(ErrorType.LOCATION_PERMISSION_ERROR))
+                        }
+                    }
+                }
+            }
     }
 }
 
-var airItemTitle by mutableStateOf("")
-val forecastTimezone: MutableState<String?> = mutableStateOf(null)
-val forecastDaily: MutableState<Daily?> = mutableStateOf(null)
-val forecastHourly: MutableState<Hourly?> = mutableStateOf(null)
-
 @Composable
-fun WeatherScreen(weatherViewModel: WeatherViewModel, permissionUtil: PermissionUtil) {
+fun WeatherScreen(weatherViewModel: WeatherViewModel, activity: MainActivity) {
     val context = LocalContext.current
     val uiState by weatherViewModel.uiState.observeAsState()
     val uAddress by weatherViewModel.lastUsedAddress.observeAsState()
@@ -159,7 +133,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel, permissionUtil: Permission
                         longitude = place.latLng?.longitude ?: 0.0
                         locality = place.name
                     }
-                    weatherViewModel.fetchWeather(address, context)
+                    weatherViewModel.fetchWeather(address)
                 }
             }
             AutocompleteActivity.RESULT_ERROR -> {
@@ -180,7 +154,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel, permissionUtil: Permission
                 IconButton(onClick = { showSettings = true }) {
                     Icon(Icons.Filled.Settings, contentDescription = "Settings")
                 }
-                IconButton(onClick = { weatherViewModel.fetchWeather(context = context) }) {
+                IconButton(onClick = { weatherViewModel.fetchWeather() }) {
                     Icon(Icons.Filled.MyLocation, contentDescription = "Get Location")
                 }
                 Text(
@@ -191,7 +165,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel, permissionUtil: Permission
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { Places.initialize(context, getAPIKey(context, Constants.PLACES_KEY))
+                onClick = { Places.initialize(context, BuildConfig.PLACES_KEY)
                     val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
                     val intent = Autocomplete
                         .IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
@@ -210,29 +184,22 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel, permissionUtil: Permission
         Box(modifier = Modifier.padding(innerPadding)) {
             when (uiState) {
                 UIStatus.Success -> {
-                    Column(
-                        Modifier.align(Alignment.Center)
-                            .verticalScroll(rememberScrollState())
-                    ) {
+                    Column(Modifier.align(Alignment.Center).verticalScroll(rememberScrollState())) {
                         WeatherViews(weatherViewModel)
                     }
                 }
-                is UIStatus.Error -> {
-                    ErrorScreen((uiState as UIStatus.Error).type, permissionUtil)
-                }
-                UIStatus.Loading -> {
-                    LoadingScreen()
-                }
+                is UIStatus.Error -> ErrorScreen((uiState as UIStatus.Error).type, activity)
+                UIStatus.Loading -> LoadingScreen()
                 null -> {}
             }
-        }
 
-        SettingsDialog(showSettings) {
-            showSettings = false
-            if (it) {
-                APIWorker.initWorker(context)
-            } else {
-                APIWorker.cancelWorker(context)
+            SettingsDialog(activity, showSettings) {
+                showSettings = false
+                if (it == 0) {
+                    APIWorker.cancelWorker(context)
+                } else {
+                    APIWorker.initWorker(context)
+                }
             }
         }
     }
@@ -274,13 +241,15 @@ fun LoadingScreen() {
 }
 
 @Composable
-fun ErrorScreen(error: ErrorType, permissionUtil: PermissionUtil) {
-    val context = LocalContext.current
+fun ErrorScreen(error: ErrorType, activity: MainActivity) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column(Modifier.padding(horizontal = 20.dp).align(Alignment.Center)) {
+        Column(
+            Modifier
+                .padding(horizontal = 20.dp)
+                .align(Alignment.Center)) {
             Icon(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
@@ -311,7 +280,7 @@ fun ErrorScreen(error: ErrorType, permissionUtil: PermissionUtil) {
                     )
                     TextButton(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = { permissionUtil.showRationaleAndRequestPermissions(context) }
+                        onClick = { activity.requestPermission(listOf( Manifest.permission.ACCESS_COARSE_LOCATION)) }
                     ) {
                         Text("Grant Permission")
                     }
@@ -326,16 +295,11 @@ fun ErrorScreen(error: ErrorType, permissionUtil: PermissionUtil) {
 
 @Composable
 fun WeatherViews(weatherViewModel: WeatherViewModel) {
-    val weatherState by weatherViewModel.oneCallResponse.observeAsState()
-    val airPollutionState by weatherViewModel.airPollutionResponse.observeAsState()
-    val sunWeather: MutableState<Daily?> = remember { mutableStateOf(null) }
+    val oneCallResponse by weatherViewModel.oneCallResponse.observeAsState()
 
     ConstraintLayout(modifier = Modifier.height(1200.dp)) {
         val (ad, header, current, hourly, currentExtra, air, wind, sun, daily) = createRefs()
-        if (weatherState != null && airPollutionState != null) {
-            val weather = weatherState!!
-            val airPollution = airPollutionState!!
-
+        oneCallResponse?.let { weather ->
             AdViewComposable(
                 Modifier.constrainAs(ad) {
                     top.linkTo(parent.top)
@@ -347,12 +311,13 @@ fun WeatherViews(weatherViewModel: WeatherViewModel) {
 
             ForecastCard(
                 Modifier.padding(10.dp).constrainAs(daily) {
-                        top.linkTo(sun.bottom, (-20).dp)
+                        top.linkTo(sun.bottom, (- 20).dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },
                 weather,
-                weather.daily.subList(1, 8)
+                weather.daily.subList(1, 8),
+                weatherViewModel
             )
             CurrentExtraCard(
                 Modifier.constrainAs(currentExtra) {
@@ -368,7 +333,7 @@ fun WeatherViews(weatherViewModel: WeatherViewModel) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-                airPollution
+                weatherViewModel
             )
             WindCard(
                 Modifier.constrainAs(wind) {
@@ -376,11 +341,12 @@ fun WeatherViews(weatherViewModel: WeatherViewModel) {
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 },
-                weather.current!!
+                weather.current
             )
-            SunCard(
-                Modifier.padding(50.dp, 0.dp)
-                    .clickable { sunWeather.value = weather.daily[0] }
+            SolarCard(
+                Modifier
+                    .padding(50.dp, 0.dp)
+                    .clickable { weatherViewModel.showCelestialDialog(weather.daily[0], weather.timezone) }
                     .constrainAs(sun) {
                         top.linkTo(wind.bottom, (-20).dp)
                         start.linkTo(parent.start)
@@ -405,43 +371,27 @@ fun WeatherViews(weatherViewModel: WeatherViewModel) {
                         end.linkTo(parent.end)
                     },
                 weather,
-                weather.hourly.subList(1,25)
+                weather.hourly.subList(1,25),
+                weatherViewModel
             )
-            LocationHeaderCard(
+            DateHeaderCard(
                 Modifier.constrainAs(header) {
                     top.linkTo(ad.bottom, 20.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
+                },
+                weather.timezone
             )
 
-            if (airItemTitle != "") {
-                AirQualityDialog(airPollution.list[0].components) {
-                    airItemTitle = ""
-                }
-            }
-            if (sunWeather.value != null) {
-                ExpandedSunMoon(sunWeather.value!!, weather.timezone) {
-                    sunWeather.value = null
-                }
-            }
-            if (forecastTimezone.value != null) {
-                ExpandForecast(
-                    daily = forecastDaily.value,
-                    hourly = forecastHourly.value,
-                    timezone = forecastTimezone.value!!
-                ) {
-                    forecastDaily.value = null
-                    forecastHourly.value = null
-                    forecastTimezone.value = null
-                }
-            }
+            AirPollutionDialog(weatherViewModel)
+            CelestialDialog(weatherViewModel)
+            ForecastDialog(weatherViewModel)
         }
     }
 }
 
 @Composable
-fun LocationHeaderCard(modifier: Modifier) {
+fun DateHeaderCard(modifier: Modifier, tz: String) {
     Card(
         modifier = modifier.wrapContentSize(),
         colors = CardDefaults.cardColors(
@@ -451,7 +401,8 @@ fun LocationHeaderCard(modifier: Modifier) {
         shape = RoundedCornerShape(30.dp)
     ) {
         val df = SimpleDateFormat("d MMMM HH:mm", Locale.getDefault())
-        val formattedDate = df.format(Calendar.getInstance().time)
+        df.timeZone = TimeZone.getTimeZone(tz)
+        val formattedDate = df.format(Calendar.getInstance(df.timeZone).time)
         Text(
             text = formattedDate,
             modifier = Modifier.padding(20.dp),
@@ -489,14 +440,14 @@ fun CurrentCard(modifier: Modifier, weather: OneCallResponse) {
                         .height(80.dp)
                         .width(80.dp)
                         .align(Alignment.CenterVertically),
-                    url = WeatherUtils.getWeatherIconUrl(weather.current?.weather!![0].icon),
+                    url = WeatherUtil.getWeatherIconUrl(weather.current.weather[0].icon),
                     contentDescription = "Weather icon"
                 )
 
                 Text(
                     text = MessageFormat.format(
                         context.getString(R.string._0_c),
-                        weather.current?.temp?.roundToInt()
+                        weather.current.temp.roundToInt()
                     ),
                     fontSize = 55.sp,
                     fontWeight = FontWeight.Bold,
@@ -547,7 +498,7 @@ fun CurrentCard(modifier: Modifier, weather: OneCallResponse) {
                 Text(
                     text = MessageFormat.format(
                         context.getString(R.string.real_feel_0_c),
-                        weather.current?.feelsLike?.roundToInt()
+                        weather.current.feelsLike.roundToInt()
                     ),
                     fontSize = 16.sp
                 )
@@ -569,7 +520,7 @@ fun CurrentCard(modifier: Modifier, weather: OneCallResponse) {
                 )
 
                 Text(
-                    text = weather.current?.uvi?.toInt().toString(),
+                    text = weather.current.uvi.toInt().toString(),
                     fontSize = 16.sp
                 )
             }
@@ -613,12 +564,12 @@ fun CurrentExtraCard(modifier: Modifier, weather: OneCallResponse) {
                         size = 18
                     )
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.humidity_0), weather.current!!.humidity),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.humidity_0), weather.current.humidity),
                         image = painterResource(id = R.drawable.precipitation),
                         size = 18
                     )
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.cloudiness_0), weather.current!!.clouds),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.cloudiness_0), weather.current.clouds),
                         image = painterResource(id = R.drawable.precipitation),
                         size = 18
                     )
@@ -630,17 +581,17 @@ fun CurrentExtraCard(modifier: Modifier, weather: OneCallResponse) {
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.dew_point_0_c), weather.current!!.dewPoint.roundToInt()),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.dew_point_0_c), weather.current.dewPoint.roundToInt()),
                         image = painterResource(id = R.drawable.dew_point),
                         size = 18
                     )
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.pressure_0_hpa), weather.current!!.pressure / 1000),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.pressure_0_hpa), weather.current.pressure / 1000),
                         image = painterResource(id = R.drawable.pressure),
                         size = 18
                     )
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.visibility_0_m), weather.current!!.visibility / 1000),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.visibility_0_m), weather.current.visibility / 1000),
                         image = painterResource(id = R.drawable.visibility),
                         size = 18
                     )
@@ -699,7 +650,7 @@ fun WindCard(modifier: Modifier, current: Current) {
                         )
                     }
                     Text(
-                        text = WeatherUtils.getWindDegreeText(current.windDeg),
+                        text = WeatherUtil.getWindDegreeText(current.windDeg),
                         fontSize = 22.sp,
                         color = Color.Black
                     )

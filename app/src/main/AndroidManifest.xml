@@ -5,8 +5,6 @@
     package="com.hidesign.hiweather">
 
     <dist:module dist:instant="true" />
-
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -34,7 +32,7 @@
         </provider>
 
         <receiver
-            android:name=".views.WeatherWidget"
+            android:name=".presentation.WeatherWidget"
             android:exported="false" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -46,7 +44,7 @@
         </receiver>
 
         <activity
-            android:name=".views.MainActivity"
+            android:name=".presentation.MainActivity"
             android:exported="true"
             android:screenOrientation="sensorPortrait"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">

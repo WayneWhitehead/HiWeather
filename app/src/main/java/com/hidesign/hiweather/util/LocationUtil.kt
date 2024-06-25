@@ -6,8 +6,7 @@ import android.content.SharedPreferences
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.Priority
+import com.google.android.gms.location.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -23,12 +22,20 @@ class LocationUtil @Inject constructor(
     @SuppressLint("MissingPermission")
     suspend fun getLocation(): Address? = withContext(Dispatchers.IO) {
         try {
-            val location = locationProviderClient.lastLocation.await()
-            location?.let {
+            val lastLocationRequest = LastLocationRequest.Builder().apply {
+                setMaxUpdateAgeMillis(10000)
+                setGranularity(Granularity.GRANULARITY_COARSE)
+            }
+
+            locationProviderClient.getLastLocation(lastLocationRequest.build()).await()?.let {
                 getAddressFromLocation(it)
-            } ?: run {
-                val currentLocation = locationProviderClient.getCurrentLocation(Priority.PRIORITY_LOW_POWER, null).await()
-                currentLocation?.let {
+            }?: run {
+                val currentLocationRequest = CurrentLocationRequest.Builder().apply {
+                    setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                    setMaxUpdateAgeMillis(10000)
+                    setGranularity(Granularity.GRANULARITY_COARSE)
+                }
+                locationProviderClient.getCurrentLocation(currentLocationRequest.build(), null).await()?.let {
                     getAddressFromLocation(it)
                 }
             }
@@ -52,9 +59,9 @@ class LocationUtil @Inject constructor(
     private suspend fun saveLocationInPreferences(address: Address) = withContext(Dispatchers.IO) {
         val prefs: SharedPreferences = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE)
         with(prefs.edit()) {
-            putString(Constants.LATITUDE, address.latitude.toString())
-            putString(Constants.LONGITUDE, address.longitude.toString())
-            putString(Constants.LOCALITY, address.locality)
+            putFloat(Constants.LATITUDE, address.latitude.toFloat())
+            putFloat(Constants.LONGITUDE, address.longitude.toFloat())
+            putString(Constants.LOCALITY, address.locality ?: address.featureName)
             apply()
         }
     }

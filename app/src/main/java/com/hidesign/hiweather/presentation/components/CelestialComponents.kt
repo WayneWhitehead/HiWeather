@@ -1,24 +1,12 @@
-package com.hidesign.hiweather.views
+package com.hidesign.hiweather.presentation.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,24 +19,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.model.Daily
-import com.hidesign.hiweather.util.AdUtil
+import com.hidesign.hiweather.data.model.Daily
 import com.hidesign.hiweather.util.DateUtils
-import com.hidesign.hiweather.util.WeatherUtils.getMoonIcon
-
-val sunGradient = Brush.linearGradient(listOf(Color(0xFFCC4B4B), Color(0xFFFFF964)))
-val moonGradient = Brush.linearGradient(listOf(Color(0xFF15439F), Color(0xFF000000)))
+import com.hidesign.hiweather.util.WeatherUtil.getMoonIcon
 
 @Composable
-fun SunCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = true) {
-    SunMoonCard(
+fun SolarCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = true) {
+    val sunGradient = Brush.linearGradient(listOf(Color(0xFFCC4B4B), Color(0xFFFFF964)))
+    CelestialCard(
         modifier = modifier,
         content = {
             Box(Modifier.background(sunGradient)) {
                 Column(
-                    Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth(),
+                    modifier = Modifier.padding(20.dp).fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -65,15 +48,14 @@ fun SunCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = t
     )
 }
 @Composable
-fun MoonCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = true) {
-    SunMoonCard(
+fun LunarCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = true) {
+    val moonGradient = Brush.linearGradient(listOf(Color(0xFF15439F), Color(0xFF000000)))
+    CelestialCard(
         modifier = modifier,
         content = {
             Box(Modifier.background(moonGradient)) {
                 Column(
-                    Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth(),
+                    Modifier.padding(20.dp).fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
@@ -97,18 +79,13 @@ fun MoonCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = 
 }
 
 @Composable
-fun SunMoonCard(modifier: Modifier, content: @Composable () -> Unit, color: Color) {
+fun CelestialCard(modifier: Modifier, content: @Composable () -> Unit, color: Color) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(30.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent,
-            contentColor = color
-        ),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.background)
-    ){
-        content()
-    }
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent, contentColor = color),
+        content = { content() }
+    )
 }
 
 @Composable
@@ -131,21 +108,4 @@ fun VisibleHoursText(hours: String) {
         fontSize = 22.sp,
         fontWeight = FontWeight.Bold,
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ExpandedSunMoon(daily: Daily, timezone: String, onDismissRequest: () -> Unit = {}) {
-    ModalBottomSheet(
-        modifier = Modifier.padding(0.dp, 0.dp , 0.dp, 20.dp),
-        containerColor = Color(0xD9000000),
-        sheetState = rememberModalBottomSheetState(),
-        onDismissRequest = onDismissRequest
-    ) {
-        SunCard(Modifier.padding(30.dp, 0.dp), daily = daily, tz = timezone)
-        HorizontalDivider(Modifier.padding(0.dp, 15.dp), color = Color.White)
-        MoonCard(Modifier.padding(30.dp, 0.dp), daily = daily, tz = timezone)
-        HorizontalDivider(Modifier.padding(0.dp, 20.dp), color = Color.Transparent)
-        AdViewComposable(modifier = Modifier, adUnitId = AdUtil.BOTTOM_SHEET_AD)
-    }
 }
