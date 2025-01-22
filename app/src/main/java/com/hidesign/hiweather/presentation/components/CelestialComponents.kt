@@ -2,7 +2,13 @@ package com.hidesign.hiweather.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,7 +30,8 @@ import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtil.getMoonIcon
 
 @Composable
-fun SolarCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = true) {
+fun SolarCard(modifier: Modifier, daily: Daily?, tz: String?, showHours: Boolean = true) {
+    if (daily == null || tz == null) return
     val sunGradient = Brush.linearGradient(listOf(Color(0xFFCC4B4B), Color(0xFFFFF964)))
     CelestialCard(
         modifier = modifier,

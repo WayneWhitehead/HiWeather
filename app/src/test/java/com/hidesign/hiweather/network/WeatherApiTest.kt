@@ -1,7 +1,8 @@
 package com.hidesign.hiweather.network
 
-import com.hidesign.hiweather.model.AirPollutionResponse
-import com.hidesign.hiweather.model.OneCallResponse
+import com.hidesign.hiweather.domain.repository.WeatherApi
+import com.hidesign.hiweather.data.model.AirPollutionResponse
+import com.hidesign.hiweather.data.model.OneCallResponse
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

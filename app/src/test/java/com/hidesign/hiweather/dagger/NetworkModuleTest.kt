@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
-import com.hidesign.hiweather.network.WeatherApi
+import com.hidesign.hiweather.domain.repository.WeatherApi
 import com.localebro.okhttpprofiler.OkHttpProfilerInterceptor
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs

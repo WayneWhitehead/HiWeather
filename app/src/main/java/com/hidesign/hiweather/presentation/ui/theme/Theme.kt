@@ -15,16 +15,17 @@ import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = colorPrimary,
-    secondary = colorAccent,
-
-    background = colorAccentDark,
-    surface = colorAccentDark,
-
     onPrimary = Color.White,
+    secondary = colorAccent,
     onSecondary = Color.White,
 
+    background = colorAccentDark,
     onBackground = Color.White,
+    surface = colorAccentDark,
     onSurface = Color.White,
+
+    primaryContainer = Color(0xFF151515),
+    onPrimaryContainer = Color.White,
 )
 
 private val shapes = Shapes(

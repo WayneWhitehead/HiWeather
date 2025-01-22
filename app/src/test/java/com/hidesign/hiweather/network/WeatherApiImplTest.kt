@@ -1,7 +1,9 @@
 package com.hidesign.hiweather.network
 
-import com.hidesign.hiweather.model.AirPollutionResponse
-import com.hidesign.hiweather.model.OneCallResponse
+import com.hidesign.hiweather.domain.repository.WeatherApi
+import com.hidesign.hiweather.data.repository.WeatherRepositoryImpl
+import com.hidesign.hiweather.data.model.AirPollutionResponse
+import com.hidesign.hiweather.data.model.OneCallResponse
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -11,10 +13,10 @@ import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
 
-class WeatherRepositoryTest {
+class WeatherApiImplTest {
 
     private val weatherApi = mockk<WeatherApi>()
-    private val weatherRepository = WeatherRepository(weatherApi, "YOUR_API_KEY")
+    private val weatherRepositoryImpl = WeatherRepositoryImpl(weatherApi, "YOUR_API_KEY")
 
     @Before
     fun setup() {
@@ -42,7 +44,7 @@ class WeatherRepositoryTest {
     @Test
     fun getWeather_withValidParameters_returnsSuccessResponse() {
         runBlocking {
-            val response = weatherRepository.getWeather(lat = 0.0, lon = 0.0, unit = "metric")
+            val response = weatherRepositoryImpl.getOneCall(lat = 0.0, lon = 0.0, unit = "metric")
 
             assert(response.isSuccessful)
             assert(response.body() != null)
@@ -52,7 +54,7 @@ class WeatherRepositoryTest {
     @Test
     fun getAirPollution_withValidParameters_returnsSuccessResponse() {
         runBlocking {
-            val response = weatherRepository.getAirPollution(lat = 0.0, lon = 0.0)
+            val response = weatherRepositoryImpl.getAirPollution(lat = 0.0, lon = 0.0)
 
             assert(response.isSuccessful())
             assert(response.body() != null)
@@ -64,7 +66,7 @@ class WeatherRepositoryTest {
         runBlocking {
             every { runBlocking { weatherApi.getOneCall(lat = 0.0, lon = 0.0, apiKey = "YOUR_API_KEY") } } returns Response.error(401, "Unauthorized".toResponseBody(null))
 
-            assertThrows(Exception::class.java) { runBlocking { weatherRepository.getWeather(lat = 0.0, lon = 0.0, unit = "metric") } }
+            assertThrows(Exception::class.java) { runBlocking { weatherRepositoryImpl.getOneCall(lat = 0.0, lon = 0.0, unit = "metric") } }
         }
     }
 
@@ -73,7 +75,7 @@ class WeatherRepositoryTest {
         runBlocking {
             every { runBlocking { weatherApi.getAirPollution(lat = 0.0, lon = 0.0, apiKey = "YOUR_API_KEY") } } returns Response.error(401, "Unauthorized".toResponseBody(null))
 
-            assertThrows(Exception::class.java) { runBlocking { weatherRepository.getAirPollution(lat = 0.0, lon = 0.0) } }
+            assertThrows(Exception::class.java) { runBlocking { weatherRepositoryImpl.getAirPollution(lat = 0.0, lon = 0.0) } }
         }
     }
 }

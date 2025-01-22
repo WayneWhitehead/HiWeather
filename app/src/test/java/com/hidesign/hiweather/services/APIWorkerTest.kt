@@ -10,8 +10,8 @@ import androidx.work.impl.utils.taskexecutor.SerialExecutor
 import androidx.work.impl.utils.taskexecutor.TaskExecutor
 import com.google.gson.Gson
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.network.WeatherRepository
+import com.hidesign.hiweather.data.model.OneCallResponse
+import com.hidesign.hiweather.data.repository.WeatherRepositoryImpl
 import com.hidesign.hiweather.services.APIWorker.Companion.WORK_NAME
 import com.hidesign.hiweather.services.APIWorker.Companion.getWorkRequest
 import com.hidesign.hiweather.services.APIWorker.Companion.updateWidget
@@ -38,7 +38,7 @@ class APIWorkerTest {
     private val weatherResponse = mockk<Response<OneCallResponse?>>()
     private val workManager: WorkManager = mockk()
     private val context: Context = mockk()
-    private val weatherRepository: WeatherRepository = mockk()
+    private val weatherRepositoryImpl: WeatherRepositoryImpl = mockk()
     private lateinit var worker: APIWorker
 
     @Before
@@ -53,7 +53,7 @@ class APIWorkerTest {
 
         every { workerParameters.taskExecutor } returns taskExecutor
         every { taskExecutor.serialTaskExecutor } returns mockk<SerialExecutor>()
-        worker = APIWorker(context, workerParameters, weatherRepository)
+        worker = APIWorker(context, workerParameters, weatherRepositoryImpl)
 
         val sharedPreferences = mockk<SharedPreferences>()
         every { context.getSharedPreferences(Constants.PREFERENCES, 0) } returns sharedPreferences
@@ -68,7 +68,7 @@ class APIWorkerTest {
 
         val weatherResponse = mockk<Response<OneCallResponse?>>()
         every { runBlocking {
-            weatherRepository.getWeather(anyDouble(), anyDouble(), anyString())
+            weatherRepositoryImpl.getOneCall(anyDouble(), anyDouble(), anyString())
         } } returns weatherResponse
 
         // Mock the updateWidget() method
@@ -83,7 +83,7 @@ class APIWorkerTest {
 
         verify {
             runBlocking {
-                weatherRepository.getWeather(anyDouble(), anyDouble(), anyString())
+                weatherRepositoryImpl.getOneCall(anyDouble(), anyDouble(), anyString())
             }
         }
     }
@@ -92,7 +92,7 @@ class APIWorkerTest {
     fun `doWork() should save the weather response to shared preferences`() {
         every {
             runBlocking {
-                weatherRepository.getWeather(anyDouble(), anyDouble(), anyString())
+                weatherRepositoryImpl.getOneCall(anyDouble(), anyDouble(), anyString())
             }
         } returns weatherResponse
 
@@ -163,7 +163,7 @@ class APIWorkerTest {
         val expectedTime = 1*60*60*1000L
 
         every { context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE) }.returns(pref)
-        every { pref.getInt(Constants.REFRESH_INTERVAL, 0) }.returns(repeatInterval)
+        every { pref.getInt(APIWorker.REFRESH_INTERVAL, 0) }.returns(repeatInterval)
 
         // Act
         val workRequest = getWorkRequest(context)

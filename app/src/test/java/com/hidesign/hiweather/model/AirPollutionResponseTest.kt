@@ -1,5 +1,6 @@
 package com.hidesign.hiweather.model
 
+import com.hidesign.hiweather.data.model.*
 import org.junit.Assert
 import org.junit.Test
 

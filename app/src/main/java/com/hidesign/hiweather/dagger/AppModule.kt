@@ -9,7 +9,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.Dispatchers
 import java.util.Locale
+import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -28,4 +31,8 @@ object AppModule {
     fun provideLocationProviderClient(context: Context): FusedLocationProviderClient {
         return LocationServices.getFusedLocationProviderClient(context)
     }
+
+    @Provides
+    @Named("io")
+    fun provideIOContext(): CoroutineContext = Dispatchers.IO
 }

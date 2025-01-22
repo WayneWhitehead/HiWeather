@@ -74,7 +74,9 @@ abstract class FutureWeather(
     @SerializedName("wind_deg") var windDeg: Int = 0,
     @SerializedName("wind_gust") var windGust: Double = 0.0,
     @SerializedName("wind_speed") var windSpeed: Double = 0.0,
-): Serializable
+): Serializable {
+    constructor() : this(0, 0.0, 0, 0, 0.0, 0, 0.0, listOf(), 0, 0.0, 0.0)
+}
 
 data class Daily(
     @SerializedName("feels_like") var feelsLike: FeelsLike = FeelsLike(),

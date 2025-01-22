@@ -1,12 +1,20 @@
 package com.hidesign.hiweather.presentation
 
 import android.location.Address
-import androidx.lifecycle.*
-import com.hidesign.hiweather.data.model.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.hidesign.hiweather.data.model.AirPollutionResponse
+import com.hidesign.hiweather.data.model.Components
+import com.hidesign.hiweather.data.model.Daily
+import com.hidesign.hiweather.data.model.ErrorType
+import com.hidesign.hiweather.data.model.FutureWeather
+import com.hidesign.hiweather.data.model.OneCallResponse
 import com.hidesign.hiweather.domain.usecase.GetAirPollutionUseCase
 import com.hidesign.hiweather.domain.usecase.GetOneCallUseCase
 import com.hidesign.hiweather.util.LocationUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,46 +27,42 @@ class WeatherViewModel @Inject constructor(
     private val getAirPollutionUseCase: GetAirPollutionUseCase,
     private val locationUtil: LocationUtil
 ) : ViewModel() {
-    data class AirPollutionDialogState(val components: Components, val title: String)
-    data class SunMoonDialogState(val daily: Daily, val timezone: String)
-    data class ForecastDialogState(val weather: FutureWeather, val timezone: String)
+    data class AirPollutionDialogState(val show: Boolean = false, val components: Components = Components(), val title: String = "")
+    data class SunMoonDialogState(val show: Boolean = false, val daily: Daily = Daily(), val timezone: String = "")
+    data class ForecastDialogState(val show: Boolean = false , val weather: FutureWeather = Daily(), val timezone: String = "")
+    data class WeatherState(
+        var lastUsedAddress: Address? = null,
+        var oneCallResponse: OneCallResponse? = null,
+        var airPollutionResponse: AirPollutionResponse? = null,
+        var airPollutionDialogState: AirPollutionDialogState = AirPollutionDialogState(),
+        var celestialDialogState: SunMoonDialogState = SunMoonDialogState(),
+        var forecastDialogState: ForecastDialogState = ForecastDialogState(),
+        val errorType: ErrorType? = null,
+        val isLoading: Boolean = false
+    )
 
-    private val _lastUsedAddress = MutableLiveData<Address?>()
-    val lastUsedAddress: LiveData<Address?> = _lastUsedAddress
-
-    private val _oneCallResponse = MutableLiveData<OneCallResponse>()
-    val oneCallResponse: LiveData<OneCallResponse> = _oneCallResponse
-
-    private val _airPollutionResponse = MutableLiveData<AirPollutionResponse>()
-    val airPollutionResponse: LiveData<AirPollutionResponse> = _airPollutionResponse
-
-    private val _uiState = MutableLiveData<UIStatus>(UIStatus.Loading)
-    val uiState: LiveData<UIStatus> = _uiState
-
-    private val _airPollutionDialogState = MutableStateFlow<AirPollutionDialogState?>(null)
-    val airPollutionDialogState: StateFlow<AirPollutionDialogState?> = _airPollutionDialogState.asStateFlow()
-
-    private val _celestialDialogState = MutableStateFlow<SunMoonDialogState?>(null)
-    val celestialDialogState: StateFlow<SunMoonDialogState?> = _celestialDialogState.asStateFlow()
-
-    private val _forecastDialogState = MutableStateFlow<ForecastDialogState?>(null)
-    val forecastDialogState: StateFlow<ForecastDialogState?> = _forecastDialogState.asStateFlow()
+    private val _state = MutableStateFlow(WeatherState())
+    val state: StateFlow<WeatherState> = _state.asStateFlow()
 
     fun fetchWeather(address: Address? = null) {
         viewModelScope.launch {
-            _uiState.value = UIStatus.Loading
             try {
                 val location = address ?: locationUtil.getLocation()
                 if (location == null) {
-                    _uiState.value = UIStatus.Error(ErrorType.LOCATION_ERROR)
-                    return@launch
+                    showErrorDialog(ErrorType.LOCATION_ERROR)
+                    this.cancel()
+                } else {
+                    _state.emit(state.value.copy(
+                        lastUsedAddress = location,
+                        isLoading = true,
+                        oneCallResponse = null,
+                        airPollutionResponse = null
+                    ))
+                    getOneCall(location)
+                    getAirPollution(location)
                 }
-
-                _lastUsedAddress.value = location
-                getOneCall(location)
-                getAirPollution(location)
             } catch (e: Exception) {
-                _uiState.value = UIStatus.Error(ErrorType.LOCATION_ERROR)
+                showErrorDialog(ErrorType.LOCATION_ERROR)
             }
         }
     }
@@ -66,12 +70,15 @@ class WeatherViewModel @Inject constructor(
     private fun getOneCall(address: Address) {
         viewModelScope.launch {
             val response = getOneCallUseCase(address)
-            response.onSuccess {
-                _oneCallResponse.value = it
-                _uiState.value = UIStatus.Success
+            response.onSuccess { oneCallResponse ->
+                oneCallResponse?.let { oneCall ->
+                    _state.emit(state.value.copy(oneCallResponse = oneCall))
+                } ?: run {
+                    showErrorDialog(ErrorType.WEATHER_ERROR)
+                }
             }
             response.onFailure {
-                _uiState.value = UIStatus.Error(ErrorType.WEATHER_ERROR)
+                showErrorDialog(ErrorType.WEATHER_ERROR)
             }
         }
     }
@@ -79,41 +86,46 @@ class WeatherViewModel @Inject constructor(
     private fun getAirPollution(address: Address) {
         viewModelScope.launch {
             val response = getAirPollutionUseCase(address)
-            response.onSuccess {
-                _airPollutionResponse.value = it
-                _uiState.value = UIStatus.Success
+            response.onSuccess { airPollutionResponse ->
+                airPollutionResponse?.let { airPollution ->
+                    _state.emit(state.value.copy(airPollutionResponse = airPollution))
+                } ?: run {
+                    _state.emit(state.value.copy(errorType = ErrorType.WEATHER_ERROR))
+                }
             }
-            response.onFailure {
-                _uiState.value = UIStatus.Error(ErrorType.WEATHER_ERROR)
-            }
+            response.onFailure { _state.emit(state.value.copy(errorType = ErrorType.WEATHER_ERROR)) }
         }
     }
 
-    fun updateUIState(status: UIStatus) {
-        _uiState.value = status
-    }
+    fun showAirPollutionDialog(components: Components, title: String) { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(airPollutionDialogState = _state.value.airPollutionDialogState.copy(show = true, components = components, title = title)))
+    }}
 
-    fun showAirPollutionDialog(components: Components, title: String) {
-        _airPollutionDialogState.value = AirPollutionDialogState(components, title)
-    }
+    fun hideAirPollutionDialog() { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(airPollutionDialogState = AirPollutionDialogState()))
+    }}
 
-    fun hideAirPollutionDialog() {
-        _airPollutionDialogState.value = null
-    }
+    fun showCelestialDialog(daily: Daily, timezone: String) { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(celestialDialogState = _state.value.celestialDialogState.copy(show = true, daily = daily, timezone = timezone)))
+    }}
 
-    fun showCelestialDialog(daily: Daily, timezone: String) {
-        _celestialDialogState.value = SunMoonDialogState(daily, timezone)
-    }
+    fun hideCelestialDialog() { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(celestialDialogState = SunMoonDialogState()))
+    }}
 
-    fun hideCelestialDialog() {
-        _celestialDialogState.value = null
-    }
+    fun showForecastDialog(weather: FutureWeather, timezone: String) { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(forecastDialogState = _state.value.forecastDialogState.copy(show = true, weather = weather, timezone = timezone)))
+    }}
 
-    fun showForecastDialog(weather: FutureWeather, timezone: String) {
-        _forecastDialogState.value = ForecastDialogState(weather, timezone)
-    }
+    fun hideForecastDialog() { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(forecastDialogState = ForecastDialogState()))
+    }}
 
-    fun hideForecastDialog() {
-        _forecastDialogState.value = null
-    }
+    fun showErrorDialog(errorType: ErrorType) { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(errorType = errorType))
+    }}
+
+    fun hideErrorDialog() { viewModelScope.launch(Dispatchers.Main) {
+        _state.emit(state.value.copy(errorType = null))
+    }}
 }

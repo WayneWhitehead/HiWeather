@@ -8,9 +8,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.hidesign.hiweather.views.ForecastIconLabel
-import com.hidesign.hiweather.views.ForecastImageLabel
-import com.hidesign.hiweather.views.LoadPicture
+import com.hidesign.hiweather.presentation.components.ForecastIconLabel
+import com.hidesign.hiweather.presentation.ForecastImageLabel
+import com.hidesign.hiweather.presentation.LoadPicture
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

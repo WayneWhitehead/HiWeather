@@ -6,9 +6,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.libraries.places.api.Places
-import com.hidesign.hiweather.model.OneCallResponse
-import com.hidesign.hiweather.model.UIStatus
-import com.hidesign.hiweather.network.WeatherViewModel
+import com.hidesign.hiweather.data.model.OneCallResponse
+import com.hidesign.hiweather.data.model.UIStatus
+import com.hidesign.hiweather.presentation.WeatherViewModel
 import com.hidesign.hiweather.util.LocationUtil
 import io.mockk.every
 import io.mockk.mockk
