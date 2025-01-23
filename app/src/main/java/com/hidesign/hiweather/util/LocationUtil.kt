@@ -9,7 +9,6 @@ import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LastLocationRequest
-import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -31,27 +30,23 @@ class LocationUtil @Inject constructor(
 
     @SuppressLint("MissingPermission")
     suspend fun getLocation(): Address = suspendCancellableCoroutine { continuation ->
-        val lastLocationRequest = LastLocationRequest.Builder().apply {
-            setMaxUpdateAgeMillis(10000)
-            setGranularity(Granularity.GRANULARITY_COARSE)
-        }
-
         coroutineScope.launch {
-            try {
-                locationProviderClient.getLastLocation(lastLocationRequest.build()).await()?.let {
+            val lastLocationRequest = LastLocationRequest.Builder().apply {
+                setMaxUpdateAgeMillis(10000)
+                setGranularity(Granularity.GRANULARITY_COARSE)
+            }.build()
+
+            locationProviderClient.getLastLocation(lastLocationRequest).await()?.let {
+                continuation.resumeWith(getAddressFromLocation(it))
+            } ?: run {
+                val currentLocationRequest = CurrentLocationRequest.Builder().apply {
+                    setMaxUpdateAgeMillis(10000)
+                    setGranularity(Granularity.GRANULARITY_COARSE)
+                }.build()
+
+                locationProviderClient.getCurrentLocation(currentLocationRequest, null).await()?.let {
                     continuation.resumeWith(getAddressFromLocation(it))
-                } ?: run {
-                    val currentLocationRequest = CurrentLocationRequest.Builder().apply {
-                        setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-                        setMaxUpdateAgeMillis(10000)
-                        setGranularity(Granularity.GRANULARITY_COARSE)
-                    }
-                    locationProviderClient.getCurrentLocation(currentLocationRequest.build(), null).await()?.let {
-                        continuation.resumeWith(getAddressFromLocation(it))
-                    }
                 }
-            } catch (e: Exception) {
-                continuation.resumeWith(Result.failure(e))
             }
         }
     }

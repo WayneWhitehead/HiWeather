@@ -60,7 +60,7 @@ android {
         minSdk = 28
         targetSdk = 35
         versionCode = 47
-        versionName = "1.0"
+        versionName = "0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -79,6 +79,7 @@ android {
         resources.excludes.add("META-INF/DEPENDENCIES")
         resources.pickFirsts.add("META-INF/LICENSE")
         resources.pickFirsts.add("META-INF/NOTICE")
+        resources.pickFirsts.add("missing_rules.txt")
     }
 }
 

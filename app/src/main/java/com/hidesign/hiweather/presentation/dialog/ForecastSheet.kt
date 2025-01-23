@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.data.model.Daily
+import com.hidesign.hiweather.data.model.FutureWeather
 import com.hidesign.hiweather.data.model.Hourly
 import com.hidesign.hiweather.presentation.AdViewComposable
 import com.hidesign.hiweather.presentation.ForecastImageLabel
 import com.hidesign.hiweather.presentation.LoadPicture
-import com.hidesign.hiweather.presentation.WeatherViewModel
 import com.hidesign.hiweather.presentation.components.ForecastIconLabel
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.DateUtils
@@ -47,22 +47,22 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForecastSheet(state: WeatherViewModel.ForecastDialogState, onDismissRequest: () -> Unit) {
+fun ForecastSheet(weather: FutureWeather, tz: String, onDismissRequest: () -> Unit) {
     ModalBottomSheet(
         containerColor = Color(0xFA000000),
         contentColor = Color.White,
         sheetState = rememberModalBottomSheetState(),
         onDismissRequest = onDismissRequest
     ) {
-        val image = WeatherUtil.getWeatherIconUrl(state.weather.weather[0].icon)
-        val date = when (state.weather) {
-            is Hourly -> DateUtils.getDateTime(DateUtils.HOURLY_FORMAT, state.weather.dt.toLong(), state.timezone)
-            is Daily -> DateUtils.getDayOfWeekText(DateUtils.DAILY_FORMAT, state.weather.dt.toLong(), state.timezone)
+        val image = WeatherUtil.getWeatherIconUrl(weather.weather[0].icon)
+        val date = when (weather) {
+            is Hourly -> DateUtils.getDateTime(DateUtils.HOURLY_FORMAT, weather.dt.toLong(), tz)
+            is Daily -> DateUtils.getDayOfWeekText(DateUtils.DAILY_FORMAT, weather.dt.toLong(), tz)
             else -> ""
         }
-        val realFeel = when (state.weather) {
-            is Hourly -> state.weather.feelsLike
-            is Daily -> state.weather.feelsLike.day
+        val realFeel = when (weather) {
+            is Hourly -> weather.feelsLike
+            is Daily -> weather.feelsLike.day
             else -> 0.0
         }.roundToInt()
 
@@ -73,17 +73,17 @@ fun ForecastSheet(state: WeatherViewModel.ForecastDialogState, onDismissRequest:
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ForecastDialogHeader(image, date)
-                when (state.weather) {
+                when (weather) {
                     is Hourly -> {
                         ForecastDialogHourlyCurrent(
-                            currentTemp = MessageFormat.format(stringResource(id = R.string._0_c), state.weather.temp.roundToInt()),
+                            currentTemp = MessageFormat.format(stringResource(id = R.string._0_c), weather.temp.roundToInt()),
                             realFeelTemp = MessageFormat.format(stringResource(id = R.string.real_feel_0_c), realFeel)
                         )
                     }
                     is Daily -> {
                         ForecastDialogDailyCurrent(
-                            highTemp = MessageFormat.format(stringResource(id = R.string.high_0_c), state.weather.temp.max.roundToInt()),
-                            lowTemp = MessageFormat.format(stringResource(id = R.string.low_0_c), state.weather.temp.min.roundToInt()),
+                            highTemp = MessageFormat.format(stringResource(id = R.string.high_0_c), weather.temp.max.roundToInt()),
+                            lowTemp = MessageFormat.format(stringResource(id = R.string.low_0_c), weather.temp.min.roundToInt()),
                             realFeelTemp = MessageFormat.format(stringResource(id = R.string.real_feel_0_c), realFeel)
                         )
                     }
@@ -102,12 +102,12 @@ fun ForecastSheet(state: WeatherViewModel.ForecastDialogState, onDismissRequest:
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.precipitation_0), (state.weather.pop * 100)),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.precipitation_0), (weather.pop * 100)),
                         image = painterResource(id = R.drawable.rain),
                         size = 16
                     )
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.humidity_0), state.weather.humidity),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.humidity_0), weather.humidity),
                         image = painterResource(id = R.drawable.humidity),
                         size = 16
                     )
@@ -117,12 +117,12 @@ fun ForecastSheet(state: WeatherViewModel.ForecastDialogState, onDismissRequest:
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             Text(
-                                text = state.weather.windSpeed.toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString(),
+                                text = weather.windSpeed.toBigDecimal().setScale(1, RoundingMode.HALF_EVEN).toString(),
                                 fontSize = 40.sp,
                                 color = Color.White
                             )
 
-                            val windDirection = state.weather.windDeg
+                            val windDirection = weather.windDeg
                             Column {
                                 Image(
                                     painter = painterResource(id = R.drawable.direction),
@@ -153,24 +153,24 @@ fun ForecastSheet(state: WeatherViewModel.ForecastDialogState, onDismissRequest:
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.dew_point_0_c), state.weather.dewPoint.roundToInt()),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.dew_point_0_c), weather.dewPoint.roundToInt()),
                         image = painterResource(id = R.drawable.dew_point),
                         size = 16
                     )
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.pressure_0_hpa), state.weather.pressure),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.pressure_0_hpa), weather.pressure),
                         image = painterResource(id = R.drawable.pressure),
                         size = 16
                     )
-                    if (state.weather is Hourly) {
+                    if (weather is Hourly) {
                         ForecastImageLabel(
-                            forecastItem = MessageFormat.format(stringResource(id = R.string.visibility_0_m), state.weather.visibility / 1000),
+                            forecastItem = MessageFormat.format(stringResource(id = R.string.visibility_0_m), weather.visibility / 1000),
                             image = painterResource(id = R.drawable.visibility),
                             size = 16
                         )
                     }
                     ForecastImageLabel(
-                        forecastItem = MessageFormat.format(stringResource(id = R.string.uv_index_0), state.weather.uvi.roundToInt()),
+                        forecastItem = MessageFormat.format(stringResource(id = R.string.uv_index_0), weather.uvi.roundToInt()),
                         image = painterResource(id = R.drawable.uv),
                         size = 16
                     )

@@ -1,6 +1,6 @@
 package com.hidesign.hiweather.presentation.components
 
-import androidx.compose.animation.Crossfade
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -37,7 +36,7 @@ import com.hidesign.hiweather.data.model.Daily
 import com.hidesign.hiweather.data.model.Hourly
 import com.hidesign.hiweather.presentation.ForecastImageLabel
 import com.hidesign.hiweather.presentation.LoadPicture
-import com.hidesign.hiweather.presentation.WeatherViewModel
+import com.hidesign.hiweather.presentation.MainActivity.Companion.FORECAST_SHEET
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtil.getWeatherIconUrl
 import java.text.MessageFormat
@@ -45,45 +44,39 @@ import java.util.TimeZone
 import kotlin.math.roundToInt
 
 @Composable
-fun ForecastCard(modifier: Modifier, weatherList: List<Any>?, tz: String?, weatherViewModel: WeatherViewModel) {
+fun ForecastCard(modifier: Modifier, weatherList: List<Any>?, tz: String?, onNavigateTo: (String) -> Unit) {
     val containerColour = Color(0xFF2B2B2B)
 
-    Crossfade(targetState = weatherList, label = "") { items ->
-        when (items) {
-            null -> ShimmerEffect(
-                modifier = modifier.height(150.dp),
-                color = containerColour,
-            )
-            else -> Card(
-                modifier = modifier,
-                colors = CardDefaults.cardColors(containerColor = containerColour, contentColor = Color.White),
-                shape = RoundedCornerShape(30.dp)
-            ) {
-                val title = when (items[0]) {
-                    is Hourly -> stringResource(R.string.hourly_forecast)
-                    is Daily -> stringResource(R.string.daily_forecast)
-                    else -> ""
-                }
-                val padding = when (items[0]) {
-                    is Hourly -> PaddingValues(10.dp)
-                    is Daily -> PaddingValues(10.dp, 20.dp, 10.dp, 10.dp)
-                    else -> PaddingValues(0.dp)
-                }
+    ShimmerCrossfade(modifier, 160.dp, containerColour, weatherList) { items ->
+        Card(
+            modifier = Modifier,
+            colors = CardDefaults.cardColors(containerColor = containerColour, contentColor = Color.White),
+            shape = RoundedCornerShape(30.dp)
+        ) {
+            val title = when (items[0]) {
+                is Hourly -> stringResource(R.string.hourly_forecast)
+                is Daily -> stringResource(R.string.daily_forecast)
+                else -> ""
+            }
+            val padding = when (items[0]) {
+                is Hourly -> PaddingValues(10.dp)
+                is Daily -> PaddingValues(10.dp, 20.dp, 10.dp, 10.dp)
+                else -> PaddingValues(0.dp)
+            }
 
-                Column (horizontalAlignment = Alignment.CenterHorizontally)  {
-                    Text(modifier = Modifier.padding(padding), text = title, fontSize = 28.sp, color = Color.White)
+            Column (horizontalAlignment = Alignment.CenterHorizontally)  {
+                Text(modifier = Modifier.padding(padding), text = title, fontSize = 28.sp, color = Color.White)
 
-                    HorizontalDivider(color = Color.White)
+                HorizontalDivider(color = Color.White)
 
-                    LazyRow(modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
-                        items(items) {
-                            when (it) {
-                                is Hourly -> HourlyItem(it, tz) {
-                                    weatherViewModel.showForecastDialog(it, tz!!)
-                                }
-                                is Daily -> DailyItem(it, tz) {
-                                    weatherViewModel.showForecastDialog(it, tz!!)
-                                }
+                LazyRow(modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
+                    items(items) { weather ->
+                        when (weather) {
+                            is Hourly -> HourlyItem(weather, tz) {
+                                onNavigateTo("$FORECAST_SHEET/${weather.toJson()}/${Uri.encode(tz)}")
+                            }
+                            is Daily -> DailyItem(weather, tz) {
+                                onNavigateTo("$FORECAST_SHEET/${weather.toJson()}/${Uri.encode(tz)}")
                             }
                         }
                     }
