@@ -17,7 +17,6 @@ import com.hidesign.hiweather.R
 import com.hidesign.hiweather.data.model.Components
 import com.hidesign.hiweather.databinding.AirPollutionDialogBinding
 import com.hidesign.hiweather.presentation.AdViewComposable
-import com.hidesign.hiweather.presentation.WeatherViewModel
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Constants
 import com.hidesign.hiweather.util.WeatherUtil
@@ -27,7 +26,7 @@ import java.text.MessageFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AirPollutionSheet(state: WeatherViewModel.AirPollutionDialogState, onDismissRequest: () -> Unit) {
+fun AirPollutionSheet(title: String, components: Components, onDismissRequest: () -> Unit) {
     val context = LocalContext.current
 
     data class AirPollutionDialogData(
@@ -54,9 +53,6 @@ fun AirPollutionSheet(state: WeatherViewModel.AirPollutionDialogState, onDismiss
         sheetState = rememberModalBottomSheetState(),
         onDismissRequest = onDismissRequest
     ) {
-        val c = state.components
-        val airItemTitle = state.title
-
         fun updateValues(
             context: Context,
             item: String,
@@ -126,14 +122,14 @@ fun AirPollutionSheet(state: WeatherViewModel.AirPollutionDialogState, onDismiss
                 this.airPicker.selectionDividerHeight = 0
             }
 
-            val initialIndex = Constants.airNamesExpanded.indexOf(airItemTitle)
+            val initialIndex = Constants.airNamesExpanded.indexOf(title)
             if (initialIndex != -1) {
                 this.airPicker.value = initialIndex
-                updateValues(context, Constants.airNamesExpanded[initialIndex], c, this, airPollutionDataMap)
+                updateValues(context, Constants.airNamesExpanded[initialIndex], components, this, airPollutionDataMap)
             }
 
             this.airPicker.setOnValueChangedListener { _, _, newVal ->
-                updateValues(context, Constants.airNamesExpanded[newVal], c, this, airPollutionDataMap)
+                updateValues(context, Constants.airNamesExpanded[newVal], components, this, airPollutionDataMap)
             }
         }
 

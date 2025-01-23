@@ -1,13 +1,11 @@
 package com.hidesign.hiweather.presentation.components
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,9 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidesign.hiweather.R
+import com.hidesign.hiweather.presentation.MainActivity.Companion.AIR_POLLUTION_SHEET
 import com.hidesign.hiweather.presentation.WeatherViewModel
 import com.hidesign.hiweather.util.Constants
-import com.hidesign.hiweather.util.Constants.airNamesExpanded
 import com.hidesign.hiweather.util.WeatherUtil
 import java.text.MessageFormat
 
@@ -38,72 +36,62 @@ import java.text.MessageFormat
 @Composable
 fun AirPollutionCard(
     modifier: Modifier,
-    weatherViewModel: WeatherViewModel
+    weatherViewModel: WeatherViewModel,
+    onNavigateTo: (String) -> Unit
 ) {
     val context = LocalContext.current
-    val containerColour = colorResource(id = R.color.airIndex1)
+    val shimmerColour = colorResource(id = R.color.airIndex1)
     val state by weatherViewModel.state.collectAsState()
 
-    Crossfade(targetState = state.airPollutionResponse, label = "") { weather ->
-        when (weather) {
-            null -> ShimmerEffect(
-                modifier = modifier.height(300.dp),
-                color = containerColour,
-            )
-            else -> {
-                val defaultAir = weather.list[0]
-                val backgroundColor = WeatherUtil.getAirQualityColour(defaultAir.main.aqi, context)
+    ShimmerCrossfade(modifier, 220.dp, shimmerColour, state.airPollutionResponse) { airPollution ->
+        val defaultAir = airPollution.list[0]
+        val backgroundColor = WeatherUtil.getAirQualityColour(defaultAir.main.aqi, context)
 
-                Card(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(10.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(backgroundColor),
-                        contentColor = Color.Black
-                    ),
-                    shape = RoundedCornerShape(30.dp)
+        Card(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(backgroundColor),
+                contentColor = Color.Black
+            ),
+            shape = RoundedCornerShape(30.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(10.dp, 10.dp, 10.dp, 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(
+                    Modifier.padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(10.dp, 10.dp, 10.dp, 20.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(
-                            Modifier.padding(10.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = defaultAir.main.aqi.toString(),
-                                fontSize = 60.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
+                    Text(
+                        text = defaultAir.main.aqi.toString(),
+                        fontSize = 60.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
 
-                            Text(
-                                text = WeatherUtil.getAirQualityText(defaultAir.main.aqi),
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black
-                            )
+                    Text(
+                        text = WeatherUtil.getAirQualityText(defaultAir.main.aqi),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
 
-                            Text(
-                                text = context.getString(R.string.air_quality),
-                                fontSize = 20.sp,
-                                color = Color.Black
-                            )
-                        }
+                    Text(
+                        text = context.getString(R.string.air_quality),
+                        fontSize = 20.sp,
+                        color = Color.Black
+                    )
+                }
 
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                            val componentsList = WeatherUtil.getComponentList(defaultAir.components)
-                            Constants.airAbbreviations.forEachIndexed { index, item ->
-                                AirPollutionButton("$item - {0}", componentsList[index]) {
-                                    weatherViewModel.showAirPollutionDialog(defaultAir.components, airNamesExpanded[index])
-                                }
-                            }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    val componentsList = WeatherUtil.getComponentList(defaultAir.components)
+                    Constants.airAbbreviations.forEachIndexed { index, item ->
+                        AirPollutionButton("$item - {0}", componentsList[index]) {
+                            onNavigateTo("$AIR_POLLUTION_SHEET/$item/${defaultAir.components.toJson()}")
                         }
                     }
                 }

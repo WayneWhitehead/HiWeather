@@ -1,5 +1,7 @@
 package com.hidesign.hiweather.data.model
 
+import android.net.Uri
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -88,13 +90,17 @@ data class Daily(
     @SerializedName("sunset") var sunset: Int = 0,
     @SerializedName("temp") var temp: Temp = Temp(),
     @SerializedName("summary") var summary: String = ""
-): FutureWeather(), Serializable
+): FutureWeather(), Serializable {
+    fun toJson(): String = Uri.encode(Gson().toJson(this))
+}
 
 data class Hourly(
     @SerializedName("feels_like") var feelsLike: Double,
     @SerializedName("temp") var temp: Double,
     @SerializedName("visibility") var visibility: Int,
-): FutureWeather(), Serializable
+): FutureWeather(), Serializable {
+    fun toJson(): String = Uri.encode(Gson().toJson(this))
+}
 
 data class Alerts(
     @SerializedName("sender_name") var senderName: String,

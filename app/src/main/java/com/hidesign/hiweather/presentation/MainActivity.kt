@@ -3,22 +3,20 @@ package com.hidesign.hiweather.presentation
 import android.Manifest
 import android.app.Activity
 import android.location.Address
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,12 +24,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
@@ -52,11 +48,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -70,33 +65,49 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
+import com.google.gson.Gson
 import com.hidesign.hiweather.BuildConfig
 import com.hidesign.hiweather.R
+import com.hidesign.hiweather.data.model.Components
 import com.hidesign.hiweather.data.model.Current
+import com.hidesign.hiweather.data.model.Daily
 import com.hidesign.hiweather.data.model.ErrorType
+import com.hidesign.hiweather.data.model.Hourly
 import com.hidesign.hiweather.data.model.OneCallResponse
+import com.hidesign.hiweather.presentation.MainActivity.Companion.ERROR_SCREEN
+import com.hidesign.hiweather.presentation.MainActivity.Companion.SETTINGS_DIALOG
 import com.hidesign.hiweather.presentation.components.AirPollutionCard
 import com.hidesign.hiweather.presentation.components.ForecastCard
-import com.hidesign.hiweather.presentation.components.ShimmerEffect
-import com.hidesign.hiweather.presentation.components.SolarCard
+import com.hidesign.hiweather.presentation.components.ShimmerCrossfade
+import com.hidesign.hiweather.presentation.components.SunRiseSunset
 import com.hidesign.hiweather.presentation.dialog.AirPollutionSheet
 import com.hidesign.hiweather.presentation.dialog.CelestialSheet
 import com.hidesign.hiweather.presentation.dialog.ForecastSheet
 import com.hidesign.hiweather.presentation.dialog.SettingsDialog
 import com.hidesign.hiweather.presentation.ui.theme.HiWeatherTheme
-import com.hidesign.hiweather.services.APIWorker
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Extensions.roundToDecimal
 import com.hidesign.hiweather.util.WeatherUtil
 import com.permissionx.guolindev.PermissionX
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -107,17 +118,74 @@ import kotlin.math.roundToInt
 @AndroidEntryPoint
 class MainActivity: FragmentActivity(){
 
+    companion object {
+        const val TAG = "MainActivity"
+        const val WEATHER_SCREEN = "WeatherScreen"
+        const val ERROR_SCREEN = "ErrorScreen"
+        const val AIR_POLLUTION_SHEET = "AirPollutionSheet"
+        const val CELESTIAL_SHEET = "CelestialSheet"
+        const val FORECAST_SHEET = "ForecastSheet"
+        const val SETTINGS_DIALOG = "SettingsDialog"
+    }
+
     private val weatherViewModel: WeatherViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestPermission(listOf(PermissionX.permission.POST_NOTIFICATIONS, Manifest.permission.ACCESS_COARSE_LOCATION))
 
         setContent {
             HiWeatherTheme {
-                WeatherScreen(weatherViewModel)
+                val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = WEATHER_SCREEN) {
+                    composable(route = WEATHER_SCREEN) {
+                        WeatherScreen(weatherViewModel) { route ->
+                            navController.navigate(route = route ) {
+                                launchSingleTop = true
+                                popUpTo(WEATHER_SCREEN) { inclusive = true }
+                            }
+                        }
+                    }
+                    composable(route = "$ERROR_SCREEN/{error}",
+                        arguments = listOf(navArgument("error") { type = NavType.EnumType(ErrorType::class.java) })) {
+                        val error = it.arguments?.getSerializable("error") as ErrorType
+                        ErrorScreen(error, weatherViewModel) {
+                            navController.navigate(WEATHER_SCREEN)
+                        }
+                    }
+
+                    dialog(route = "$AIR_POLLUTION_SHEET/{title}/{components}") {
+                        val title = it.arguments?.getString("title") ?: ""
+                        val components = Gson().fromJson(it.arguments?.getString("components"), Components::class.java)
+                        AirPollutionSheet(title, components) { navController.popBackStack() }
+                    }
+                    dialog(route = "$CELESTIAL_SHEET/{daily}/{tz}"){
+                        val daily = Gson().fromJson(it.arguments?.getString("daily"), Daily::class.java)
+                        val tz = it.arguments?.getString("tz") ?: ""
+                        CelestialSheet(daily, tz) { navController.popBackStack() }
+                    }
+                    dialog(route = "$FORECAST_SHEET/{weather}/{tz}"){
+                        val weatherJson = it.arguments?.getString("weather")
+                        val weather = try {
+                            Gson().fromJson(weatherJson, Daily::class.java)
+                        } catch (e: Exception) {
+                            Gson().fromJson(weatherJson, Hourly::class.java)
+                        }
+                        val tz = Uri.decode(it.arguments?.getString("tz"))
+                        ForecastSheet(weather, tz) { navController.popBackStack() }
+                    }
+                    dialog(route = SETTINGS_DIALOG) {
+                        SettingsDialog { navController.popBackStack() }
+                    }
+                }
             }
         }
-        requestPermission(listOf(PermissionX.permission.POST_NOTIFICATIONS, Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
+
+    private fun NavGraphBuilder.dialog(route: String, content: @Composable (NavBackStackEntry) -> Unit){
+        dialog(route = route, dialogProperties = DialogProperties(usePlatformDefaultWidth = false)) {
+            content(it)
+        }
     }
 
     fun requestPermission(permissions: List<String>) {
@@ -147,7 +215,9 @@ class MainActivity: FragmentActivity(){
                 deniedList.forEach {
                     when (it) {
                         Manifest.permission.ACCESS_COARSE_LOCATION -> {
-                            weatherViewModel.showErrorDialog(ErrorType.LOCATION_PERMISSION_ERROR)
+                            lifecycleScope.launch {
+                                weatherViewModel.showErrorDialog(ErrorType.LOCATION_PERMISSION_ERROR)
+                            }
                         }
                     }
                 }
@@ -156,10 +226,16 @@ class MainActivity: FragmentActivity(){
 }
 
 @Composable
-fun WeatherScreen(weatherViewModel: WeatherViewModel) {
+fun WeatherScreen(weatherViewModel: WeatherViewModel, onNavigateTo: (String) -> Unit) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val state by weatherViewModel.state.collectAsState()
-    var showSettings by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.errorType) {
+        state.errorType?.let { error ->
+            onNavigateTo("$ERROR_SCREEN/${error}")
+        }
+    }
 
     val intentLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { activityResult ->
         when (activityResult.resultCode) {
@@ -175,7 +251,9 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
                 }
             }
             AutocompleteActivity.RESULT_ERROR -> {
-                weatherViewModel.showErrorDialog(ErrorType.PLACES_ERROR)
+                scope.launch {
+                    weatherViewModel.showErrorDialog(ErrorType.PLACES_ERROR)
+                }
             }
             Activity.RESULT_CANCELED -> {}
         }
@@ -183,7 +261,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
     Scaffold(
         bottomBar = {
             BottomAppBar(containerColor = MaterialTheme.colorScheme.primaryContainer) {
-                IconButton(onClick = { showSettings = true }) {
+                IconButton(onClick = { onNavigateTo(SETTINGS_DIALOG) }) {
                     Icon(Icons.Filled.Settings, contentDescription = "Settings")
                 }
                 IconButton(onClick = { weatherViewModel.fetchWeather() }) {
@@ -214,42 +292,11 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel) {
         containerColor = Color.Black
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            AnimatedVisibility(
-                visible = state.lastUsedAddress == null,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
+
+            WeatherViews(weatherViewModel, onNavigateTo)
+
+            AnimatedVisibility(visible = state.lastUsedAddress == null, enter = fadeIn(), exit = fadeOut()) {
                 LoadingScreen()
-            }
-
-            WeatherViews(weatherViewModel)
-
-            AnimatedVisibility(state.errorType != null) {
-                ErrorScreen(state.errorType!!)
-            }
-            AnimatedVisibility(state.airPollutionDialogState.show) {
-                AirPollutionSheet(state.airPollutionDialogState) {
-                    weatherViewModel.hideAirPollutionDialog()
-                }
-            }
-            AnimatedVisibility(state.celestialDialogState.show) {
-                CelestialSheet(state.celestialDialogState) {
-                    weatherViewModel.hideCelestialDialog()
-                }
-            }
-            AnimatedVisibility(state.forecastDialogState.show && state.forecastDialogState.weather.weather.isNotEmpty()) {
-                ForecastSheet(state.forecastDialogState) {
-                    weatherViewModel.hideForecastDialog()
-                }
-            }
-
-            SettingsDialog(showSettings) {
-                showSettings = false
-                if (it == 0) {
-                    APIWorker.cancelWorker(context)
-                } else {
-                    APIWorker.initWorker(context)
-                }
             }
         }
     }
@@ -291,7 +338,7 @@ fun LoadingScreen() {
 }
 
 @Composable
-fun ErrorScreen(error: ErrorType) {
+fun ErrorScreen(error: ErrorType, weatherViewModel: WeatherViewModel, onDismiss: (Unit) -> Unit) {
     val context = LocalContext.current
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -331,9 +378,28 @@ fun ErrorScreen(error: ErrorType) {
                     )
                     TextButton(
                         modifier = Modifier.align(Alignment.CenterHorizontally),
-                        onClick = { (context as MainActivity).requestPermission(listOf( Manifest.permission.ACCESS_COARSE_LOCATION)) }
+                        onClick = {
+                            onDismiss((context as MainActivity).requestPermission(listOf( Manifest.permission.ACCESS_COARSE_LOCATION)))
+                        }
                     ) {
                         Text("Grant Permission")
+                    }
+                }
+                ErrorType.LOCATION_ERROR -> {
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        text = "There was an error getting your location. Please try again.",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    TextButton(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        onClick = {
+                            onDismiss(weatherViewModel.fetchWeather())
+                        }
+                    ) {
+                        Text("Try Again")
                     }
                 }
                 else -> {}
@@ -345,93 +411,71 @@ fun ErrorScreen(error: ErrorType) {
 }
 
 @Composable
-fun WeatherViews(weatherViewModel: WeatherViewModel) {
+fun WeatherViews(weatherViewModel: WeatherViewModel, onNavigateTo: (String) -> Unit) {
     val state by weatherViewModel.state.collectAsState()
-    LazyColumn(
-        modifier = Modifier.fillMaxHeight(),
+
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item {
-            AdViewComposable(
-                modifier = Modifier,
-                adUnitId = AdUtil.APP_BAR_AD
-            )
-        }
+        AdViewComposable(
+            modifier = Modifier,
+            adUnitId = AdUtil.APP_BAR_AD
+        )
 
-        item {
-            DateHeaderCard(
-                modifier = Modifier.zIndex(1f),
-                tz = state.oneCallResponse?.timezone ?: TimeZone.getDefault().displayName
-            )
-        }
+        DateHeaderCard(
+            modifier = Modifier.zIndex(1f),
+            tz = state.oneCallResponse?.timezone ?: TimeZone.getDefault().displayName
+        )
 
-        item {
-            CurrentCard(
-                modifier = Modifier.offset(y = (-20).dp).zIndex(0f),
-                oneCallResponse = state.oneCallResponse
-            )
-        }
+        CurrentCard(
+            modifier = Modifier.zIndex(0f).offset(y = (-15).dp).padding(horizontal = 5.dp),
+            oneCallResponse = state.oneCallResponse
+        )
 
-        item {
-            ForecastCard(
-                modifier = Modifier.offset(y = (-70).dp).zIndex(2f),
-                weatherList = state.oneCallResponse?.hourly?.subList(1, 25),
-                tz = state.oneCallResponse?.timezone,
-                weatherViewModel = weatherViewModel
-            )
-        }
+        ForecastCard(
+            modifier = Modifier.zIndex(1f).offset(y = (-45).dp).padding(horizontal = 20.dp),
+            weatherList = state.oneCallResponse?.hourly?.subList(1, 25),
+            tz = state.oneCallResponse?.timezone,
+            onNavigateTo = { route -> onNavigateTo(route) })
 
-        item {
-            CurrentExtraCard(
-                modifier = Modifier.offset(y = (-75).dp).zIndex(1f),
-                oneCallResponse = state.oneCallResponse
-            )
-        }
+        CurrentExtraCard(
+            modifier = Modifier.zIndex(0f).offset(y = (-55).dp).padding(horizontal = 5.dp),
+            oneCallResponse = state.oneCallResponse
+        )
 
-        item {
-            AirPollutionCard(
-                modifier = Modifier.offset(y = (-100).dp).zIndex(2f),
-                weatherViewModel = weatherViewModel
-            )
-        }
+        AirPollutionCard(
+            modifier = Modifier.zIndex(1f).offset(y = (-75).dp).padding(horizontal = 15.dp),
+            weatherViewModel = weatherViewModel,
+            onNavigateTo = { route -> onNavigateTo(route) }
+        )
 
-        item {
-            SolarCard(
-                modifier = Modifier
-                    .clickable {
-                        state.oneCallResponse?.let {
-                            weatherViewModel.showCelestialDialog(state.oneCallResponse!!.daily[0], state.oneCallResponse!!.timezone)
-                        }
-                    }
-                    .offset(y = (-120).dp),
-                daily = state.oneCallResponse?.daily?.get(0),
-                tz = state.oneCallResponse?.timezone ?: TimeZone.getDefault().displayName,
-                showHours = false,
-            )
-        }
+        SunRiseSunset(
+            modifier = Modifier.zIndex(2f).offset(y = (-90).dp).padding(horizontal = 45.dp),
+            daily = state.oneCallResponse?.daily?.get(0),
+            tz = state.oneCallResponse?.timezone ?: TimeZone.getDefault().displayName,
+            showHours = false,
+            onNavigateTo = { route -> onNavigateTo(route) }
+        )
 
-        item {
-            WindCard(
-                modifier = Modifier.offset(y = (-140).dp),
-                current = state.oneCallResponse?.current
-            )
-        }
+        WindCard(
+            modifier = Modifier.zIndex(3f).offset(y = (-100).dp).padding(horizontal = 60.dp),
+            current = state.oneCallResponse?.current
+        )
 
-        item {
-            ForecastCard(
-                modifier = Modifier.offset(y = (-160).dp),
-                weatherList = state.oneCallResponse?.hourly?.subList(1, 25),
-                tz = state.oneCallResponse?.timezone,
-                weatherViewModel = weatherViewModel
-            )
-        }
+        ForecastCard(
+            modifier = Modifier.zIndex(4f).offset(y = (-120).dp).padding(horizontal = 20.dp),
+            weatherList = state.oneCallResponse?.daily?.subList(1, 8),
+            tz = state.oneCallResponse?.timezone,
+            onNavigateTo = { route -> onNavigateTo(route) }
+        )
     }
 }
 
 @Composable
 fun DateHeaderCard(modifier: Modifier, tz: String?) {
     Card(
-        modifier = modifier.wrapContentSize().padding(top = 10.dp),
+        modifier = modifier.wrapContentSize().padding(top = 20.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondary,
             contentColor = Color.White
@@ -454,37 +498,23 @@ fun DateHeaderCard(modifier: Modifier, tz: String?) {
 @Composable
 fun CurrentCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
     val containerColour = Color.White
-
-    Crossfade(targetState = oneCallResponse, label = "") { weather ->
-        when (weather) {
-            null -> ShimmerEffect(
-                modifier = modifier.height(260.dp),
-                color = containerColour,
-            )
-            else -> Card(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                colors = CardDefaults.cardColors(
-                    containerColor = containerColour,
-                    contentColor = Color.Black
-                ),
-                shape = RoundedCornerShape(30.dp)
-            ) {
+    ShimmerCrossfade(modifier, 205.dp, containerColour, oneCallResponse) { weather ->
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = containerColour,
+                contentColor = Color.Black
+            ),
+            shape = RoundedCornerShape(30.dp)
+        ) {
                 val context = LocalContext.current
                 Column(
-                    Modifier
-                        .padding(0.dp, 20.dp, 0.dp, 50.dp)
-                        .fillMaxWidth(),
+                    Modifier.padding(0.dp, 20.dp, 0.dp, 50.dp).fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         LoadPicture(
-                            Modifier
-                                .height(80.dp)
-                                .width(80.dp)
-                                .align(Alignment.CenterVertically),
+                            modifier = Modifier.height(80.dp).width(80.dp).align(Alignment.CenterVertically),
                             url = WeatherUtil.getWeatherIconUrl(weather.current.weather[0].icon),
                             contentDescription = "Weather icon"
                         )
@@ -498,7 +528,7 @@ fun CurrentCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
 
                         Column {
                             Row(
-                                Modifier.padding(top = 5.dp),
+                                modifier = Modifier.padding(top = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Image(
@@ -513,7 +543,7 @@ fun CurrentCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
                             }
 
                             Row(
-                                Modifier.padding(top = 5.dp),
+                                modifier = Modifier.padding(top = 5.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Image(
@@ -537,7 +567,7 @@ fun CurrentCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
                         )
 
                         HorizontalDivider(
-                            Modifier.width(20.dp).padding(5.dp, 0.dp),
+                            modifier = Modifier.width(20.dp).padding(5.dp, 0.dp),
                             thickness = 1.dp,
                             color = Color.Black
                         )
@@ -557,102 +587,87 @@ fun CurrentCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
                     Text(
                         text = weather.daily[0].summary,
                         fontSize = 16.sp,
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(10.dp, 0.dp)
+                        modifier = Modifier.align(Alignment.CenterHorizontally).padding(10.dp, 0.dp)
                     )
                 }
             }
-        }
     }
 }
 
 @Composable
 fun CurrentExtraCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
     val containerColour = Color(0xFF174488)
-
-    Crossfade(targetState = oneCallResponse, label = "") { weather ->
-        when (weather) {
-            null -> ShimmerEffect(
-                modifier = modifier.height(160.dp),
-                color = containerColour,
-            )
-            else -> Card(
-                modifier = modifier.wrapContentSize().padding(10.dp, 0.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = containerColour,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(30.dp)
-            ) {
-                LazyVerticalGrid(
-                    modifier = Modifier.padding(10.dp, 30.dp, 10.dp, 40.dp),
-                    columns = GridCells.Fixed(2)
-                ) {
-                    item {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            ForecastImageLabel(
-                                forecastItem = MessageFormat.format(
-                                    stringResource(id = R.string.precipitation_0),
-                                    weather.daily[0].pop.roundToInt()
-                                ),
-                                image = painterResource(id = R.drawable.rain),
-                                size = 18
-                            )
-                            ForecastImageLabel(
-                                forecastItem = MessageFormat.format(
-                                    stringResource(id = R.string.humidity_0),
-                                    weather.current.humidity
-                                ),
-                                image = painterResource(id = R.drawable.precipitation),
-                                size = 18
-                            )
-                            ForecastImageLabel(
-                                forecastItem = MessageFormat.format(
-                                    stringResource(id = R.string.cloudiness_0),
-                                    weather.current.clouds
-                                ),
-                                image = painterResource(id = R.drawable.precipitation),
-                                size = 18
-                            )
-                        }
+    ShimmerCrossfade(modifier, 160.dp, containerColour, oneCallResponse) { weather ->
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = containerColour,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(30.dp)
+        ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(10.dp, 30.dp, 10.dp, 40.dp)) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        ForecastImageLabel(
+                            forecastItem = MessageFormat.format(
+                                stringResource(id = R.string.precipitation_0),
+                                weather.daily[0].pop.roundToInt()
+                            ),
+                            image = painterResource(id = R.drawable.rain),
+                            size = 18
+                        )
+                        ForecastImageLabel(
+                            forecastItem = MessageFormat.format(
+                                stringResource(id = R.string.humidity_0),
+                                weather.current.humidity
+                            ),
+                            image = painterResource(id = R.drawable.precipitation),
+                            size = 18
+                        )
+                        ForecastImageLabel(
+                            forecastItem = MessageFormat.format(
+                                stringResource(id = R.string.cloudiness_0),
+                                weather.current.clouds
+                            ),
+                            image = painterResource(id = R.drawable.precipitation),
+                            size = 18
+                        )
                     }
-                    item {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(5.dp)
-                        ) {
-                            ForecastImageLabel(
-                                forecastItem = MessageFormat.format(
-                                    stringResource(id = R.string.dew_point_0_c),
-                                    weather.current.dewPoint.roundToInt()
-                                ),
-                                image = painterResource(id = R.drawable.dew_point),
-                                size = 18
-                            )
-                            ForecastImageLabel(
-                                forecastItem = MessageFormat.format(
-                                    stringResource(id = R.string.pressure_0_hpa),
-                                    weather.current.pressure / 1000
-                                ),
-                                image = painterResource(id = R.drawable.pressure),
-                                size = 18
-                            )
-                            ForecastImageLabel(
-                                forecastItem = MessageFormat.format(
-                                    stringResource(id = R.string.visibility_0_m),
-                                    weather.current.visibility / 1000
-                                ),
-                                image = painterResource(id = R.drawable.visibility),
-                                size = 18
-                            )
-                        }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        ForecastImageLabel(
+                            forecastItem = MessageFormat.format(
+                                stringResource(id = R.string.dew_point_0_c),
+                                weather.current.dewPoint.roundToInt()
+                            ),
+                            image = painterResource(id = R.drawable.dew_point),
+                            size = 18
+                        )
+                        ForecastImageLabel(
+                            forecastItem = MessageFormat.format(
+                                stringResource(id = R.string.pressure_0_hpa),
+                                weather.current.pressure / 1000
+                            ),
+                            image = painterResource(id = R.drawable.pressure),
+                            size = 18
+                        )
+                        ForecastImageLabel(
+                            forecastItem = MessageFormat.format(
+                                stringResource(id = R.string.visibility_0_m),
+                                weather.current.visibility / 1000
+                            ),
+                            image = painterResource(id = R.drawable.visibility),
+                            size = 18
+                        )
                     }
                 }
-            }
         }
     }
 }
@@ -660,25 +675,16 @@ fun CurrentExtraCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
 @Composable
 fun WindCard(modifier: Modifier, current: Current?) {
     val containerColour = Color.White
-
-    Crossfade(targetState = current, label = "") { weather ->
-        when (weather) {
-            null -> ShimmerEffect(
-                modifier = modifier
-                    .padding(10.dp, 0.dp)
-                    .fillMaxWidth()
-                    .height(300.dp),
-                color = containerColour,
-            )
-            else -> Card(
-                modifier = modifier.padding(horizontal = 65.dp).wrapContentSize(),
-                colors = CardDefaults.cardColors(
-                    containerColor = containerColour,
-                    contentColor = Color.Black
-                ),
-                shape = RoundedCornerShape(30.dp)
-            ) {
-                Box(Modifier.height(100.dp)) {
+    ShimmerCrossfade(modifier, 100.dp, containerColour, current) { weather ->
+        Card(
+            modifier = Modifier.wrapContentSize(),
+            colors = CardDefaults.cardColors(
+                containerColor = containerColour,
+                contentColor = Color.Black
+            ),
+            shape = RoundedCornerShape(30.dp)
+        ) {
+            Box(Modifier.height(100.dp)) {
                     Image(
                         painter = painterResource(id = R.drawable.airwaves),
                         contentDescription = "",
@@ -720,7 +726,6 @@ fun WindCard(modifier: Modifier, current: Current?) {
                         }
                     }
                 }
-            }
         }
     }
 }

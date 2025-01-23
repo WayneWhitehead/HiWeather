@@ -1,7 +1,9 @@
 package com.hidesign.hiweather.presentation.components
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,31 +28,42 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.data.model.Daily
+import com.hidesign.hiweather.presentation.MainActivity.Companion.CELESTIAL_SHEET
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtil.getMoonIcon
 
 @Composable
-fun SolarCard(modifier: Modifier, daily: Daily?, tz: String?, showHours: Boolean = true) {
-    if (daily == null || tz == null) return
+fun SunRiseSunset(modifier: Modifier, daily: Daily?, tz: String, showHours: Boolean = true, onNavigateTo: (String) -> Unit) {
+    ShimmerCrossfade(modifier, 105.dp, Color(0xFFCC4B4B), daily) { weather ->
+        SolarCard(
+            modifier = Modifier.clickable { onNavigateTo("$CELESTIAL_SHEET/${weather.toJson()}/${Uri.encode(tz)}") },
+            daily = weather,
+            tz = tz,
+            showHours = showHours)
+    }
+}
+
+@Composable
+fun SolarCard(modifier: Modifier, daily: Daily, tz: String, showHours: Boolean = true) {
     val sunGradient = Brush.linearGradient(listOf(Color(0xFFCC4B4B), Color(0xFFFFF964)))
     CelestialCard(
         modifier = modifier,
         content = {
-            Box(Modifier.background(sunGradient)) {
-                Column(
-                    modifier = Modifier.padding(20.dp).fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-                        RiseSetText(value = daily.sunrise, tz = tz, label = stringResource(id = R.string.sunrise))
-                        RiseSetText(value = daily.sunset, tz = tz, label = stringResource(id = R.string.sunset))
-                    }
-                    if (showHours) {
-                        VisibleHoursText(hours = DateUtils.getHours(daily.sunrise.toLong(), daily.sunset.toLong()))
+                Box(Modifier.background(sunGradient)) {
+                    Column(
+                        modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                            RiseSetText(value = daily.sunrise, tz = tz, label = stringResource(id = R.string.sunrise))
+                            RiseSetText(value = daily.sunset, tz = tz, label = stringResource(id = R.string.sunset))
+                        }
+                        if (showHours) {
+                            VisibleHoursText(hours = DateUtils.getHours(daily.sunrise.toLong(), daily.sunset.toLong()))
+                        }
                     }
                 }
-            }
-        },
+            },
         color = Color.Black
     )
 }
