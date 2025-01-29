@@ -122,7 +122,7 @@ fun AirPollutionSheet(title: String, components: Components, onDismissRequest: (
                 this.airPicker.selectionDividerHeight = 0
             }
 
-            val initialIndex = Constants.airNamesExpanded.indexOf(title)
+            val initialIndex = Constants.airAbbreviations.indexOf(title)
             if (initialIndex != -1) {
                 this.airPicker.value = initialIndex
                 updateValues(context, Constants.airNamesExpanded[initialIndex], components, this, airPollutionDataMap)

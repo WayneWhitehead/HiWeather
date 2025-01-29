@@ -35,4 +35,8 @@ object AppModule {
     @Provides
     @Named("io")
     fun provideIOContext(): CoroutineContext = Dispatchers.IO
+
+    @Provides
+    @Named("main")
+    fun provideMainContext(): CoroutineContext = Dispatchers.Main
 }

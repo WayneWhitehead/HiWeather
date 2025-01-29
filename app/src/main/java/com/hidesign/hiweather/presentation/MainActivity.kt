@@ -13,6 +13,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,6 +94,7 @@ import com.hidesign.hiweather.data.model.Hourly
 import com.hidesign.hiweather.data.model.OneCallResponse
 import com.hidesign.hiweather.presentation.MainActivity.Companion.ERROR_SCREEN
 import com.hidesign.hiweather.presentation.MainActivity.Companion.SETTINGS_DIALOG
+import com.hidesign.hiweather.presentation.MainActivity.Companion.WIND_SHEET
 import com.hidesign.hiweather.presentation.components.AirPollutionCard
 import com.hidesign.hiweather.presentation.components.ForecastCard
 import com.hidesign.hiweather.presentation.components.ShimmerCrossfade
@@ -101,6 +103,7 @@ import com.hidesign.hiweather.presentation.dialog.AirPollutionSheet
 import com.hidesign.hiweather.presentation.dialog.CelestialSheet
 import com.hidesign.hiweather.presentation.dialog.ForecastSheet
 import com.hidesign.hiweather.presentation.dialog.SettingsDialog
+import com.hidesign.hiweather.presentation.dialog.WindSheet
 import com.hidesign.hiweather.presentation.ui.theme.HiWeatherTheme
 import com.hidesign.hiweather.util.AdUtil
 import com.hidesign.hiweather.util.Extensions.roundToDecimal
@@ -119,12 +122,12 @@ import kotlin.math.roundToInt
 class MainActivity: FragmentActivity(){
 
     companion object {
-        const val TAG = "MainActivity"
         const val WEATHER_SCREEN = "WeatherScreen"
         const val ERROR_SCREEN = "ErrorScreen"
         const val AIR_POLLUTION_SHEET = "AirPollutionSheet"
         const val CELESTIAL_SHEET = "CelestialSheet"
         const val FORECAST_SHEET = "ForecastSheet"
+        const val WIND_SHEET = "WindSheet"
         const val SETTINGS_DIALOG = "SettingsDialog"
     }
 
@@ -173,6 +176,10 @@ class MainActivity: FragmentActivity(){
                         }
                         val tz = Uri.decode(it.arguments?.getString("tz"))
                         ForecastSheet(weather, tz) { navController.popBackStack() }
+                    }
+                    dialog(route = "$WIND_SHEET/{current}"){
+                        val current = Gson().fromJson(it.arguments?.getString("current"), Current::class.java)
+                        WindSheet(current = current) { navController.popBackStack() }
                     }
                     dialog(route = SETTINGS_DIALOG) {
                         SettingsDialog { navController.popBackStack() }
@@ -460,7 +467,8 @@ fun WeatherViews(weatherViewModel: WeatherViewModel, onNavigateTo: (String) -> U
 
         WindCard(
             modifier = Modifier.zIndex(3f).offset(y = (-100).dp).padding(horizontal = 60.dp),
-            current = state.oneCallResponse?.current
+            current = state.oneCallResponse?.current,
+            onNavigateTo = { route -> onNavigateTo(route) }
         )
 
         ForecastCard(
@@ -673,11 +681,11 @@ fun CurrentExtraCard(modifier: Modifier, oneCallResponse: OneCallResponse?) {
 }
 
 @Composable
-fun WindCard(modifier: Modifier, current: Current?) {
+fun WindCard(modifier: Modifier, current: Current?, onNavigateTo: (String) -> Unit) {
     val containerColour = Color.White
     ShimmerCrossfade(modifier, 100.dp, containerColour, current) { weather ->
         Card(
-            modifier = Modifier.wrapContentSize(),
+            modifier = Modifier.wrapContentSize().clickable { onNavigateTo("$WIND_SHEET/${current?.toJson()}") },
             colors = CardDefaults.cardColors(
                 containerColor = containerColour,
                 contentColor = Color.Black

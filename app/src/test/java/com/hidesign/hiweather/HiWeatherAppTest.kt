@@ -1,37 +1,59 @@
 package com.hidesign.hiweather
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import android.os.Build
+import android.os.Looper
 import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.Assert.assertEquals
-import org.junit.Rule
+import io.mockk.mockkStatic
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import timber.log.Timber
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.P])
 class HiWeatherAppTest {
 
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
-
+    private lateinit var hiWeatherApp: HiWeatherApp
     private var workerFactory: HiltWorkerFactory = mockk()
-    private val hiWeatherApp = HiWeatherApp()
+
+    @Before
+    fun setUp() {
+        hiWeatherApp = HiWeatherApp()
+        hiWeatherApp.workerFactory = workerFactory
+        mockkStatic(BuildConfig::class)
+        mockkStatic(Looper::class)
+        every { Looper.getMainLooper() } returns mockk()
+    }
 
     @Test
-    fun `getWorkManagerConfiguration should return a Configuration object that configures WorkManager to use the HiltWorkerFactory`() {
-        // Call the getWorkManagerConfiguration() method
-        every { hiWeatherApp.getWorkManagerConfiguration() } returns Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
+    fun workManagerConfiguration_returnsNonNullConfiguration() {
+        val configuration = hiWeatherApp.workManagerConfiguration
+        assertNotNull(configuration)
+    }
 
-        val result = hiWeatherApp.getWorkManagerConfiguration()
+    @Test
+    fun workManagerConfiguration_hasCorrectWorkerFactory() {
+        val configuration = hiWeatherApp.workManagerConfiguration
+        assertTrue(configuration.workerFactory == workerFactory)
+    }
 
-        // Assert that the result is a Configuration object that configures WorkManager to use the HiltWorkerFactory
-        assertEquals(
-            Configuration.Builder()
-                .setWorkerFactory(workerFactory)
-                .build(),
-            result
-        )
+    @Test
+    fun onCreate_debugMode_plantsTimberDebugTree() {
+        every { BuildConfig.DEBUG } returns true
+        hiWeatherApp.onCreate()
+        assertTrue(Timber.treeCount > 0)
+    }
+
+    @Test
+    fun onCreate_nonDebugMode_doesNotPlantTimberDebugTree() {
+        every { BuildConfig.DEBUG } returns false
+        hiWeatherApp.onCreate()
+        assertTrue(Timber.treeCount == 0)
     }
 }

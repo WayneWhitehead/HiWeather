@@ -1,125 +1,87 @@
 package com.hidesign.hiweather.util
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.Timeout
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
+@RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE)
 class LocationUtilTest {
 
+    @get:Rule
+    val globalTimeout: Timeout = Timeout(10, TimeUnit.SECONDS)
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    private val testDispatcher = StandardTestDispatcher()
+    private val context: Context = mockk()
+    private val locationProviderClient: FusedLocationProviderClient = mockk()
+    private val geocoder: Geocoder = mockk()
+    private val sharedPreferences: SharedPreferences = mockk()
     private lateinit var locationUtil: LocationUtil
-    private val fusedLocationProviderClientMock: FusedLocationProviderClient = mockk()
-    private val geocoderMock: Geocoder = mockk()
-    private val addressCallbackMock: LocationUtil.AddressCallback = mockk()
-    private val addressMock = mockk<Address>()
-    private val locationMock = mockk<Location>().apply {
-        coEvery { latitude } returns 0.0
-        coEvery { longitude } returns 0.0
-    }
 
     @Before
-    fun setup() {
+    fun setUp() {
         MockKAnnotations.init(this)
-        locationUtil = LocationUtil(fusedLocationProviderClientMock, geocoderMock)
-        coEvery { addressCallbackMock.onSuccess(addressMock) } returns Unit
-        coEvery { addressCallbackMock.onFailure() } returns Unit
+        locationUtil = LocationUtil(testDispatcher, context, locationProviderClient, geocoder)
+        every { context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE) } returns sharedPreferences
     }
 
     @Test
-    fun `getLastLocation should return OnSuccess`() {
-        every { fusedLocationProviderClientMock.lastLocation } returns mockk {
-            every { addOnCompleteListener(any()) } answers {
-                firstArg<OnCompleteListener<Location>>().onComplete(mockk {
-                    every { isSuccessful } returns true
-                    every { result } returns locationMock
-                })
-                mockk<Task<Location>>()
-            }
-        }
+    fun getLocation_returnsAddress() = runTest(testDispatcher) {
+        val location = mockk<Location>()
+        val address = mockk<Address>()
+        coEvery { locationProviderClient.getLastLocation(any()).await() } returns location
+        coEvery { geocoder.getFromLocation(location.latitude, location.longitude, 1) } returns listOf(address)
 
-        every { geocoderMock.getFromLocation(any(), any(), any()) } returns listOf(addressMock)
-        locationUtil.getLastLocation(addressCallbackMock)
-        verify { addressCallbackMock.onSuccess(addressMock) }
+        val result = locationUtil.getLocation()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(address, result)
     }
 
     @Test
-    fun `getLastLocation should call getCurrentLocation which should return OnSuccess`() {
-        every { fusedLocationProviderClientMock.lastLocation } returns mockk {
-            every { addOnCompleteListener(any()) } answers {
-                firstArg<OnCompleteListener<Location>>().onComplete(mockk {
-                    every { isSuccessful } returns false
-                    every { result } returns null
-                })
-                mockk<Task<Location>>()
-            }
-        }
+    fun getLocation_returnsNullOnFailure() = runTest(testDispatcher) {
+        coEvery { locationProviderClient.getLastLocation(any()).await() } returns null
+        coEvery { locationProviderClient.getCurrentLocation(mockk<CurrentLocationRequest>(), any()).await() } returns null
 
-        every { fusedLocationProviderClientMock.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null) } returns mockk {
-            every { addOnCompleteListener(any()) } answers {
-                firstArg<OnCompleteListener<Location>>().onComplete(mockk {
-                    every { isSuccessful } returns true
-                    every { result } returns locationMock
-                })
-                mockk<Task<Location>>()
-            }
-        }
+        val result = locationUtil.getLocation()
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        every { geocoderMock.getFromLocation(any(), any(), any()) } returns listOf(addressMock)
-        locationUtil.getLastLocation(addressCallbackMock)
-        verify { addressCallbackMock.onSuccess(addressMock) }
+        assertEquals(null, result)
     }
 
     @Test
-    fun `getLastLocation should call getCurrentLocation which should return OnFailure`() {
-        every { fusedLocationProviderClientMock.lastLocation } returns mockk {
-            every { addOnCompleteListener(any()) } answers {
-                firstArg<OnCompleteListener<Location>>().onComplete(mockk {
-                    every { isSuccessful } returns false
-                    every { result } returns null
-                })
-                mockk<Task<Location>>()
-            }
-        }
+    fun getLocation_handlesGeocoderIOException() = runTest(testDispatcher) {
+        val location = mockk<Location>()
+        coEvery { locationProviderClient.getLastLocation(any()).await() } returns location
+        coEvery { geocoder.getFromLocation(location.latitude, location.longitude, 1) } throws IOException()
 
-        every { fusedLocationProviderClientMock.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null) } returns mockk {
-            every { addOnCompleteListener(any()) } answers {
-                firstArg<OnCompleteListener<Location>>().onComplete(mockk {
-                    every { isSuccessful } returns false
-                    every { result } returns null
-                })
-                mockk<Task<Location>>()
-            }
-        }
+        val result = locationUtil.getLocation()
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        locationUtil.getLastLocation(addressCallbackMock)
-        verify { addressCallbackMock.onFailure() }
-    }
-
-    @Test
-    fun `handleLocation should call callback with failure`() {
-        coEvery { geocoderMock.getFromLocation(any(), any(), any()) } returns listOf(null)
-
-        locationUtil.handleLocation(locationMock, addressCallbackMock)
-        coVerify(exactly = 1) { addressCallbackMock.onFailure() }
-    }
-
-    @Test
-    fun `handleLocation should call callback with failure message if error`() {
-        coEvery { geocoderMock.getFromLocation(any(), any(), any()) } throws IOException()
-
-        locationUtil.handleLocation(locationMock, addressCallbackMock)
-        verify(exactly = 1) { addressCallbackMock.onFailure() }
+        assertEquals(null, result)
     }
 }

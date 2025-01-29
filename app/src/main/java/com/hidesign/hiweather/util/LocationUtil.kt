@@ -9,53 +9,60 @@ import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
 import com.google.android.gms.location.LastLocationRequest
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
 
+@SuppressLint("MissingPermission")
 class LocationUtil @Inject constructor(
-    private val context: Context,
     @Named("io") private val ioContext: CoroutineContext,
+    private val context: Context,
     private val locationProviderClient: FusedLocationProviderClient,
     private val geocoder: Geocoder
 ) {
-    private val coroutineScope = CoroutineScope(ioContext) + Job()
 
-    @SuppressLint("MissingPermission")
-    suspend fun getLocation(): Address = suspendCancellableCoroutine { continuation ->
-        coroutineScope.launch {
-            val lastLocationRequest = LastLocationRequest.Builder().apply {
-                setMaxUpdateAgeMillis(10000)
-                setGranularity(Granularity.GRANULARITY_COARSE)
-            }.build()
+    companion object {
+        val lastLocationRequest = LastLocationRequest.Builder().apply {
+            setMaxUpdateAgeMillis(10000)
+            setGranularity(Granularity.GRANULARITY_COARSE)
+        }
 
-            locationProviderClient.getLastLocation(lastLocationRequest).await()?.let {
-                continuation.resumeWith(getAddressFromLocation(it))
-            } ?: run {
-                val currentLocationRequest = CurrentLocationRequest.Builder().apply {
-                    setMaxUpdateAgeMillis(10000)
-                    setGranularity(Granularity.GRANULARITY_COARSE)
-                }.build()
-
-                locationProviderClient.getCurrentLocation(currentLocationRequest, null).await()?.let {
-                    continuation.resumeWith(getAddressFromLocation(it))
-                }
-            }
+        val currentLocationRequest = CurrentLocationRequest.Builder().apply {
+            setMaxUpdateAgeMillis(10000)
+            setGranularity(Granularity.GRANULARITY_COARSE)
         }
     }
 
-    private suspend fun getAddressFromLocation(location: Location): Result<Address> {
-        return withContext(ioContext) {
-            val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)?.first()!!
-            saveLocationInPreferences(address)
-            Result.success(address)
+    suspend fun getLocation(): Address? = withContext(ioContext) {
+        try {
+            getLastAddress() ?: getCurrentAddress()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private suspend fun getLastAddress(): Address? = withContext(ioContext) {
+        locationProviderClient.getLastLocation(lastLocationRequest.build()).await()?.let { lastLocation ->
+            getAddressFromLocation(lastLocation).getOrNull()
+        }
+    }
+
+    private suspend fun getCurrentAddress(): Address? = withContext(ioContext) {
+        locationProviderClient.getCurrentLocation(currentLocationRequest.build(), null).await()?.let { currentLocation ->
+            getAddressFromLocation(currentLocation).getOrNull()
+        }
+    }
+
+    private suspend fun getAddressFromLocation(location: Location): Result<Address> = withContext(ioContext) {
+        suspendCancellableCoroutine { continuation ->
+            geocoder.getFromLocation(location.latitude, location.longitude, 1)?.let { addresses ->
+                saveLocationInPreferences(addresses[0])
+                continuation.resume(Result.success(addresses[0]))
+            } ?: continuation.resume(Result.failure(Exception("No address found")))
         }
     }
 

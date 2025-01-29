@@ -10,18 +10,20 @@ import com.hidesign.hiweather.domain.usecase.GetAirPollutionUseCase
 import com.hidesign.hiweather.domain.usecase.GetOneCallUseCase
 import com.hidesign.hiweather.util.LocationUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
+    @Named("io") private val io: CoroutineContext,
+    @Named("main") private val main: CoroutineContext,
     private val getOneCallUseCase: GetOneCallUseCase,
     private val getAirPollutionUseCase: GetAirPollutionUseCase,
     private val locationUtil: LocationUtil
@@ -30,8 +32,7 @@ class WeatherViewModel @Inject constructor(
         var lastUsedAddress: Address? = null,
         var oneCallResponse: OneCallResponse? = null,
         var airPollutionResponse: AirPollutionResponse? = null,
-        val errorType: ErrorType? = null,
-        val isLoading: Boolean = false
+        val errorType: ErrorType? = null
     )
 
     private val _state = MutableStateFlow(WeatherState())
@@ -41,14 +42,12 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch {
             hideErrorDialog()
             try {
-                val location = address ?: locationUtil.getLocation()
+                val location = address ?: async { locationUtil.getLocation() }.await()
                 if (location == null) {
                     showErrorDialog(ErrorType.LOCATION_ERROR)
-                    this.cancel()
                 } else {
                     _state.emit(state.value.copy(
                         lastUsedAddress = location,
-                        isLoading = true,
                         oneCallResponse = null,
                         airPollutionResponse = null
                     ))
@@ -61,39 +60,45 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getOneCall(address: Address) = withContext(Dispatchers.IO) {
-        val response = getOneCallUseCase(address)
-        response.onSuccess { oneCallResponse ->
-            oneCallResponse?.let { oneCall ->
-                _state.emit(state.value.copy(oneCallResponse = oneCall))
-            } ?: run {
-                showErrorDialog(ErrorType.WEATHER_ERROR)
-            }
-        }
-        response.onFailure {
-            showErrorDialog(ErrorType.WEATHER_ERROR)
-        }
-    }
-
-    private suspend fun getAirPollution(address: Address) = withContext(Dispatchers.IO) {
-        val response = getAirPollutionUseCase(address)
-        response.onSuccess { airPollutionResponse ->
-            airPollutionResponse?.let { airPollution ->
-                _state.emit(state.value.copy(airPollutionResponse = airPollution))
-            } ?: run {
-                _state.emit(state.value.copy(errorType = ErrorType.WEATHER_ERROR))
-            }
-        }
-        response.onFailure {
-            showErrorDialog(ErrorType.WEATHER_ERROR)
+    private suspend fun getOneCall(address: Address) {
+        getOneCallUseCase(address).collect { result ->
+            result.fold(
+                onSuccess = { oneCallResponse ->
+                    oneCallResponse?.let { oneCall ->
+                        _state.emit(state.value.copy(oneCallResponse = oneCall))
+                    } ?: run {
+                        showErrorDialog(ErrorType.WEATHER_ERROR)
+                    }
+                },
+                onFailure = {
+                    showErrorDialog(ErrorType.WEATHER_ERROR)
+                }
+            )
         }
     }
 
-    suspend fun showErrorDialog(errorType: ErrorType) = withContext(Dispatchers.Main) {
+    private suspend fun getAirPollution(address: Address) = withContext(io) {
+        getAirPollutionUseCase(address).collect { result ->
+            result.fold(
+                onSuccess = { airPollutionResponse ->
+                    airPollutionResponse?.let { airPollution ->
+                        _state.emit(state.value.copy(airPollutionResponse = airPollution))
+                    } ?: run {
+                        showErrorDialog(ErrorType.WEATHER_ERROR)
+                    }
+                },
+                onFailure = {
+                    showErrorDialog(ErrorType.WEATHER_ERROR)
+                }
+            )
+        }
+    }
+
+    suspend fun showErrorDialog(errorType: ErrorType) = withContext(main) {
         _state.emit(state.value.copy(errorType = errorType))
     }
 
-    private fun hideErrorDialog() = viewModelScope.launch {
+    private suspend fun hideErrorDialog() = withContext(main) {
         _state.emit(state.value.copy(errorType = null))
     }
 }

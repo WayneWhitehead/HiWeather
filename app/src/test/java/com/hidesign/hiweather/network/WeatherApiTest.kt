@@ -1,12 +1,14 @@
 package com.hidesign.hiweather.network
 
-import com.hidesign.hiweather.domain.repository.WeatherApi
 import com.hidesign.hiweather.data.model.AirPollutionResponse
 import com.hidesign.hiweather.data.model.OneCallResponse
-import io.mockk.every
+import com.hidesign.hiweather.domain.repository.WeatherApi
+import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import okhttp3.ResponseBody.Companion.toResponseBody
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
@@ -17,56 +19,53 @@ class WeatherApiTest {
 
     @Before
     fun setup() {
-        every {
-            runBlocking { weatherApi.getOneCall(any(), any(), apiKey = "INVALID_API_KEY", any(), any()) }
-        } returns Response.error(401, "Unauthorized".toResponseBody(null))
-        every {
-            runBlocking { weatherApi.getOneCall(any(), any(), apiKey = "YOUR_API_KEY") }
-        } returns Response.success(200, OneCallResponse())
+        coEvery {
+            weatherApi.getOneCall(any(), any(), any(), any())
+        } returns Response.success(OneCallResponse())
 
-        every {
-            runBlocking { weatherApi.getAirPollution(any(), any(), apiKey = "INVALID_API_KEY") }
-        } returns Response.error(401, "Unauthorized".toResponseBody(null))
-        every {
-            runBlocking { weatherApi.getAirPollution(any(), any(), apiKey = "YOUR_API_KEY") }
-        } returns Response.success(200, AirPollutionResponse())
+        coEvery {
+            weatherApi.getAirPollution(any(), any())
+        } returns Response.success(AirPollutionResponse())
     }
 
     @Test
-    fun getOneCall_returnsSuccessResponse() {
-        runBlocking {
-            val response = weatherApi.getOneCall(apiKey = "YOUR_API_KEY")
+    fun getOneCall_returnsSuccessResponse() = runTest {
+        val response = weatherApi.getOneCall(0.0, 0.0, "minutely", "metric")
+        assert(response.isSuccessful)
+        assertNotNull(response.body())
 
-            assert(response.isSuccessful)
-            assert(response.body() != null)
-        }
     }
 
     @Test
-    fun getAirPollution_returnsSuccessResponse() {
-        runBlocking {
-            val response = weatherApi.getAirPollution(apiKey = "YOUR_API_KEY")
-
-            assert(response.isSuccessful)
-            assert(response.body() != null)
-        }
+    fun getAirPollution_returnsSuccessResponse() = runTest {
+        val response = weatherApi.getAirPollution(0.0, 0.0)
+        assert(response.isSuccessful)
+        assertNotNull(response.body())
     }
 
     @Test
     fun getOneCall_withInvalidApiKey_returnsErrorResponse() {
-        runBlocking {
-            val response = weatherApi.getOneCall(apiKey = "INVALID_API_KEY")
+        coEvery {
+            weatherApi.getOneCall(any(), any(), any(), any())
+        } returns Response.error(401, "Unauthorized".toResponseBody(null))
+
+        runTest {
+            val response = weatherApi.getOneCall(0.0, 0.0, "minutely", "metric")
             assert(!response.isSuccessful)
-            assert(response.code() == 401)
+            assertEquals(401, response.code())
         }
     }
 
     @Test
     fun getAirPollution_withInvalidApiKey_returnsErrorResponse() {
-        runBlocking {
-            val response = weatherApi.getAirPollution(apiKey = "INVALID_API_KEY")
+        coEvery {
+            weatherApi.getAirPollution(any(), any())
+        } returns Response.error(401, "Unauthorized".toResponseBody(null))
+
+        runTest {
+            val response = weatherApi.getAirPollution(0.0, 0.0)
             assert(!response.isSuccessful)
-            assert(response.code() == 401)
+            assertEquals(401, response.code())
         }
     }
 }

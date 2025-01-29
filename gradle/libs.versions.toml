@@ -1,9 +1,10 @@
 [versions]
-agp = "8.7.3"
+agp = "8.8.0"
 androidDecoviewCharting = "v1.2"
 appDistribution = "5.1.0"
 appcompat = "1.7.0"
 coilCompose = "2.7.0"
+compiler = "4.16.0"
 compose = "1.0.0-beta01"
 composeBom = "2025.01.00"
 constraintlayoutCompose = "1.1.0"
@@ -17,19 +18,18 @@ firebaseCrashlyticsKtx = "19.0.2"
 glide = "4.16.0"
 googleServices = "4.4.2"
 gson = "2.11.0"
-hilt = "2.52"
-hiltAndroid = "2.52"
-hiltAndroidTesting = "2.52"
+hilt = "2.55"
+hiltTesting = "2.52"
 hiltCompiler = "1.2.0"
-hiltNavigationFragment = "1.2.0"
-hiltWork = "1.2.0"
 junit = "4.13.2"
 kotlin = "1.9.0"
 kotlinStdlibJdk8 = "1.9.0"
+kotlinxCoroutinesTest = "1.8.1"
 kotlinxSerializationJson = "1.7.0"
 legacySupportV4 = "1.0.0"
 lifecycle = "2.8.7"
 lifecycleExtensions = "2.2.0"
+lottieCompose = "6.6.2"
 material = "1.12.0"
 mockitoKotlin = "5.1.0"
 mockk = "1.13.11"
@@ -41,11 +41,11 @@ places = "4.1.0"
 playServicesAds = "23.1.0"
 playServicesLocation = "21.3.0"
 retrofit = "2.11.0"
+robolectric = "4.10.3"
 secrets = "2.0.1"
 swiperefreshlayout = "1.1.0"
 timber = "5.0.1"
-uiTestJunit4 = "1.7.6"
-uiTestManifest = "1.7.6"
+uiTest = "1.7.6"
 workRuntimeKtx = "2.10.0"
 workRuntimeKtxVersion = "1.0.1"
 
@@ -61,8 +61,8 @@ androidx-core-testing = { module = "androidx.arch.core:core-testing", version.re
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-foundation = { module = "androidx.compose.foundation:foundation" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltCompiler" }
-androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-fragment", version.ref = "hiltNavigationFragment" }
-androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
+androidx-hilt-navigation-fragment = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltCompiler" }
+androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltCompiler" }
 androidx-legacy-support-v4 = { module = "androidx.legacy:legacy-support-v4", version.ref = "legacySupportV4" }
 androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensions", version.ref = "lifecycleExtensions" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
@@ -77,27 +77,32 @@ androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedat
 androidx-swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
-androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
-androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
+androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTest" }
+androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTest" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview-android = { module = "androidx.compose.ui:ui-tooling-preview-android" }
 androidx-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
 compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebaseAnalyticsKtx" }
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltTesting" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlinStdlibJdk8" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockitoKotlin" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
@@ -108,6 +113,7 @@ places = { module = "com.google.android.libraries.places:places", version.ref = 
 play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 work-runtime-ktx = { module = "android.arch.work:work-runtime-ktx", version.ref = "workRuntimeKtxVersion" }
 

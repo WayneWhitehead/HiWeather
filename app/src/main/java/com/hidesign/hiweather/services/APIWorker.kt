@@ -5,7 +5,14 @@ import android.content.ComponentName
 import android.content.Context
 import android.location.Address
 import androidx.hilt.work.HiltWorker
-import androidx.work.*
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import com.hidesign.hiweather.R
 import com.hidesign.hiweather.domain.usecase.GetAirPollutionUseCase
 import com.hidesign.hiweather.domain.usecase.GetOneCallUseCase
@@ -28,39 +35,43 @@ class APIWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         val pref = context.getSharedPreferences(Constants.PREFERENCES, Context.MODE_PRIVATE)
-        val lat = pref.getFloat(Constants.LATITUDE, 0.0F).toDouble()
-        val lon = pref.getFloat(Constants.LONGITUDE, 0.0F).toDouble()
+        val address = Address(Locale.getDefault()).apply {
+            latitude = pref.getFloat(Constants.LATITUDE, 0.0F).toDouble()
+            longitude = pref.getFloat(Constants.LONGITUDE, 0.0F).toDouble()
+        }
         val locality = pref.getString(Constants.LOCALITY, "") ?: ""
 
         if (pref.getBoolean(WEATHER_UPDATES, false)) {
-            getOneCallUseCase(Address(Locale.getDefault()).apply {
-                latitude = lat
-                longitude = lon
-            }).onSuccess { oneCallResponse ->
-                NotificationUtil.createWeatherNotificationData(
-                    interval = pref.getInt(REFRESH_INTERVAL, 0),
-                    oneCallResponse = oneCallResponse,
-                    locality = locality
-                )?.let {
-                    NotificationUtil.createOrUpdateNotification(context, it, WEATHER_UPDATES_ID)
-                } ?: return Result.failure()
-            }.onFailure {
-                return Result.failure()
+            getOneCallUseCase(address).collect { result ->
+                result.fold(
+                    onSuccess = { oneCallResponse ->
+                        NotificationUtil.createWeatherNotificationData(
+                            interval = pref.getInt(REFRESH_INTERVAL, 0),
+                            oneCallResponse = oneCallResponse,
+                            locality = locality
+                        )?.let {
+                            NotificationUtil.createOrUpdateNotification(context, it, WEATHER_UPDATES_ID)
+                        } ?: Result.failure()
+                    },
+                    onFailure = {
+                        Result.failure()
+                    }
+                )
             }
         }
         if (pref.getBoolean(AIR_UPDATES, false)) {
-            getAirPollutionUseCase(Address(Locale.getDefault()).apply {
-                latitude = lat
-                longitude = lon
-            }).onSuccess { airPollutionResponse ->
-                NotificationUtil.createAirPollutionNotificationData(
-                    airPollutionResponse = airPollutionResponse,
-                    locality = locality
-                )?.let {
-                    NotificationUtil.createOrUpdateNotification(context, it, AIR_UPDATES_ID)
-                } ?: return Result.failure()
-            }.onFailure {
-                return Result.failure()
+            getAirPollutionUseCase(address).collect { result ->
+                result.fold(
+                    onSuccess = { airPollutionResponse ->
+                        NotificationUtil.createAirPollutionNotificationData(
+                            airPollutionResponse = airPollutionResponse,
+                            locality = locality
+                        )?.let {
+                            NotificationUtil.createOrUpdateNotification(context, it, AIR_UPDATES_ID)
+                        } ?: Result.failure()
+                    },
+                    onFailure = { Result.failure() }
+                )
             }
         }
 

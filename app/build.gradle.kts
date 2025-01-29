@@ -59,7 +59,7 @@ android {
         applicationId = "com.hidesign.hiweather"
         minSdk = 28
         targetSdk = 35
-        versionCode = 47
+        versionCode = 48
         versionName = "0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -73,6 +73,10 @@ android {
         jvmTarget = "17"
     }
 
+    kapt {
+        correctErrorTypes = true
+    }
+
     packaging {
         resources.excludes.add("META-INF/*.md")
         resources.excludes.add("/META-INF/{AL2.0,LGPL2.1}")
@@ -84,7 +88,6 @@ android {
 }
 
 dependencies {
-    androidTestImplementation(libs.androidx.espresso.core)
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.work.runtime.ktx)
@@ -124,7 +127,7 @@ dependencies {
     // Glide
     implementation(libs.android.decoview.charting)
     implementation(libs.glide)
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    kapt(libs.compiler)
     implementation(libs.compose)
     implementation(libs.coil.compose)
 
@@ -145,10 +148,11 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.lottie.compose)
 
     // Dagger Hilt
-    kapt("com.google.dagger:hilt-compiler:${libs.versions.hiltAndroid.get()}")
-    kaptTest("com.google.dagger:hilt-android-compiler:${libs.versions.hiltAndroid.get()}")
+    kapt(libs.hilt.compiler)
+    kaptTest(libs.hilt.android.compiler)
     implementation(libs.hilt.android)
     kapt(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.fragment)
@@ -162,4 +166,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.core.testing)
     implementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

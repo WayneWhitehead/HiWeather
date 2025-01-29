@@ -55,7 +55,9 @@ data class Current(
     var windGust: Double = 0.0,
     @SerializedName("wind_speed")
     var windSpeed: Double = 0.0,
-): Serializable
+): Serializable {
+    fun toJson(): String = Uri.encode(Gson().toJson(this))
+}
 
 data class Weather(
     @SerializedName("description") var description: String,

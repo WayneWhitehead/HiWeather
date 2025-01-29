@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 object NetworkModule {
 
     @Provides
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(interceptor: OkHttpProfilerInterceptor): OkHttpClient {
         return OkHttpClient.Builder()
             .readTimeout(20L, TimeUnit.SECONDS)
             .connectTimeout(20L, TimeUnit.SECONDS)
@@ -30,7 +30,7 @@ object NetworkModule {
                     .build()
                 chain.proceed(modifiedRequest)
             }
-            .addInterceptor(OkHttpProfilerInterceptor())
+            .addInterceptor(interceptor)
             .build()
     }
 
@@ -46,5 +46,10 @@ object NetworkModule {
     @Provides
     fun provideWeatherApi(retrofit: Retrofit): WeatherApi {
         return retrofit.create(WeatherApi::class.java)
+    }
+
+    @Provides
+    fun provideOkHttpProfilerInterceptor(): OkHttpProfilerInterceptor {
+        return OkHttpProfilerInterceptor()
     }
 }
