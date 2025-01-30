@@ -4,8 +4,9 @@ androidDecoviewCharting = "v1.2"
 appDistribution = "5.1.0"
 appcompat = "1.7.0"
 coilCompose = "2.7.0"
-compiler = "4.16.0"
-compose = "1.0.0-beta01"
+compose = "1.5.0"
+glideCompiler = "4.16.0"
+glideCompose = "1.0.0-beta01"
 composeBom = "2025.01.00"
 constraintlayoutCompose = "1.1.0"
 coreKtx = "1.15.0"
@@ -23,7 +24,6 @@ hiltTesting = "2.52"
 hiltCompiler = "1.2.0"
 junit = "4.13.2"
 kotlin = "1.9.0"
-kotlinStdlibJdk8 = "1.9.0"
 kotlinxCoroutinesTest = "1.8.1"
 kotlinxSerializationJson = "1.7.0"
 legacySupportV4 = "1.0.0"
@@ -84,19 +84,18 @@ androidx-ui-tooling-preview-android = { module = "androidx.compose.ui:ui-tooling
 androidx-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "compiler" }
-compose = { module = "com.github.bumptech.glide:compose", version.ref = "compose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version.ref = "firebaseAnalyticsKtx" }
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glideCompiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glideCompiler" }
+glideCompose = { module = "com.github.bumptech.glide:compose", version.ref = "glideCompose" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltTesting" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlinStdlibJdk8" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }

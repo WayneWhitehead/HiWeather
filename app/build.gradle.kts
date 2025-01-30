@@ -1,10 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.google.services)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.firebase.crashlytics)
-    alias(libs.plugins.secrets)
+    alias(libs.plugins.google.services)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.secrets)
     id("kotlin-kapt")
 }
 
@@ -52,7 +52,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.0"
+        kotlinCompilerExtensionVersion = libs.versions.compose.get()
     }
 
     defaultConfig {
@@ -63,10 +63,6 @@ android {
         versionName = "0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    dependenciesInfo {
-        includeInBundle = true
     }
 
     kotlinOptions {
@@ -109,7 +105,6 @@ dependencies {
     implementation(libs.okhttpprofiler)
 
     // Kotlin Dependencies
-    implementation(libs.kotlin.stdlib.jdk8)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
@@ -127,8 +122,8 @@ dependencies {
     // Glide
     implementation(libs.android.decoview.charting)
     implementation(libs.glide)
-    kapt(libs.compiler)
-    implementation(libs.compose)
+    kapt(libs.glideCompiler)
+    implementation(libs.glideCompose)
     implementation(libs.coil.compose)
 
     // Compose

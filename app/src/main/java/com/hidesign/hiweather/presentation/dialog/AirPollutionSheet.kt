@@ -5,12 +5,12 @@ import android.content.res.Resources
 import android.os.Build
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.hidesign.hiweather.R
@@ -49,7 +49,7 @@ fun AirPollutionSheet(title: String, components: Components, onDismissRequest: (
     }
 
     ModalBottomSheet(
-        containerColor = Color.Black.copy(alpha = 0.85f),
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
         sheetState = rememberModalBottomSheetState(),
         onDismissRequest = onDismissRequest
     ) {

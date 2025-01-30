@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Activity
 import android.location.Address
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -151,7 +152,11 @@ class MainActivity: FragmentActivity(){
                     }
                     composable(route = "$ERROR_SCREEN/{error}",
                         arguments = listOf(navArgument("error") { type = NavType.EnumType(ErrorType::class.java) })) {
-                        val error = it.arguments?.getSerializable("error") as ErrorType
+                        val error = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            it.arguments?.getSerializable("error", ErrorType::class.java) as ErrorType
+                        } else {
+                            it.arguments?.getSerializable("error") as ErrorType
+                        }
                         ErrorScreen(error, weatherViewModel) {
                             navController.navigate(WEATHER_SCREEN)
                         }
@@ -250,9 +255,9 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel, onNavigateTo: (String) -> 
                 activityResult.data?.let {
                     val place = Autocomplete.getPlaceFromIntent(it)
                     val address = Address(Locale.getDefault()).apply {
-                        latitude = place.latLng?.latitude ?: 0.0
-                        longitude = place.latLng?.longitude ?: 0.0
-                        locality = place.name
+                        latitude = place.location?.latitude ?: 0.0
+                        longitude = place.location?.longitude ?: 0.0
+                        locality = place.displayName
                     }
                     weatherViewModel.fetchWeather(address)
                 }
@@ -283,7 +288,7 @@ fun WeatherScreen(weatherViewModel: WeatherViewModel, onNavigateTo: (String) -> 
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { Places.initialize(context, BuildConfig.PLACES_KEY)
-                    val fields = listOf(Place.Field.NAME, Place.Field.LAT_LNG)
+                    val fields = listOf(Place.Field.DISPLAY_NAME, Place.Field.LOCATION)
                     val intent = Autocomplete
                         .IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
                         .build(context)

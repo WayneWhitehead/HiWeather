@@ -3,6 +3,7 @@ package com.hidesign.hiweather.presentation.dialog
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -20,7 +21,7 @@ import com.hidesign.hiweather.util.AdUtil
 fun CelestialSheet(daily: Daily, tz: String, onDismissRequest: () -> Unit) {
     ModalBottomSheet(
         modifier = Modifier.padding(0.dp, 0.dp , 0.dp, 20.dp),
-        containerColor = Color(0xD9000000),
+        containerColor = MaterialTheme.colorScheme.secondaryContainer,
         sheetState = rememberModalBottomSheetState(),
         onDismissRequest = onDismissRequest
     ) {

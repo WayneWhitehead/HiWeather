@@ -8,10 +8,10 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = colorPrimary,
@@ -26,6 +26,9 @@ private val DarkColorScheme = darkColorScheme(
 
     primaryContainer = Color(0xFF151515),
     onPrimaryContainer = Color.White,
+
+    secondaryContainer = Color.Black.copy(alpha = 0.85f),
+    onSecondaryContainer = Color.White,
 )
 
 private val shapes = Shapes(
@@ -40,8 +43,10 @@ fun HiWeatherTheme(content: @Composable () -> Unit) {
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = DarkColorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            WindowInsetsControllerCompat(window, view).apply {
+                isAppearanceLightStatusBars = false
+            }
         }
     }
 
