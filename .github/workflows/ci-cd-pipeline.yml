@@ -1,5 +1,8 @@
-name: ViewModel and UseCase Test Cases
-on: [push, pull_request]
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    types: [synchronize]
 
 jobs:
   build:
