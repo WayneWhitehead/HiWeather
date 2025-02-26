@@ -1,0 +1,56 @@
+name: Check Composable Files for Hardcoded Values
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check-hardcoded-values:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          java-package: jdk
+          architecture: x64
+          check-latest: false
+
+      - name: Find hardcoded values in composable files
+        id: find-hardcoded-values
+        run: |
+          FILES=$(find app/src/main/java -name '*.kt')
+          WARNINGS=""
+          for file in $FILES; do
+            LINES=$(grep -nE '("[^"]*"|[0-9]+\.dp)' $file)
+            if [ ! -z "$LINES" ]; then
+              WARNINGS="$WARNINGS\n$file:\n$LINES"
+            fi
+          done
+          echo "WARNINGS<<EOF" >> $GITHUB_ENV
+          echo -e "$WARNINGS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post warnings as comments
+        if: env.WARNINGS != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const warnings = process.env.WARNINGS.split('\n');
+            let commentBody = '### Hardcoded Values Warning\n';
+            warnings.forEach(line => {
+              if (line.trim() !== '') {
+                commentBody += `${line}\n`;
+              }
+            });
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: commentBody
+            });
