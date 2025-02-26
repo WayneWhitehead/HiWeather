@@ -1,0 +1,68 @@
+name: ViewModel Unit Tests
+
+on:
+  pull_request:
+    types: [synchronize]
+
+jobs:
+  viewmodel-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          java-package: jdk
+          architecture: x64
+          check-latest: false
+          server-id: github
+          server-username: ${{ secrets.GITHUB_ACTOR }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+          overwrite-settings: true
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          api-level: 30
+          build-tools: 30.0.3
+
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Run Unit Tests
+        run: ./gradlew test --tests '*ViewModelTest*'
+        continue-on-error: true
+
+      - name: Generate Coverage Report
+        run: ./gradlew jacocoTestReport
+
+      - name: Verify Coverage
+        id: verify-coverage
+        run: |
+          COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
+          COVERAGE_REPORT=""
+          for file in $(find . -name '*ViewModel.kt'); do
+            # Extract coverage percentage for each ViewModel file
+            FILE_NAME=$(basename $file)
+            COVERAGE=$(grep -oP "name=\"$FILE_NAME\".*?covered=\".*?\" pct=\"\K\d+" $COVERAGE_FILE)
+            COVERAGE_REPORT="$COVERAGE_REPORT\n$FILE_NAME: $COVERAGE%"
+          done
+          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV
+
+      - name: Post Comment on PR
+        if: env.COVERAGE_REPORT != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const coverageReport = process.env.COVERAGE_REPORT;
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `Coverage report for ViewModel files:${coverageReport}`
+            });
