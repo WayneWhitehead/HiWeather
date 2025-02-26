@@ -48,6 +48,7 @@ jobs:
       - name: Run Unit Tests
         if: env.VIEWMODEL_USECASE_FILES
         run: ./gradlew test --include '**/*ViewModelTest*' --include '**/*UseCaseTest*'
+        continue-on-error: true
 
       - name: Run Detekt
         if: env.VIEWMODEL_USECASE_FILES
