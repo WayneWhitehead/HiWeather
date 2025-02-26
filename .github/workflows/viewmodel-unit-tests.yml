@@ -32,7 +32,11 @@ jobs:
           build-tools: 30.0.3
 
       - name: Create local.properties
-        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "ADMOB_APP_KEY=${{ secrets.ADMOB_APP_KEY }}" >> local.properties
+          echo "PLACES_KEY=${{ secrets.PLACES_KEY }}" >> local.properties
+          echo "OPENWEATHER_KEY=${{ secrets.OPENWEATHER_KEY }}" >> local.properties
 
       - name: Fetch ViewModel Test Files
         id: fetch-test-files
