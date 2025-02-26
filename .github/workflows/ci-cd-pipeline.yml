@@ -39,9 +39,6 @@ jobs:
       - name: Run Unit Tests
         if: env.VIEWMODEL_USECASE_FILES
         run: ./gradlew test --tests "*ViewModelTest*" --tests "*UseCaseTest*"
-          - env:
-            JAVA_OPTS: "-Xmx4g -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant"
-
 
       - name: Run Detekt
         if: env.VIEWMODEL_USECASE_FILES
