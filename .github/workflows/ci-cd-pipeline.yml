@@ -1,5 +1,4 @@
-name: CI/CD Pipeline
-
+name: ViewModel and UseCase Test Cases
 on: [push, pull_request]
 
 jobs:
@@ -7,72 +6,75 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt' # or 'zulu', 'temurin', etc.
-        java-version: 11
-        java-package: jdk
-        architecture: x64
-        check-latest: false
-        server-id: github
-        server-username: ${{ secrets.GITHUB_ACTOR }}
-        server-password: ${{ secrets.GITHUB_TOKEN }}
-        overwrite-settings: true
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt' # or 'zulu', 'temurin', etc.
+          java-version: 11
+          java-package: jdk
+          architecture: x64
+          check-latest: false
+          server-id: github
+          server-username: ${{ secrets.GITHUB_ACTOR }}
+          server-password: ${{ secrets.GITHUB_TOKEN }}
+          overwrite-settings: true
 
-    - name: Get changed files
-      id: files
-      uses: tj-actions/changed-files@v34
-      with:
-        format: 'json'
+      - name: Get changed files
+        id: files
+        uses: tj-actions/changed-files@v34
+        with:
+          format: 'json'
 
-    - name: Filter ViewModel and UseCase files
-      id: relevant-files
-      run: |
-        echo "VIEWMODEL_USECASE_FILES=$(echo ${{ steps.files.outputs.all_changed_files }} | jq -r '.[] | select(endswith("ViewModel.kt") or endswith("UseCase.kt"))')" >> $GITHUB_ENV
+      - name: Filter ViewModel and UseCase files
+        id: relevant-files
+        run: |
+          echo "VIEWMODEL_USECASE_FILES=$(echo ${{ steps.files.outputs.all_changed_files }} | jq -r '.[] | select(endswith("ViewModel.kt") or endswith("UseCase.kt"))')" >> $GITHUB_ENV
 
-    - name: Run Unit Tests
-      if: env.VIEWMODEL_USECASE_FILES
-      run: ./gradlew test --tests "*ViewModelTest*" --tests "*UseCaseTest*"
+      - name: Run Unit Tests
+        if: env.VIEWMODEL_USECASE_FILES
+        run: ./gradlew test --tests "*ViewModelTest*" --tests "*UseCaseTest*"
 
-    - name: Run Detekt
-      if: env.VIEWMODEL_USECASE_FILES
-      run: ./gradlew detekt
+      - name: Run Detekt
+        if: env.VIEWMODEL_USECASE_FILES
+        run: ./gradlew detekt
 
-    - name: Check Test Coverage
-      if: env.VIEWMODEL_USECASE_FILES
-      run: ./gradlew jacocoTestReport
+      - name: Check Test Coverage
+        if: env.VIEWMODEL_USECASE_FILES
+        run: ./gradlew jacocoTestReport
 
-    - name: Verify Coverage
-      if: env.VIEWMODEL_USECASE_FILES
-      id: verify-coverage
-      run: |
-        COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
-        COVERAGE_THRESHOLD=80
-        LOW_COVERAGE_FILES=""
-        for file in $(echo $VIEWMODEL_USECASE_FILES); do
-          # Extract coverage percentage for each ViewModel or UseCase file
-          COVERAGE=$(grep -oP "name=\"$file\".*?covered=\".*?\" pct=\"\K\d+" $COVERAGE_FILE)
-          if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
-            LOW_COVERAGE_FILES="$LOW_COVERAGE_FILES\n$file: $COVERAGE%"
-          else
-            echo "Coverage for $file is above threshold: $COVERAGE%"
-          fi
-        done
-        echo "LOW_COVERAGE_FILES=$LOW_COVERAGE_FILES" >> $GITHUB_ENV
+      - name: Verify Coverage
+        if: env.VIEWMODEL_USECASE_FILES
+        id: verify-coverage
+        run: |
+          COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
+          COVERAGE_THRESHOLD=80
+          LOW_COVERAGE_FILES=""
+          COVERAGE_REPORT=""
+          for file in $(echo $VIEWMODEL_USECASE_FILES); do
+            # Extract coverage percentage for each ViewModel or UseCase file
+            COVERAGE=$(grep -oP "name=\"$file\".*?covered=\".*?\" pct=\"\K\d+" $COVERAGE_FILE)
+            COVERAGE_REPORT="$COVERAGE_REPORT\n$file: $COVERAGE%"
+            if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+              LOW_COVERAGE_FILES="$LOW_COVERAGE_FILES\n$file: $COVERAGE%"
+            else
+              echo "Coverage for $file is above threshold: $COVERAGE%"
+            fi
+          done
+          echo "LOW_COVERAGE_FILES=$LOW_COVERAGE_FILES" >> $GITHUB_ENV
+          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV
 
-    - name: Post Comment on PR
-      if: env.LOW_COVERAGE_FILES
-      uses: actions/github-script@v5
-      with:
-        script: |
-          const lowCoverageFiles = process.env.LOW_COVERAGE_FILES;
-          github.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.payload.pull_request.number,
-            body: `The following ViewModel or UseCase files have below-threshold test coverage:${lowCoverageFiles}`
-          });
+      - name: Post Comment on PR
+        if: env.COVERAGE_REPORT != ""
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const coverageReport = process.env.COVERAGE_REPORT;
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `Coverage report for ViewModel and UseCase files:${coverageReport}`
+            });
