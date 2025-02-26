@@ -11,6 +11,7 @@ import com.hidesign.hiweather.domain.usecase.GetOneCallUseCase
 import com.hidesign.hiweather.util.LocationUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +43,7 @@ class WeatherViewModel @Inject constructor(
         viewModelScope.launch {
             hideErrorDialog()
             try {
-                val location = address ?: async { locationUtil.getLocation() }.await()
+                val location = address ?: locationUtil.getLocation()
                 if (location == null) {
                     showErrorDialog(ErrorType.LOCATION_ERROR)
                 } else {
@@ -51,8 +52,7 @@ class WeatherViewModel @Inject constructor(
                         oneCallResponse = null,
                         airPollutionResponse = null
                     ))
-                    getOneCall(location)
-                    getAirPollution(location)
+                    fetchWeatherData(location)
                 }
             } catch (e: Exception) {
                 showErrorDialog(ErrorType.LOCATION_ERROR)
@@ -60,7 +60,7 @@ class WeatherViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getOneCall(address: Address) {
+    private suspend fun fetchWeatherData(address: Address) = coroutineScope {
         getOneCallUseCase(address).collect { result ->
             result.fold(
                 onSuccess = { oneCallResponse ->
@@ -75,9 +75,6 @@ class WeatherViewModel @Inject constructor(
                 }
             )
         }
-    }
-
-    private suspend fun getAirPollution(address: Address) = withContext(io) {
         getAirPollutionUseCase(address).collect { result ->
             result.fold(
                 onSuccess = { airPollutionResponse ->
