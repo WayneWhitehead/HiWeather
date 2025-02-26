@@ -34,8 +34,17 @@ jobs:
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
+      - name: Fetch ViewModel Test Files
+        id: fetch-test-files
+        run: |
+          TEST_FILES=$(find app/src/test/java -name '*ViewModelTest.kt')
+          echo "TEST_FILES=$TEST_FILES" >> $GITHUB_ENV
+
       - name: Run Unit Tests
-        run: ./gradlew test --tests '*ViewModelTest*'
+        run: |
+          for file in ${{ env.TEST_FILES }}; do
+            ./gradlew test --tests $(basename $file .kt)
+          done
         continue-on-error: true
 
       - name: Generate Coverage Report
@@ -47,7 +56,6 @@ jobs:
           COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
           COVERAGE_REPORT=""
           for file in $(find . -name '*ViewModel.kt'); do
-            # Extract coverage percentage for each ViewModel file
             FILE_NAME=$(basename $file)
             COVERAGE=$(grep -oP "name=\"$FILE_NAME\".*?covered=\".*?\" pct=\"\K\d+" $COVERAGE_FILE)
             COVERAGE_REPORT="$COVERAGE_REPORT\n$FILE_NAME: $COVERAGE%"
