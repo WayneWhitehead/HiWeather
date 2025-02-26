@@ -43,11 +43,13 @@ jobs:
       - name: Filter ViewModel and UseCase files
         id: relevant-files
         run: |
-          echo "VIEWMODEL_USECASE_FILES=$(echo ${{ steps.files.outputs.all_changed_files }} | jq -r '.[] | select(endswith("ViewModel.kt") or endswith("UseCase.kt"))')" >> $GITHUB_ENV
+          VIEWMODEL_USECASE_FILES=$(echo ${{ steps.files.outputs.all_changed_files }} | jq -r '.[] | select(endswith("ViewModel.kt") or endswith("UseCase.kt"))')
+          echo "Found ViewModel and UseCase files: $VIEWMODEL_USECASE_FILES"
+          echo "VIEWMODEL_USECASE_FILES=$VIEWMODEL_USECASE_FILES" >> $GITHUB_ENV
 
       - name: Run Unit Tests
         if: env.VIEWMODEL_USECASE_FILES
-        run: ./gradlew test --include '**/*ViewModelTest*' --include '**/*UseCaseTest*'
+        run: ./gradlew test --tests '*ViewModelTest*' --tests '*UseCaseTest*'
         continue-on-error: true
 
       - name: Run Detekt
