@@ -65,6 +65,10 @@ android {
         versionName = "0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "ADMOB_APP_KEY", "\"${project.findProperty("ADMOB_APP_KEY")}\"")
+        buildConfigField("String", "PLACES_KEY", "\"${project.findProperty("PLACES_KEY")}\"")
+        buildConfigField("String", "OPENWEATHER_KEY", "\"${project.findProperty("OPENWEATHER_KEY")}\"")
     }
 
     kotlinOptions {
