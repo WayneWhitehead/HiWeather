@@ -70,7 +70,7 @@ jobs:
           echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV
 
       - name: Post Comment on PR
-        if: env.COVERAGE_REPORT != ""
+        if: env.COVERAGE_REPORT != ''
         uses: actions/github-script@v5
         with:
           script: |
