@@ -27,9 +27,18 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            const github = require('@actions/github');
+            const context = github.context;
 
             // Get the list of changed files
             const changedFiles = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
+
+            // Get existing comments
+            const existingComments = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number
@@ -57,17 +66,26 @@ jobs:
                       console.log(`Line Number: ${lineNumber}`);
                       console.log(`Message: ${message}`);
 
-                      // Post a comment on the pull request
-                      await github.rest.pulls.createReviewComment({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        pull_number: context.payload.pull_request.number,
-                        body: message,
-                        commit_id: context.payload.pull_request.head.sha,
-                        path: file.filename,
-                        line: lineNumber,
-                        side: 'RIGHT'
-                      });
+                      // Check if there's already a comment from github-actions[bot] on this line
+                      const existingComment = existingComments.data.find(comment => 
+                        comment.path === file.filename && comment.line === lineNumber && comment.user.login === 'github-actions[bot]'
+                      );
+
+                      if (!existingComment) {
+                        // Post a comment on the pull request
+                        await github.rest.pulls.createReviewComment({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          pull_number: context.payload.pull_request.number,
+                          body: message,
+                          commit_id: context.payload.pull_request.head.sha,
+                          path: file.filename,
+                          line: lineNumber,
+                          side: 'RIGHT'
+                        });
+                      } else {
+                        console.log(`Comment already exists from github-actions[bot] on ${file.filename} at line ${lineNumber}`);
+                      }
                     }
                   } else if (!line.startsWith('-')) {
                     lineNumber++;
