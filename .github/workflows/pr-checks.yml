@@ -38,7 +38,7 @@ jobs:
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             FILE_NAME=$(basename $file)
             # Get the diff of the changed file
-            DIFF_LINES=$(git diff origin/main --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|[0-9]+\.dp' | grep -v 'const val' | grep -v '""' | grep -v '@SerializedName') || true
+            DIFF_LINES=$(git diff origin/main --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|HARDCODED|[0-9]+\.dp' | grep -v 'const val' | grep -v '""' | grep -v '@SerializedName') || true
             if [ ! -z "$DIFF_LINES" ]; then
               WARNINGS="$WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Values\n$DIFF_LINES"
             fi
@@ -60,6 +60,8 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            const github = require('@actions/github');
+            const context = github.context;
             const warnings = process.env.WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
             warnings.forEach(line => {
