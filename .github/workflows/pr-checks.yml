@@ -27,16 +27,11 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            const github = require('@actions/github');
+            const context = github.context;
 
             // Get the list of changed files
             const changedFiles = await github.rest.pulls.listFiles({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number
-            });
-
-            // Get existing comments
-            const existingComments = await github.rest.pulls.listReviewComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number
@@ -48,45 +43,33 @@ jobs:
                 const diffLines = file.patch.split('\n').filter(line => line.startsWith('+') && !line.startsWith('++'));
 
                 let lineNumber = 0;
-                let position = 0;
                 for (const line of file.patch.split('\n')) {
                   if (line.startsWith('@@')) {
                     // Extract the starting line number from the diff hunk header
                     const match = line.match(/@@ \-(\d+),\d+ \+(\d+),\d+ @@/);
                     if (match) {
                       lineNumber = parseInt(match[2]) - 1;
-                      position = 0;
                     }
                   } else if (line.startsWith('+')) {
                     lineNumber++;
-                    position++;
                     if (line.match(/"[^"]*"|[0-9]+\.dp/) && !line.includes('const val') && !line.includes('@SerializedName')) {
                       const message = `Hardcoded value found: ${line.trim()}`;
 
                       console.log(`File: ${file.filename}`);
                       console.log(`Line Number: ${lineNumber}`);
-                      console.log(`Position: ${position}`);
                       console.log(`Message: ${message}`);
 
-                      // Check if there's already a comment from this bot on this line
-                      const existingComment = existingComments.data.find(comment => 
-                        comment.path === file.filename && comment.position === position && comment.user.login === context.actor
-                      );
-
-                      if (!existingComment) {
-                        // Post a comment on the pull request
-                        await github.rest.pulls.createReviewComment({
-                          owner: context.repo.owner,
-                          repo: context.repo.repo,
-                          pull_number: context.payload.pull_request.number,
-                          body: message,
-                          commit_id: context.payload.pull_request.head.sha,
-                          path: file.filename,
-                          position: position
-                        });
-                      } else {
-                        console.log(`Comment already exists from this bot on ${file.filename} at position ${position}`);
-                      }
+                      // Post a comment on the pull request
+                      await github.rest.pulls.createReviewComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: context.payload.pull_request.number,
+                        body: message,
+                        commit_id: context.payload.pull_request.head.sha,
+                        path: file.filename,
+                        line: lineNumber,
+                        side: 'RIGHT'
+                      });
                     }
                   } else if (!line.startsWith('-')) {
                     lineNumber++;
