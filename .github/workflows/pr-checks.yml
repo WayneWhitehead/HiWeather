@@ -34,27 +34,14 @@ jobs:
         id: find-hardcoded-values
         run: |
           set -e
-          WARNINGS=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             FILE_NAME=$(basename $file)
             # Get the diff of the changed file
             DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|HARDCODED|[0-9]+\.dp' | grep -v 'const val' | grep -v '""' | grep -v '@SerializedName') || true
             if [ ! -z "$DIFF_LINES" ]; then
-              while IFS= read -r line; do
-                LINE_NUMBER=$(echo "$line" | cut -d: -f1)
-                CONTENT=$(echo "$line" | cut -d: -f2-)
-                WARNINGS="$WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Values\n$LINE_NUMBER: $CONTENT"
-              done <<< "$DIFF_LINES"
+              echo "::warning file=$file,line=$DIFF_LINES::Hardcoded value found in $file"
             fi
           done
-          if [ -z "$WARNINGS" ]; then
-            echo "No hardcoded values found."
-          else
-            echo "WARNINGS<<EOF" >> $GITHUB_ENV
-            echo -e "$WARNINGS" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-            echo "::warning::Hardcoded values found."
-          fi
         shell: /usr/bin/bash -e {0}
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
@@ -66,24 +53,18 @@ jobs:
           script: |
             const warnings = process.env.WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
-            let currentFile = '';
-            let currentLineNumber = 0;
-            let currentContent = '';
             warnings.forEach(line => {
               if (line.trim() !== '' && line.startsWith('## ')) {
-                currentFile = line.split('**Full Path:** ')[1];
-              } else if (line.trim() !== '' && line.startsWith('### Hardcoded Values')) {
-                const lineParts = line.split(': ');
-                currentLineNumber = parseInt(lineParts[0].split(' ')[0].trim());
-                currentContent = lineParts[1];
+                const filePath = line.split('**Full Path:** ')[1];
+                const lineNumber = parseInt(line.split(':')[0].split(' ')[1]);
                 github.rest.pulls.createReviewComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   pull_number: context.payload.pull_request.number,
-                  body: `Check Hardcoded Values Here: ${currentContent}`,
+                  body: 'Check Hardcoded Values Here',
                   commit_id: commitId,
-                  path: currentFile,
-                  line: currentLineNumber
+                  path: filePath,
+                  line: lineNumber
                 });
               }
             });
