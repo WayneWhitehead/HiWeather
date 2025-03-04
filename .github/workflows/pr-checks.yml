@@ -27,6 +27,9 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            const github = require('@actions/github');
+            const context = github.context;
+
             // Get the list of changed files
             const changedFiles = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
@@ -39,25 +42,37 @@ jobs:
                 // Get the diff of the changed file
                 const diffLines = file.patch.split('\n').filter(line => line.startsWith('+') && !line.startsWith('++'));
 
-                for (const [index, line] of diffLines.entries()) {
-                  if (line.match(/"[^"]*"|[0-9]+\.dp/) && !line.includes('const val') && !line.includes('@SerializedName')) {
-                    const lineNumber = file.patch.split('\n').slice(0, index + 1).filter(line => line.startsWith('+')).length;
-                    const message = `Hardcoded value found: ${line.trim()}`;
+                let lineNumber = 0;
+                for (const line of file.patch.split('\n')) {
+                  if (line.startsWith('@@')) {
+                    // Extract the starting line number from the diff hunk header
+                    const match = line.match(/@@ \-(\d+),\d+ \+(\d+),\d+ @@/);
+                    if (match) {
+                      lineNumber = parseInt(match[2]) - 1;
+                    }
+                  } else if (line.startsWith('+')) {
+                    lineNumber++;
+                    if (line.match(/"[^"]*"|[0-9]+\.dp/) && !line.includes('const val') && !line.includes('@SerializedName')) {
+                      const message = `Hardcoded value found: ${line.trim()}`;
 
-                    console.log(`File: ${file.filename}`);
-                    console.log(`Line Number: ${lineNumber}`);
-                    console.log(`Message: ${message}`);
+                      console.log(`File: ${file.filename}`);
+                      console.log(`Line Number: ${lineNumber}`);
+                      console.log(`Message: ${message}`);
 
-                    // Post a comment on the pull request
-                    await github.rest.pulls.createReviewComment({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      pull_number: context.payload.pull_request.number,
-                      body: message,
-                      commit_id: context.payload.pull_request.head.sha,
-                      path: file.filename,
-                      position: lineNumber
-                    });
+                      // Post a comment on the pull request
+                      await github.rest.pulls.createReviewComment({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        pull_number: context.payload.pull_request.number,
+                        body: message,
+                        commit_id: context.payload.pull_request.head.sha,
+                        path: file.filename,
+                        line: lineNumber,
+                        side: 'RIGHT'
+                      });
+                    }
+                  } else if (!line.startsWith('-')) {
+                    lineNumber++;
                   }
                 }
               }
