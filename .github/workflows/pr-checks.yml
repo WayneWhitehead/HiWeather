@@ -42,12 +42,12 @@ jobs:
               DETAILS+="$file|$DIFF_LINES|Hardcoded value found in $file\n"
             fi
           done
-          echo "DETAILS=$(echo -n "$DETAILS" | base64)" >> $GITHUB_ENV
-        shell: /usr/bin/bash -e {0}
+          echo "$DETAILS" > details.txt
+        shell: /usr/bin/bash -e
 
       - name: Post warnings as comments
         run: |
-          DETAILS=$(echo -n "$DETAILS" | base64 --decode)
+          DETAILS=$(cat details.txt)
           IFS=$'\n' read -d '' -r -a lines <<< "$DETAILS"
           for line in "${lines[@]}"; do
             IFS='|' read -r file diff_lines message <<< "$line"
