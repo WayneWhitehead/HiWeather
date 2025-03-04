@@ -1,4 +1,4 @@
-name: Check Composable Files for Hardcoded Values
+name: PR Linting
 
 on:
   pull_request:
