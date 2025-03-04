@@ -28,7 +28,7 @@ jobs:
           FILES=$(find app/src/main/java -name '*.kt')
           WARNINGS=""
           for file in $FILES; do
-            LINES=$(grep -nE '("[^"]*"|[0-9]+\.dp)' $file) || true
+            LINES=$(grep -nE '("[^"]*"|[0-9]+\.dp)' $file | grep -v 'const val') || true
             if [ ! -z "$LINES" ]; then
               WARNINGS="$WARNINGS\n$file:\n$LINES"
             fi
