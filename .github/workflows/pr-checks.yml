@@ -43,7 +43,7 @@ jobs:
             fi
           done
           echo "$DETAILS" > details.txt
-        shell: /usr/bin/bash -e
+        shell: /usr/bin/bash -e {0}
 
       - name: Post warnings as comments
         uses: actions/github-script@v5
