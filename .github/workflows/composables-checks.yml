@@ -1,4 +1,5 @@
-name: PR Review
+name: Check Composable Files for Hardcoded Values and Copilot Review
+
 on:
   pull_request:
     types: [opened, synchronize, edited]
@@ -72,16 +73,3 @@ jobs:
           pr_summary: true
           pr_reset: true
           review_filter: true
-
-  summarize:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Generate PR summary
-        uses: github/copilot-action@v1
-        with:
-          markers: 'copilot:all'
-
