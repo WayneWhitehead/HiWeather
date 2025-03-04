@@ -5,6 +5,7 @@ import android.content.Context
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.util.Log
 import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.Granularity
@@ -27,12 +28,12 @@ class LocationUtil @Inject constructor(
 
     companion object {
         val lastLocationRequest = LastLocationRequest.Builder().apply {
-            setMaxUpdateAgeMillis(10000)
+            setMaxUpdateAgeMillis(8000)
             setGranularity(Granularity.GRANULARITY_COARSE)
         }
 
         val currentLocationRequest = CurrentLocationRequest.Builder().apply {
-            setMaxUpdateAgeMillis(10000)
+            setMaxUpdateAgeMillis(8000)
             setGranularity(Granularity.GRANULARITY_COARSE)
         }
     }
@@ -41,6 +42,7 @@ class LocationUtil @Inject constructor(
         try {
             getLastAddress() ?: getCurrentAddress()
         } catch (e: Exception) {
+            Log.e("LocationUtil", "Error getting location", e)
             null
         }
     }
@@ -59,10 +61,14 @@ class LocationUtil @Inject constructor(
 
     private suspend fun getAddressFromLocation(location: Location): Result<Address> = withContext(ioContext) {
         suspendCancellableCoroutine { continuation ->
-            geocoder.getFromLocation(location.latitude, location.longitude, 1)?.let { addresses ->
-                saveLocationInPreferences(addresses[0])
-                continuation.resume(Result.success(addresses[0]))
-            } ?: continuation.resume(Result.failure(Exception("No address found")))
+            try {
+                geocoder.getFromLocation(location.latitude, location.longitude, 1)?.let { addresses ->
+                    saveLocationInPreferences(addresses[0])
+                    continuation.resume(Result.success(addresses[0]))
+                } ?: continuation.resume(Result.failure(Exception("No address found")))
+            } catch (e: Exception) {
+                continuation.resume(Result.failure(e))
+            }
         }
     }
 

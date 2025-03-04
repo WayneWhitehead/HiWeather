@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.secrets)
     id("kotlin-kapt")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" apply true
+    id("jacoco")
 }
 
 android {
@@ -63,6 +65,10 @@ android {
         versionName = "0.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "ADMOB_APP_KEY", "\"${project.findProperty("ADMOB_APP_KEY")}\"")
+        buildConfigField("String", "PLACES_KEY", "\"${project.findProperty("PLACES_KEY")}\"")
+        buildConfigField("String", "OPENWEATHER_KEY", "\"${project.findProperty("OPENWEATHER_KEY")}\"")
     }
 
     kotlinOptions {
@@ -81,6 +87,35 @@ android {
         resources.pickFirsts.add("META-INF/NOTICE")
         resources.pickFirsts.add("missing_rules.txt")
     }
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+tasks.withType<Test> {
+    finalizedBy("jacocoTestReport")
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.withType<Test>())
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf("**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*", "**/*Test*.*")
+    val debugTree = fileTree("${buildDir}/intermediates/javac/debug") {
+        exclude(fileFilter)
+    }
+    val mainSrc = "${projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(buildDir) {
+        include("jacoco/testDebugUnitTest.exec", "outputs/code_coverage/debugAndroidTest/connected/**/*.ec")
+    })
 }
 
 dependencies {
