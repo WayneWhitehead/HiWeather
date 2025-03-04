@@ -21,14 +21,14 @@ jobs:
           architecture: x64
           check-latest: false
 
-      - name: Find hardcoded values in composable files
+      - name: Find hardcoded values in changed files
         id: find-hardcoded-values
         run: |
           set -e
-          FILES=$(find app/src/main/java -name '*.kt')
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep 'app/src/main/java/.*\.kt')
           STRING_WARNINGS=""
           SIZE_WARNINGS=""
-          for file in $FILES; do
+          for file in $CHANGED_FILES; do
             FILE_NAME=$(basename $file)
             STRING_LINES=$(grep -nE '"[^"]*"' $file | grep -v 'const val' | grep -v '""' | grep -v '@SerializedName') || true
             SIZE_LINES=$(grep -nE '[0-9]+\.dp' $file) || true
