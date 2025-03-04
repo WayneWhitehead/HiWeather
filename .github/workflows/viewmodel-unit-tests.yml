@@ -58,7 +58,7 @@ jobs:
         run: |
           for file in ${{ env.TEST_FILES }}; do
             TEST_CLASS=$(basename $file .kt)
-            ./gradlew test -Dtest.single=$TEST_CLASS
+            ./gradlew :app:testDebugUnitTest --tests "$TEST_CLASS"
           done
         continue-on-error: true
 
