@@ -34,37 +34,31 @@ jobs:
         id: find-hardcoded-values
         run: |
           set -e
-          FILES=()
-          LINES=()
-          VALUES=()
+          DETAILS=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             FILE_NAME=$(basename $file)
             DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|[0-9]+\.dp' | grep -v 'const val' | grep -v '@SerializedName') || true
             if [ ! -z "$DIFF_LINES" ]; then
-              FILES+=("$file")
-              LINES+=("$DIFF_LINES")
-              VALUES+=("Hardcoded value found in $file")
+              DETAILS+="$file|$DIFF_LINES|Hardcoded value found in $file\n"
             fi
           done
-          echo "FILES=${FILES[@]}" >> $GITHUB_ENV
-          echo "LINES=${LINES[@]}" >> $GITHUB_ENV
-          echo "VALUES=${VALUES[@]}" >> $GITHUB_ENV
-        shell: /usr/bin/bash -e {0}
+          echo "DETAILS=$DETAILS" >> $GITHUB_ENV
+        shell: /usr/bin/bash -e
 
       - name: Post warnings as comments
         run: |
-          FILES=(${FILES[@]})
-          LINES=(${LINES[@]})
-          VALUES=(${VALUES[@]})
-          for i in "${!FILES[@]}"; do
+          DETAILS=${DETAILS}
+          IFS=$'\n' read -d '' -r -a lines <<< "$DETAILS"
+          for line in "${lines[@]}"; do
+            IFS='|' read -r file diff_lines message <<< "$line"
             github.rest.pulls.createReviewComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              body: "${VALUES[$i]}",
+              body: "$message",
               commit_id: context.payload.pull_request.head.sha,
-              path: "${FILES[$i]}",
-              line: "${LINES[$i]}"
+              path: "$file",
+              line: "$diff_lines"
             });
           done
         shell: node
