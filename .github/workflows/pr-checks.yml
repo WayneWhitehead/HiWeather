@@ -76,7 +76,7 @@ jobs:
                   body: 'Check Hardcoded Values Here',
                   commit_id: commitId,
                   path: filePath,
-                  position: lineNumber
+                  line: lineNumber
                 });
               }
             });
