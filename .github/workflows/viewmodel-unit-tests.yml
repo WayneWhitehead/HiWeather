@@ -38,8 +38,8 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
         with:
-          api-level: 30
-          build-tools: 30.0.3
+          api-level: 35
+          build-tools: 35.0.0
 
       - name: Create local.properties
         run: |
