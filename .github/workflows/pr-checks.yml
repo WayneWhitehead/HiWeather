@@ -39,7 +39,9 @@ jobs:
             FILE_NAME=$(basename $file)
             DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|[0-9]+\.dp' | grep -v 'const val' | grep -v '@SerializedName') || true
             if [ ! -z "$DIFF_LINES" ]; then
-              DETAILS+="$file|$DIFF_LINES|Hardcoded value found in $file\n"
+              while IFS= read -r line; do
+                DETAILS+="$file|$line|Hardcoded value found in $file\n"
+              done <<< "$DIFF_LINES"
             fi
           done
           echo "$DETAILS" > details.txt
@@ -57,8 +59,8 @@ jobs:
 
             lines.forEach(line => {
               if (line.trim() !== '') {
-                const [file, diff_lines, message] = line.split('|');
-                const lineNumber = parseInt(diff_lines.split(':')[0]);
+                const [file, diff_line, message] = line.split('|');
+                const lineNumber = parseInt(diff_line.split(':')[0]);
                 if (!isNaN(lineNumber)) {
                   github.rest.pulls.createReviewComment({
                     owner: context.repo.owner,
