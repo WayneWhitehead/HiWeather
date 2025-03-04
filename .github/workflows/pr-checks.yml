@@ -45,7 +45,7 @@ jobs:
           done
           if [ ! -z "$WARNINGS" ]; then
             echo "::warning::Hardcoded values found in the changed files."
-            echo "warnings=$WARNINGS" >> $GITHUB_ENV
+            echo "warnings=$(echo "$WARNINGS" | base64)" >> $GITHUB_ENV
           fi
         shell: /usr/bin/bash -e {0}
         env:
@@ -55,7 +55,7 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const warnings = process.env.warnings.split('\n').filter(Boolean);
+            const warnings = Buffer.from(process.env.warnings, 'base64').toString('utf-8').split('\n').filter(Boolean);
             for (const warning of warnings) {
               const [file, lines] = warning.split(':');
               const lineNumbers = lines.split(',').map(line => line.split(':')[0]);
