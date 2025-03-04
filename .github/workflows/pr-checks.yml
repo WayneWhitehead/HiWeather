@@ -43,13 +43,16 @@ jobs:
             fi
           done
           echo "$DETAILS" > details.txt
-        shell: /usr/bin/bash -e {0}
+          cat details.txt
+        shell: /usr/bin/bash -e
 
       - name: Post warnings as comments
         uses: actions/github-script@v5
         with:
           script: |
             const fs = require('fs');
+            const github = require('@actions/github');
+            const context = github.context;
 
             const details = fs.readFileSync('details.txt', 'utf8');
             const lines = details.split('\n');
