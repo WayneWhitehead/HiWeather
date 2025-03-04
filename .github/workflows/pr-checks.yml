@@ -67,8 +67,8 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const stringWarnings = process.env.STRING_WARNINGS.split('\n');
             const { context, github } = require('@actions/github');
+            const stringWarnings = process.env.STRING_WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
             stringWarnings.forEach(line => {
               if (line.trim() !== '' && line.startsWith('## ')) {
@@ -91,8 +91,8 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const sizeWarnings = process.env.SIZE_WARNINGS.split('\n');
             const { context, github } = require('@actions/github');
+            const sizeWarnings = process.env.SIZE_WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
             sizeWarnings.forEach(line => {
               if (line.trim() !== '' && line.startsWith('## ')) {
