@@ -67,13 +67,11 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const stringWarnings = process.env.STRING_WARNINGS.split('\n');
+            const stringWarnings = JSON.parse(process.env.STRING_WARNINGS);
             const { context, github } = require('@actions/github');
             const commitId = context.payload.pull_request.head.sha;
-            stringWarnings.forEach(line => {
-              if (line.trim() !== '' && line.startsWith('## ')) {
-                const filePath = line.split('**Full Path:** ')[1];
-                const lineNumber = parseInt(line.split(':')[0].split(' ')[1]);
+            stringWarnings.forEach(warning => {
+              if (warning.filePath && warning.lineNumber) {
                 github.rest.pulls.createReviewComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
