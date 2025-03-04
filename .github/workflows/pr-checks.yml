@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Fetch a few commits back for comparison
+          fetch-depth: 0  # Fetch all history for the branches involved in the PR
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
@@ -34,23 +34,14 @@ jobs:
         id: find-hardcoded-values
         run: |
           set -e
-          WARNINGS=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             FILE_NAME=$(basename $file)
             # Get the diff of the changed file
             DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|HARDCODED|[0-9]+\.dp' | grep -v 'const val' | grep -v '""' | grep -v '@SerializedName') || true
             if [ ! -z "$DIFF_LINES" ]; then
-              WARNINGS="$WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Values\n$DIFF_LINES"
+              echo "::warning file=$file,line=$DIFF_LINES::Hardcoded value found in $file"
             fi
           done
-          if [ -z "$WARNINGS" ]; then
-            echo "No hardcoded values found."
-          else
-            echo "WARNINGS<<EOF" >> $GITHUB_ENV
-            echo -e "$WARNINGS" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-            echo "::warning::Hardcoded values found."
-          fi
         shell: /usr/bin/bash -e {0}
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
