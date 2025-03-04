@@ -46,21 +46,28 @@ jobs:
           done
           echo "$DETAILS" > details.txt
           cat details.txt
-        shell: /usr/bin/bash -e {0}
+        shell: /usr/bin/bash -e
 
       - name: Post warnings as comments
         uses: actions/github-script@v5
         with:
           script: |
             const fs = require('fs');
+            const github = require('@actions/github');
+            const context = github.context;
 
             const details = fs.readFileSync('details.txt', 'utf8');
             const lines = details.split('\n');
+
+            console.log('Details:', details);
 
             lines.forEach(line => {
               if (line.trim() !== '') {
                 const [file, diff_line, message] = line.split('|');
                 const lineNumber = parseInt(diff_line.split(':')[0]);
+                console.log('File:', file);
+                console.log('Line Number:', lineNumber);
+                console.log('Message:', message);
                 if (!isNaN(lineNumber)) {
                   github.rest.pulls.createReviewComment({
                     owner: context.repo.owner,
@@ -70,6 +77,10 @@ jobs:
                     commit_id: context.payload.pull_request.head.sha,
                     path: file,
                     position: lineNumber
+                  }).then(response => {
+                    console.log('Comment posted:', response.data);
+                  }).catch(error => {
+                    console.error('Error posting comment:', error);
                   });
                 }
               }
