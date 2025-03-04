@@ -77,7 +77,8 @@ jobs:
                           body: message,
                           commit_id: context.payload.pull_request.head.sha,
                           path: file.filename,
-                          position: lineNumber
+                          line: lineNumber,
+                          side: 'RIGHT'
                         });
                       } else {
                         console.log(`Comment already exists on ${file.filename} at line ${lineNumber}`);
