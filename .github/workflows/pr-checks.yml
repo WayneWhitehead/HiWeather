@@ -49,7 +49,7 @@ jobs:
           echo "FILES=${FILES[@]}" >> $GITHUB_ENV
           echo "LINES=${LINES[@]}" >> $GITHUB_ENV
           echo "VALUES=${VALUES[@]}" >> $GITHUB_ENV
-        shell: /usr/bin/bash -e
+        shell: /usr/bin/bash -e {0}
 
       - name: Post warnings as comments
         run: |
