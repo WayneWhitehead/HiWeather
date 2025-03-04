@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Fetch all history for the branches involved in the PR
+          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
@@ -34,14 +34,19 @@ jobs:
         id: find-hardcoded-values
         run: |
           set -e
+          WARNINGS=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             FILE_NAME=$(basename $file)
-            # Get the diff of the changed file
             DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|[0-9]+\.dp' | grep -v 'const val' | grep -v '@SerializedName') || true
             if [ ! -z "$DIFF_LINES" ]; then
-              echo "::warning file=$file,line=$DIFF_LINES::Hardcoded value found in $file"
+              while IFS= read -r line; do
+                LINE_NUMBER=$(echo $line | cut -d: -f1)
+                CONTENT=$(echo $line | cut -d: -f2-)
+                WARNINGS="$WARNINGS\n::warning file=$file,line=$LINE_NUMBER::Hardcoded value found: $CONTENT"
+              done <<< "$DIFF_LINES"
             fi
           done
+          echo "$WARNINGS" >> $GITHUB_ENV
         shell: /usr/bin/bash -e {0}
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
@@ -55,24 +60,98 @@ jobs:
             const context = github.context;
             const warnings = process.env.WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
-            let currentFile = '';
-            let currentLineNumber = 0;
-            let currentContent = '';
             warnings.forEach(line => {
-              if (line.trim() !== '' && line.startsWith('## ')) {
-                currentFile = line.split('**Full Path:** ')[1];
-              } else if (line.trim() !== '' && line.startsWith('### Hardcoded Values')) {
-                const lineParts = line.split(': ');
-                currentLineNumber = parseInt(lineParts[0].split(' ')[0].trim());
-                currentContent = lineParts[1];
+              if (line.trim() !== '' && line.startsWith('::warning file=')) {
+                const parts = line.split('::warning file=')[1].split(',');
+                const file = parts[0].split('=')[1];
+                const lineNumber = parseInt(parts[1].split('=')[1]);
+                const content = line.split('::Hardcoded value found: ')[1];
                 github.rest.pulls.createReviewComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   pull_number: context.payload.pull_request.number,
-                  body: `Check Hardcoded Values Here: ${currentContent}`,
+                  body: `Check Hardcoded Values Here: ${content}`,
                   commit_id: commitId,
-                  path: currentFile,
-                  line: currentLineNumber
+                  path: file,
+                  line: lineNumber
+                });
+              }
+            });name: PR Linting
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  check-hardcoded-values:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          java-package: jdk
+          architecture: x64
+          check-latest: false
+
+      - name: Get list of changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v34
+        with:
+          files: |
+            app/src/main/java/**/*.kt
+
+      - name: Find hardcoded values in changed lines
+        id: find-hardcoded-values
+        run: |
+          set -e
+          WARNINGS=""
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            FILE_NAME=$(basename $file)
+            DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|[0-9]+\.dp' | grep -v 'const val' | grep -v '@SerializedName') || true
+            if [ ! -z "$DIFF_LINES" ]; then
+              while IFS= read -r line; do
+                LINE_NUMBER=$(echo $line | cut -d: -f1)
+                CONTENT=$(echo $line | cut -d: -f2-)
+                WARNINGS="$WARNINGS\n::warning file=$file,line=$LINE_NUMBER::Hardcoded value found: $CONTENT"
+              done <<< "$DIFF_LINES"
+            fi
+          done
+          echo "$WARNINGS" >> $GITHUB_ENV
+        shell: /usr/bin/bash -e {0}
+        env:
+          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
+
+      - name: Post warnings as comments
+        if: env.WARNINGS != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const github = require('@actions/github');
+            const context = github.context;
+            const warnings = process.env.WARNINGS.split('\n');
+            const commitId = context.payload.pull_request.head.sha;
+            warnings.forEach(line => {
+              if (line.trim() !== '' && line.startsWith('::warning file=')) {
+                const parts = line.split('::warning file=')[1].split(',');
+                const file = parts[0].split('=')[1];
+                const lineNumber = parseInt(parts[1].split('=')[1]);
+                const content = line.split('::Hardcoded value found: ')[1];
+                github.rest.pulls.createReviewComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.payload.pull_request.number,
+                  body: `Check Hardcoded Values Here: ${content}`,
+                  commit_id: commitId,
+                  path: file,
+                  line: lineNumber
                 });
               }
             });
