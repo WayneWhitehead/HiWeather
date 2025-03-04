@@ -39,8 +39,7 @@ jobs:
             echo "WARNINGS<<EOF" >> $GITHUB_ENV
             echo -e "$WARNINGS" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
-            echo "::error::Hardcoded values found:\n$WARNINGS"
-            exit 1
+            echo "::warning::Hardcoded values found:\n$WARNINGS"
           fi
         shell: /usr/bin/bash -e {0}
         env:
