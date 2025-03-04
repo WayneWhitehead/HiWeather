@@ -68,6 +68,8 @@ jobs:
         with:
           script: |
             const stringWarnings = process.env.STRING_WARNINGS.split('\n');
+            const { context, github } = require('@actions/github');
+            const commitId = context.payload.pull_request.head.sha;
             stringWarnings.forEach(line => {
               if (line.trim() !== '' && line.startsWith('## ')) {
                 const filePath = line.split('**Full Path:** ')[1];
@@ -77,9 +79,9 @@ jobs:
                   repo: context.repo.repo,
                   pull_number: context.payload.pull_request.number,
                   body: 'Hardcoded string found here.',
+                  commit_id: commitId,
                   path: filePath,
-                  line: lineNumber,
-                  side: 'RIGHT'
+                  position: lineNumber
                 });
               }
             });
@@ -90,6 +92,8 @@ jobs:
         with:
           script: |
             const sizeWarnings = process.env.SIZE_WARNINGS.split('\n');
+            const { context, github } = require('@actions/github');
+            const commitId = context.payload.pull_request.head.sha;
             sizeWarnings.forEach(line => {
               if (line.trim() !== '' && line.startsWith('## ')) {
                 const filePath = line.split('**Full Path:** ')[1];
@@ -99,9 +103,9 @@ jobs:
                   repo: context.repo.repo,
                   pull_number: context.payload.pull_request.number,
                   body: 'Hardcoded size found here.',
+                  commit_id: commitId,
                   path: filePath,
-                  line: lineNumber,
-                  side: 'RIGHT'
+                  position: lineNumber
                 });
               }
             });
