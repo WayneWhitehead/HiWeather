@@ -30,6 +30,13 @@ jobs:
           files: |
             app/src/main/java/**/*.kt
 
+     - name: Get list of changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v34
+        with:
+          files: |
+            app/src/main/java/**/*.kt
+
       - name: Find hardcoded values in changed lines
         id: find-hardcoded-values
         run: |
@@ -60,6 +67,8 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            const github = require('@actions/github');
+            const context = github.context;
             const warnings = process.env.WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
             let currentFile = '';
