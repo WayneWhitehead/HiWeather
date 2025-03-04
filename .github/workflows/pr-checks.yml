@@ -34,27 +34,23 @@ jobs:
         id: find-hardcoded-values
         run: |
           set -e
-          STRING_WARNINGS=""
-          SIZE_WARNINGS=""
+          WARNINGS=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             FILE_NAME=$(basename $file)
             STRING_LINES=$(grep -nE '"[^"]*"' $file | grep -v 'const val' | grep -v '""' | grep -v '@SerializedName') || true
             SIZE_LINES=$(grep -nE '[0-9]+\.dp' $file) || true
             if [ ! -z "$STRING_LINES" ]; then
-              STRING_WARNINGS="$STRING_WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Strings\n$STRING_LINES"
+              WARNINGS="$WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Strings\n$STRING_LINES"
             fi
             if [ ! -z "$SIZE_LINES" ]; then
-              SIZE_WARNINGS="$SIZE_WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Sizes\n$SIZE_LINES"
+              WARNINGS="$WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Sizes\n$SIZE_LINES"
             fi
           done
-          if [ -z "$STRING_WARNINGS" ] && [ -z "$SIZE_WARNINGS" ]; then
+          if [ -z "$WARNINGS" ]; then
             echo "No hardcoded values found."
           else
-            echo "STRING_WARNINGS<<EOF" >> $GITHUB_ENV
-            echo -e "$STRING_WARNINGS" >> $GITHUB_ENV
-            echo "EOF" >> $GITHUB_ENV
-            echo "SIZE_WARNINGS<<EOF" >> $GITHUB_ENV
-            echo -e "$SIZE_WARNINGS" >> $GITHUB_ENV
+            echo "WARNINGS<<EOF" >> $GITHUB_ENV
+            echo -e "$WARNINGS" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
             echo "::warning::Hardcoded values found."
           fi
@@ -62,15 +58,15 @@ jobs:
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
 
-      - name: Post string warnings as comments
-        if: env.STRING_WARNINGS != ''
+      - name: Post warnings as comments
+        if: env.WARNINGS != ''
         uses: actions/github-script@v5
         with:
           script: |
             const { context, github } = require('@actions/github');
-            const stringWarnings = process.env.STRING_WARNINGS.split('\n');
+            const warnings = process.env.WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
-            stringWarnings.forEach(line => {
+            warnings.forEach(line => {
               if (line.trim() !== '' && line.startsWith('## ')) {
                 const filePath = line.split('**Full Path:** ')[1];
                 const lineNumber = parseInt(line.split(':')[0].split(' ')[1]);
@@ -78,31 +74,7 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   pull_number: context.payload.pull_request.number,
-                  body: 'Hardcoded string found here.',
-                  commit_id: commitId,
-                  path: filePath,
-                  position: lineNumber
-                });
-              }
-            });
-
-      - name: Post size warnings as comments
-        if: env.SIZE_WARNINGS != ''
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { context, github } = require('@actions/github');
-            const sizeWarnings = process.env.SIZE_WARNINGS.split('\n');
-            const commitId = context.payload.pull_request.head.sha;
-            sizeWarnings.forEach(line => {
-              if (line.trim() !== '' && line.startsWith('## ')) {
-                const filePath = line.split('**Full Path:** ')[1];
-                const lineNumber = parseInt(line.split(':')[0].split(' ')[1]);
-                github.rest.pulls.createReviewComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: context.payload.pull_request.number,
-                  body: 'Hardcoded size found here.',
+                  body: 'Check Hardcoded Values Here',
                   commit_id: commitId,
                   path: filePath,
                   position: lineNumber
