@@ -23,63 +23,42 @@ jobs:
           architecture: x64
           check-latest: false
 
-      - name: Get list of changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v34
-        with:
-          files: |
-            app/src/main/java/**/*.kt
-
-      - name: Find hardcoded values in changed lines
-        id: find-hardcoded-values
-        run: |
-          set -e
-          DETAILS=""
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            FILE_NAME=$(basename $file)
-            DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|[0-9]+\.dp' | grep -v 'const val' | grep -v '@SerializedName') || true
-            if [ ! -z "$DIFF_LINES" ]; then
-              while IFS= read -r line; do
-                DETAILS+="$file|$line|Hardcoded value found in $file\n"
-              done <<< "$DIFF_LINES"
-            fi
-          done
-          echo "$DETAILS" > details.txt
-          cat details.txt
-        shell: /usr/bin/bash -e {0}
-
-      - name: Post warnings as comments
+      - name: Find and comment on hardcoded values
         uses: actions/github-script@v5
         with:
           script: |
-            const fs = require('fs');
+            // Get the list of changed files
+            const changedFiles = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number
+            });
 
-            const details = fs.readFileSync('details.txt', 'utf8');
-            const lines = details.split('\n');
+            for (const file of changedFiles.data) {
+              if (file.filename.endsWith('.kt')) {
+                // Get the diff of the changed file
+                const diffLines = file.patch.split('\n').filter(line => line.startsWith('+') && !line.startsWith('++'));
 
-            console.log('Details:', details);
+                for (const [index, line] of diffLines.entries()) {
+                  if (line.match(/"[^"]*"|[0-9]+\.dp/) && !line.includes('const val') && !line.includes('@SerializedName')) {
+                    const lineNumber = file.patch.split('\n').slice(0, index + 1).filter(line => line.startsWith('+')).length;
+                    const message = `Hardcoded value found: ${line.trim()}`;
 
-            lines.forEach(line => {
-              if (line.trim() !== '') {
-                const [file, diff_line, message] = line.split('|');
-                const lineNumber = parseInt(diff_line.split(':')[0]);
-                console.log('File:', file);
-                console.log('Line Number:', lineNumber);
-                console.log('Message:', message);
-                if (!isNaN(lineNumber)) {
-                  github.rest.pulls.createReviewComment({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    pull_number: context.payload.pull_request.number,
-                    body: message,
-                    commit_id: context.payload.pull_request.head.sha,
-                    path: file,
-                    position: lineNumber
-                  }).then(response => {
-                    console.log('Comment posted:', response.data);
-                  }).catch(error => {
-                    console.error('Error posting comment:', error);
-                  });
+                    console.log(`File: ${file.filename}`);
+                    console.log(`Line Number: ${lineNumber}`);
+                    console.log(`Message: ${message}`);
+
+                    // Post a comment on the pull request
+                    await github.rest.pulls.createReviewComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.payload.pull_request.number,
+                      body: message,
+                      commit_id: context.payload.pull_request.head.sha,
+                      path: file.filename,
+                      position: lineNumber
+                    });
+                  }
                 }
               }
-            });
+            }
