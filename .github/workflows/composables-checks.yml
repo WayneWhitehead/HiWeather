@@ -26,40 +26,67 @@ jobs:
         run: |
           set -e
           FILES=$(find app/src/main/java -name '*.kt')
-          WARNINGS=""
+          STRING_WARNINGS=""
+          SIZE_WARNINGS=""
           for file in $FILES; do
-            LINES=$(grep -nE '("[^"]*"|[0-9]+\.dp)' $file | grep -v 'const val') || true
-            if [ ! -z "$LINES" ]; then
-              WARNINGS="$WARNINGS\n$file:\n$LINES"
+            STRING_LINES=$(grep -nE '"[^"]*"' $file | grep -v 'const val') || true
+            SIZE_LINES=$(grep -nE '[0-9]+\.dp' $file) || true
+            if [ ! -z "$STRING_LINES" ]; then
+              STRING_WARNINGS="$STRING_WARNINGS\n### $file\n$STRING_LINES"
+            fi
+            if [ ! -z "$SIZE_LINES" ]; then
+              SIZE_WARNINGS="$SIZE_WARNINGS\n### $file\n$SIZE_LINES"
             fi
           done
-          if [ -z "$WARNINGS" ]; then
+          if [ -z "$STRING_WARNINGS" ] && [ -z "$SIZE_WARNINGS" ]; then
             echo "No hardcoded values found."
           else
-            echo "WARNINGS<<EOF" >> $GITHUB_ENV
-            echo -e "$WARNINGS" >> $GITHUB_ENV
+            echo "STRING_WARNINGS<<EOF" >> $GITHUB_ENV
+            echo -e "$STRING_WARNINGS" >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
-            echo "::warning::Hardcoded values found:\n$WARNINGS"
+            echo "SIZE_WARNINGS<<EOF" >> $GITHUB_ENV
+            echo -e "$SIZE_WARNINGS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "::warning::Hardcoded values found."
           fi
         shell: /usr/bin/bash -e {0}
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
 
-      - name: Post warnings as comments
-        if: env.WARNINGS != ''
+      - name: Post string warnings as comments
+        if: env.STRING_WARNINGS != ''
         uses: actions/github-script@v5
         with:
           script: |
-            const warnings = process.env.WARNINGS.split('\n');
-            let commentBody = '### Hardcoded Values Warning\n';
-            warnings.forEach(line => {
+            const stringWarnings = process.env.STRING_WARNINGS.split('\n');
+            let stringCommentBody = '### Hardcoded String Values Warning\n';
+            stringWarnings.forEach(line => {
               if (line.trim() !== '') {
-                commentBody += `${line}\n`;
+                stringCommentBody += `${line}\n`;
               }
             });
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: commentBody
+              body: stringCommentBody
+            });
+
+      - name: Post size warnings as comments
+        if: env.SIZE_WARNINGS != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const sizeWarnings = process.env.SIZE_WARNINGS.split('\n');
+            let sizeCommentBody = '### Hardcoded Size Values Warning\n';
+            sizeWarnings.forEach(line => {
+              if (line.trim() !== '') {
+                sizeCommentBody += `${line}\n`;
+              }
+            });
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: sizeCommentBody
             });
