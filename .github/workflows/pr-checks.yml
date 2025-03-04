@@ -27,8 +27,6 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const github = require('@actions/github');
-            const context = github.context;
 
             // Get the list of changed files
             const changedFiles = await github.rest.pulls.listFiles({
