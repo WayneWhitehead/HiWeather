@@ -92,7 +92,6 @@ jobs:
         with:
           script: |
             const sizeWarnings = process.env.SIZE_WARNINGS.split('\n');
-            const { context, github } = require('@actions/github');
             const commitId = context.payload.pull_request.head.sha;
             sizeWarnings.forEach(line => {
               if (line.trim() !== '' && line.startsWith('## ')) {
