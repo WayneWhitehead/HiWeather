@@ -41,6 +41,13 @@ jobs:
           api-level: 35
           build-tools: 35.0.0
 
+      - name: Set up Gradle 8.8.0
+        run: |
+          wget https://services.gradle.org/distributions/gradle-8.8.0-bin.zip
+          unzip gradle-8.8.0-bin.zip
+          echo "GRADLE_HOME=$PWD/gradle-8.8.0" >> $GITHUB_ENV
+          echo "$GRADLE_HOME/bin" >> $GITHUB_PATH
+
       - name: Create local.properties
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
