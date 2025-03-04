@@ -29,13 +29,14 @@ jobs:
           STRING_WARNINGS=""
           SIZE_WARNINGS=""
           for file in $FILES; do
+            FILE_NAME=$(basename $file)
             STRING_LINES=$(grep -nE '"[^"]*"' $file | grep -v 'const val') || true
             SIZE_LINES=$(grep -nE '[0-9]+\.dp' $file) || true
             if [ ! -z "$STRING_LINES" ]; then
-              STRING_WARNINGS="$STRING_WARNINGS\n### $file\n$STRING_LINES"
+              STRING_WARNINGS="$STRING_WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Strings\n$STRING_LINES"
             fi
             if [ ! -z "$SIZE_LINES" ]; then
-              SIZE_WARNINGS="$SIZE_WARNINGS\n### $file\n$SIZE_LINES"
+              SIZE_WARNINGS="$SIZE_WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Sizes\n$SIZE_LINES"
             fi
           done
           if [ -z "$STRING_WARNINGS" ] && [ -z "$SIZE_WARNINGS" ]; then
