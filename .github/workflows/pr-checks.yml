@@ -61,4 +61,3 @@ jobs:
               line: "$diff_lines"
             });
           done
-        shell: node
