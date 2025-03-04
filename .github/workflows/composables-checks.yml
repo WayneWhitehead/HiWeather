@@ -1,8 +1,8 @@
-name: Check Composable Files for Hardcoded Values and Copilot Review
+name: Check Composable Files for Hardcoded Values
 
 on:
   pull_request:
-    types: [opened, synchronize, edited]
+    types: [opened, synchronize]
 
 jobs:
   check-hardcoded-values:
@@ -24,17 +24,27 @@ jobs:
       - name: Find hardcoded values in composable files
         id: find-hardcoded-values
         run: |
+          set -e
           FILES=$(find app/src/main/java -name '*.kt')
           WARNINGS=""
           for file in $FILES; do
-            LINES=$(grep -nE '("[^"]*"|[0-9]+\.dp)' $file)
+            LINES=$(grep -nE '("[^"]*"|[0-9]+\.dp)' $file) || true
             if [ ! -z "$LINES" ]; then
               WARNINGS="$WARNINGS\n$file:\n$LINES"
             fi
           done
-          echo "WARNINGS<<EOF" >> $GITHUB_ENV
-          echo -e "$WARNINGS" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          if [ -z "$WARNINGS" ]; then
+            echo "No hardcoded values found."
+          else
+            echo "WARNINGS<<EOF" >> $GITHUB_ENV
+            echo -e "$WARNINGS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "::error::Hardcoded values found:\n$WARNINGS"
+            exit 1
+          fi
+        shell: /usr/bin/bash -e {0}
+        env:
+          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
 
       - name: Post warnings as comments
         if: env.WARNINGS != ''
