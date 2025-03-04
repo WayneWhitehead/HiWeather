@@ -70,4 +70,4 @@ jobs:
             }
           });
           EOF
-        shell: node
+        shell: /usr/bin/bash -e {0}
