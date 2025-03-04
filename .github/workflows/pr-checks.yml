@@ -68,17 +68,20 @@ jobs:
         with:
           script: |
             const stringWarnings = process.env.STRING_WARNINGS.split('\n');
-            let stringCommentBody = '### Hardcoded String Values Warning\n';
             stringWarnings.forEach(line => {
-              if (line.trim() !== '') {
-                stringCommentBody += `${line}\n`;
+              if (line.trim() !== '' && line.startsWith('## ')) {
+                const filePath = line.split('**Full Path:** ')[1];
+                const lineNumber = parseInt(line.split(':')[0].split(' ')[1]);
+                github.rest.pulls.createReviewComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.payload.pull_request.number,
+                  body: 'Hardcoded string found here.',
+                  path: filePath,
+                  line: lineNumber,
+                  side: 'RIGHT'
+                });
               }
-            });
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: stringCommentBody
             });
 
       - name: Post size warnings as comments
@@ -87,15 +90,18 @@ jobs:
         with:
           script: |
             const sizeWarnings = process.env.SIZE_WARNINGS.split('\n');
-            let sizeCommentBody = '### Hardcoded Size Values Warning\n';
             sizeWarnings.forEach(line => {
-              if (line.trim() !== '') {
-                sizeCommentBody += `${line}\n`;
+              if (line.trim() !== '' && line.startsWith('## ')) {
+                const filePath = line.split('**Full Path:** ')[1];
+                const lineNumber = parseInt(line.split(':')[0].split(' ')[1]);
+                github.rest.pulls.createReviewComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.payload.pull_request.number,
+                  body: 'Hardcoded size found here.',
+                  path: filePath,
+                  line: lineNumber,
+                  side: 'RIGHT'
+                });
               }
-            });
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: sizeCommentBody
             });
