@@ -30,7 +30,7 @@ jobs:
           SIZE_WARNINGS=""
           for file in $FILES; do
             FILE_NAME=$(basename $file)
-            STRING_LINES=$(grep -nE '"[^"]*"' $file | grep -v 'const val' | grep -v '""') || true
+            STRING_LINES=$(grep -nE '"[^"]*"' $file | grep -v 'const val' | grep -v '""' | grep -v '@SerializedName') || true
             SIZE_LINES=$(grep -nE '[0-9]+\.dp' $file) || true
             if [ ! -z "$STRING_LINES" ]; then
               STRING_WARNINGS="$STRING_WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Strings\n$STRING_LINES"
