@@ -63,7 +63,8 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const { context, github } = require('@actions/github');
+            const github = require('@actions/github');
+            const context = github.context;
             const warnings = process.env.WARNINGS.split('\n');
             const commitId = context.payload.pull_request.head.sha;
             warnings.forEach(line => {
