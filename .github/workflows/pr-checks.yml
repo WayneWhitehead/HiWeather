@@ -46,6 +46,8 @@ jobs:
         shell: /usr/bin/bash -e {0}
 
       - name: Post warnings as comments
+        if: steps.find-hardcoded-values.outputs.DETAILS != ''
+        uses: actions/github-script@v5
         run: |
           node <<EOF
           const fs = require('fs');
