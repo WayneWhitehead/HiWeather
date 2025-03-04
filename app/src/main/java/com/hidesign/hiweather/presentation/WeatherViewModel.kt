@@ -29,6 +29,8 @@ class WeatherViewModel @Inject constructor(
     private val getAirPollutionUseCase: GetAirPollutionUseCase,
     private val locationUtil: LocationUtil
 ) : ViewModel() {
+
+    val HARDCODE = "HARDCODED"
     data class WeatherState(
         var lastUsedAddress: Address? = null,
         var oneCallResponse: OneCallResponse? = null,
