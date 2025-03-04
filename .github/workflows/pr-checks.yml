@@ -30,18 +30,34 @@ jobs:
           files: |
             app/src/main/java/**/*.kt
 
+     - name: Get list of changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v34
+        with:
+          files: |
+            app/src/main/java/**/*.kt
+
       - name: Find hardcoded values in changed lines
         id: find-hardcoded-values
         run: |
           set -e
+          WARNINGS=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             FILE_NAME=$(basename $file)
             # Get the diff of the changed file
             DIFF_LINES=$(git diff HEAD^ --unified=0 $file | grep -E '^\+[^+]' | grep -nE '"[^"]*"|[0-9]+\.dp' | grep -v 'const val' | grep -v '@SerializedName') || true
             if [ ! -z "$DIFF_LINES" ]; then
-              echo "::warning file=$file,line=$DIFF_LINES::Hardcoded value found in $file"
+              WARNINGS="$WARNINGS\n## $FILE_NAME\n**Full Path:** $file\n### Hardcoded Values\n$DIFF_LINES"
             fi
           done
+          if [ -z "$WARNINGS" ]; then
+            echo "No hardcoded values found."
+          else
+            echo "WARNINGS<<EOF" >> $GITHUB_ENV
+            echo -e "$WARNINGS" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+            echo "::warning::Hardcoded values found."
+          fi
         shell: /usr/bin/bash -e {0}
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.14-7/x64
@@ -72,7 +88,7 @@ jobs:
                   body: `Check Hardcoded Values Here: ${currentContent}`,
                   commit_id: commitId,
                   path: currentFile,
-                  line: currentLineNumber
+                  position: currentLineNumber
                 });
               }
             });
