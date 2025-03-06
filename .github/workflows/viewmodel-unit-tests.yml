@@ -87,8 +87,8 @@ jobs:
 
                 console.log(`Searching for test files: ${fileNamePattern1} or ${fileNamePattern2}`);
 
-                const testFile1 = await searchForTestFiles('app/src/main/test/java', fileNamePattern1);
-                const testFile2 = await searchForTestFiles('app/src/main/test/java', fileNamePattern2);
+                const testFile1 = await searchForTestFiles('app/src/test/java', fileNamePattern1);
+                const testFile2 = await searchForTestFiles('app/src/test/java', fileNamePattern2);
 
                 if (!testFile1 && !testFile2) {
                   missingTestFiles += `\n${file.replace('ViewModel.kt', 'ViewModelTest.kt')}\n${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`;
