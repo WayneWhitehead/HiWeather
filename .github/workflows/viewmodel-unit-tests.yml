@@ -48,13 +48,44 @@ jobs:
           echo "PLACES_KEY=${{ secrets.PLACES_KEY }}" >> local.properties
           echo "OPENWEATHER_KEY=${{ secrets.OPENWEATHER_KEY }}" >> local.properties
 
-      - name: Fetch ViewModel Test Files
-        id: fetch-test-files
+      - name: Fetch Modified ViewModel Files
+        id: fetch-modified-viewmodels
         run: |
-          TEST_FILES=$(find app/src/test/java -name '*ViewModelTest.kt')
+          MODIFIED_FILES=$(jq -r '.[] | select(.filename | test(".*ViewModel\\.kt$")) | .filename' < ${{ github.event.pull_request.changes }})
+          echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
+
+      - name: Check for Corresponding Test Files
+        id: check-test-files
+        run: |
+          MISSING_TEST_FILES=false
+          for file in ${{ env.MODIFIED_FILES }}; do
+            TEST_FILE=${file/ViewModel.kt/ViewModelTest.kt}
+            if [ ! -f $TEST_FILE ]; then
+              MISSING_TEST_FILES=true
+              echo "Missing test file: $TEST_FILE"
+            else
+              TEST_FILES="$TEST_FILES $TEST_FILE"
+            fi
+          done
           echo "TEST_FILES=$TEST_FILES" >> $GITHUB_ENV
+          if [ "$MISSING_TEST_FILES" = true ]; then
+            exit 1
+          fi
+
+      - name: Post Error Comment on PR if Tests are Missing
+        if: failure()
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: "Error: Missing test files for modified ViewModel files."
+            })
 
       - name: Run Unit Tests
+        if: success()
         run: |
           for file in ${{ env.TEST_FILES }}; do
             TEST_CLASS=$(basename $file .kt)
