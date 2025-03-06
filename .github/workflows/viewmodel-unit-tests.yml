@@ -77,4 +77,49 @@ jobs:
           fi
 
       - name: Post Error Comment on PR if Tests are Missing
-        if ▋
+        if: failure()
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: "Error: Missing test files for modified ViewModel files."
+            })
+
+      - name: Run Unit Tests
+        if: success()
+        run: |
+          for file in ${{ env.TEST_FILES }}; do
+            TEST_CLASS=$(basename $file .kt)
+            ./gradlew :app:testDebugUnitTest --tests "$TEST_CLASS"
+          done
+
+      - name: Generate Coverage Report
+        run: ./gradlew jacocoTestReport
+
+      - name: Verify Coverage
+        id: verify-coverage
+        run: |
+          COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
+          COVERAGE_REPORT=""
+          for file in $(find . -name '*ViewModel.kt'); do
+            FILE_NAME=$(basename $file)
+            COVERAGE=$(grep -oP "name=\"$FILE_NAME\".*?covered=\".*?\" pct=\"\K\d+" $COVERAGE_FILE)
+            COVERAGE_REPORT="$COVERAGE_REPORT\n$FILE_NAME: $COVERAGE%"
+          done
+          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV
+
+      - name: Post Comment on PR
+        if: env.COVERAGE_REPORT != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const coverageReport = process.env.COVERAGE_REPORT;
+            github.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `Coverage report for ViewModel files:${coverageReport}`
+            });
