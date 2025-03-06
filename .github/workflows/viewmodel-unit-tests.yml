@@ -71,6 +71,9 @@ jobs:
                 const testFile1 = file.replace('ViewModel.kt', 'ViewModelTest.kt');
                 const testFile2 = file.replace('ViewModel.kt', 'ViewModelTests.kt');
 
+                console.log(`Checking for test file: ${testFile1}`);
+                console.log(`Checking for test file: ${testFile2}`);
+
                 const testFile1Exists = await fileExists(testFile1);
                 const testFile2Exists = await fileExists(testFile2);
 
