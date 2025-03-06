@@ -97,12 +97,6 @@ jobs:
                 core.exportVariable('MISSING_TEST_FILES', 'false');
               }
             })();
-          env:
-            MODIFIED_FILES: ${{ env.MODIFIED_FILES }}
-            JAVA_HOME: /opt/hostedtoolcache/Java_JetBrains_jdk/17.0.14-1367.22/x64
-            JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_JetBrains_jdk/17.0.14-1367.22/x64
-            ANDROID_HOME: /usr/local/lib/android/sdk
-            ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: Run Unit Tests
         if: env.TEST_FILES != ''
