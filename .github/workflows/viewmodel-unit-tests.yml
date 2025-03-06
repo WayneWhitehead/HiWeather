@@ -13,22 +13,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
-        with:
-          distribution: 'jetbrains'
-          java-version: '17'
-          cache: 'gradle'
-
+          with:
+            distribution: 'jetbrains'
+            java-version: '17'
+            cache: 'gradle'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -79,7 +70,7 @@ jobs:
             })
 
       - name: Run Unit Tests
-        if: env.TEST_FILES != ''
+        if: success()
         run: |
           for file in ${{ env.TEST_FILES }}; do
             TEST_CLASS=$(basename $file .kt)
