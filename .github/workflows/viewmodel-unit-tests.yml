@@ -68,8 +68,9 @@ jobs:
 
             (async () => {
               for (const file of modifiedFiles) {
-                const testFile1 = file.replace('ViewModel.kt', 'ViewModelTest.kt');
-                const testFile2 = file.replace('ViewModel.kt', 'ViewModelTests.kt');
+                const fileName = file.split('/').pop();
+                const testFile1 = `app/src/main/test/${fileName.replace('ViewModel.kt', 'ViewModelTest.kt')}`;
+                const testFile2 = `app/src/main/test/${fileName.replace('ViewModel.kt', 'ViewModelTests.kt')}`;
 
                 console.log(`Checking for test file: ${testFile1}`);
                 console.log(`Checking for test file: ${testFile2}`);
