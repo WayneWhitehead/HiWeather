@@ -132,6 +132,13 @@ jobs:
         run: ./gradlew createDebugUnitTestCoverageReport
         continue-on-error: true
 
+      - name: Publish Unit Test Results
+        uses: pooi/coverage-comment@1.0.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          xml-test-report-path: ${SOURCE_PATH}app/build/reports/coverage/test/debug/report.xml
+        continue-on-error: true
+
       - name: Parse Coverage Report
         if: env.TEST_FILES != ''
         id: parse-coverage
