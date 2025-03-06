@@ -88,12 +88,12 @@ jobs:
 
             (async () => {
               for (const file of modifiedFiles) {
-                const fileNamePattern1 = new RegExp(file.replace('ViewModel.kt', 'ViewModelTest.kt') + '$');
-                const fileNamePattern2 = new RegExp(file.replace('ViewModel.kt', 'ViewModelTests.kt') + '$');
+                const fileNamePattern1 = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTest.kt') + '$');
+                const fileNamePattern2 = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTests.kt') + '$');
 
                 console.log(`Searching for test files: ${fileNamePattern1} or ${fileNamePattern2}`);
 
-                const testFile = await searchForTestFiles('app/src/main/test/java', fileNamePattern1, fileNamePattern2);
+                const testFile = await searchForTestFiles('app/src/test/java', fileNamePattern1, fileNamePattern2);
 
                 if (!testFile) {
                   missingTestFiles += `\n${file.replace('ViewModel.kt', 'ViewModelTest.kt')}\n${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`;
