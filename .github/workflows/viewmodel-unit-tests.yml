@@ -107,9 +107,11 @@ jobs:
           done
 
       - name: Generate Coverage Report
+        if: env.TEST_FILES != ''
         run: ./gradlew jacocoTestReport
 
       - name: Verify Coverage
+        if: env.TEST_FILES != ''
         id: verify-coverage
         run: |
           COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
