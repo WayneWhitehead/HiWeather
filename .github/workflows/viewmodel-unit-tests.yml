@@ -128,7 +128,7 @@ jobs:
 
       - name: Generate Coverage Report
         if: env.TEST_FILES != ''
-        run: ./gradlew jacocoTestReport
+        run: ./gradlew testDebugUnitTestCoverage
 
       - name: Verify Coverage
         if: env.TEST_FILES != ''
