@@ -42,31 +42,54 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            const { context, github } = require('@actions/github');
+            const core = require('@actions/core');
+
             const modifiedFiles = process.env.MODIFIED_FILES.split('\n').filter(Boolean);
             let missingTestFiles = '';
             let testFiles = '';
 
-            modifiedFiles.forEach(file => {
+            async function fileExists(path) {
+              try {
+                await github.repos.getContent({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path: path
+                });
+                return true;
+              } catch (error) {
+                if (error.status === 404) {
+                  return false;
+                }
+                throw error;
+              }
+            }
+
+            for (const file of modifiedFiles) {
               const testFile1 = file.replace('ViewModel.kt', 'ViewModelTest.kt');
               const testFile2 = file.replace('ViewModel.kt', 'ViewModelTests.kt');
 
-              if (!fs.existsSync(testFile1) && !fs.existsSync(testFile2)) {
+              const testFile1Exists = await fileExists(testFile1);
+              const testFile2Exists = await fileExists(testFile2);
+
+              if (!testFile1Exists && !testFile2Exists) {
                 missingTestFiles += `\n${testFile1}\n${testFile2}`;
                 console.log(`Missing test files: ${testFile1} or ${testFile2}`);
               } else {
-                if (fs.existsSync(testFile1)) {
+                if (testFile1Exists) {
                   testFiles += ` ${testFile1}`;
                 }
-                if (fs.existsSync(testFile2)) {
+                if (testFile2Exists) {
                   testFiles += ` ${testFile2}`;
                 }
               }
-            });
+            }
 
             core.exportVariable('TEST_FILES', testFiles);
+
             if (missingTestFiles.trim()) {
               core.exportVariable('MISSING_TEST_FILES', 'true');
-              github.issues.createComment({
+              await github.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
@@ -75,19 +98,6 @@ jobs:
             } else {
               core.exportVariable('MISSING_TEST_FILES', 'false');
             }
-
-      - name: Post Error Comment on PR if Tests are Missing
-        if: env.MISSING_TEST_FILES == 'true'
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const missingTests = process.env.MISSING_TEST_FILES.split('\n').filter(Boolean).join('\n');
-            github.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body: `Error: Missing test files for modified ViewModel files:\n${missingTests}`
-            })
 
       - name: Run Unit Tests
         if: env.TEST_FILES != ''
