@@ -42,7 +42,6 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const { context, github } = require('@actions/github');
             const core = require('@actions/core');
 
             const modifiedFiles = process.env.MODIFIED_FILES.split('\n').filter(Boolean);
