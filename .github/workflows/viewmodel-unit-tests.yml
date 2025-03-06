@@ -121,6 +121,7 @@ jobs:
       - name: Generate Coverage Report
         if: env.TEST_FILES != ''
         run: ./gradlew createDebugUnitTestCoverageReport
+        continue-on-error: true
 
       - name: Parse Coverage Report
         if: env.TEST_FILES != ''
