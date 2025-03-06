@@ -10,18 +10,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: 17
-          java-package: jdk
-          architecture: x64
-          check-latest: false
+          distribution: 'jetbrains'
+          java-version: '17'
+          cache: 'gradle'
 
       - name: Find and comment on hardcoded values
         uses: actions/github-script@v5
