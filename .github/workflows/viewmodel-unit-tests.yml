@@ -136,4 +136,4 @@ jobs:
         run: |
           COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
           COVERAGE_REPORT=""
-          for file in $(find . -name '*ViewModel.kt ▋
+          for file in $(find . -name '*ViewModel.kt')
