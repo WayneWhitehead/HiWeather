@@ -50,31 +50,33 @@ jobs:
       - name: Check for Corresponding Test Files
         id: check-test-files
         run: |
-          MISSING_TEST_FILES=false
+          MISSING_TEST_FILES=""
           for file in ${{ env.MODIFIED_FILES }}; do
             TEST_FILE=${file/ViewModel.kt/ViewModelTest.kt}
             if [ ! -f $TEST_FILE ]; then
-              MISSING_TEST_FILES=true
+              MISSING_TEST_FILES="$MISSING_TEST_FILES\n$TEST_FILE"
               echo "Missing test file: $TEST_FILE"
             else
               TEST_FILES="$TEST_FILES $TEST_FILE"
             fi
           done
           echo "TEST_FILES=$TEST_FILES" >> $GITHUB_ENV
-          if [ "$MISSING_TEST_FILES" = true ]; then
-            exit 1
-          fi
+          if [ -n "$MISSING_TEST_FILES" ]; then
+            echo "MISSING_TEST_FILES=true" >> $GITHUB_ENV
+          else
+            echo "MISSING_TEST_FILES=false" >> $GITHUB_ENV
 
       - name: Post Error Comment on PR if Tests are Missing
-        if: failure()
+        if: env.MISSING_TEST_FILES == 'true'
         uses: actions/github-script@v5
         with:
           script: |
+            const missingTests = process.env.MISSING_TEST_FILES.split('\n').filter(Boolean).join('\n');
             github.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: "Error: Missing test files for modified ViewModel files."
+              body: `Error: Missing test files for modified ViewModel files:\n${missingTests}`
             })
 
       - name: Run Unit Tests
