@@ -7,6 +7,33 @@ plugins {
     alias(libs.plugins.secrets)
     id("kotlin-kapt")
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" apply true
+    id("jacoco")
+}
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    finalizedBy("jacocoTestReport") // report is always generated after tests run
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileTree = fileTree("${buildDir}/jacoco/testDebugUnitTest.exec") {
+        setIncludes(listOf("**/*.exec"))
+    }
+
+    sourceDirectories.setFrom(files("src/main/java"))
+    classDirectories.setFrom(files("build/tmp/kotlin-classes/debug"))
+    executionData.setFrom(fileTree)
 }
 
 android {
@@ -39,7 +66,6 @@ android {
             }
         }
         getByName("debug") {
-            enableUnitTestCoverage = true
             versionNameSuffix = ".debug"
             signingConfig = signingConfigs.getByName("release")
             isDebuggable = true
