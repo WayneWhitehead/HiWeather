@@ -35,6 +35,10 @@ jobs:
         id: fetch-modified-viewmodel-files
         run: |
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD | grep 'ViewModel\.kt$')
+          echo "Modified ViewModel files found:"
+          for file in $MODIFIED_FILES; do
+            echo $file
+          done
           echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
 
       - name: Check for Corresponding Test Files and Post Error Comment if Missing
