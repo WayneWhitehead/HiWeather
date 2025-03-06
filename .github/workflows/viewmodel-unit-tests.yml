@@ -2,7 +2,7 @@ name: ViewModel Unit Tests
 
 on:
   pull_request:
-    types: [synchronize, opened, reopened, edited]
+    types: [synchronize, opened, reopened]
 
 jobs:
   viewmodel-tests:
