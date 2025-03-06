@@ -126,10 +126,10 @@ jobs:
         if: env.TEST_FILES != ''
         id: parse-coverage
         run: |
-          COVERAGE_REPORT="app/build/reports/coverage/debug/report.xml"
-          FILE_COVERAGE=$(xmllint --xpath '//class' $COVERAGE_REPORT | grep -oP 'filename="\K[^"]+')
-          TOTAL_COVERAGE=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@covered)' $COVERAGE_REPORT)
-          TOTAL_MISSED=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@missed)' $COVERAGE_REPORT)
+          COVERAGE_REPORT="app/build/reports/tests/testDebugUnitTest/index.html"
+          FILE_COVERAGE=$(grep -oP 'filename="\K[^"]+' $COVERAGE_REPORT)
+          TOTAL_COVERAGE=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@covered)' $COVERAGE_REPORT)
+          TOTAL_MISSED=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@missed)' $COVERAGE_REPORT)
           TOTAL=$(($TOTAL_COVERAGE + $TOTAL_MISSED))
           TOTAL_PERCENTAGE=$(echo "scale=2; $TOTAL_COVERAGE / $TOTAL * 100" | bc)
           echo "FILE_COVERAGE=$FILE_COVERAGE" >> $GITHUB_ENV
