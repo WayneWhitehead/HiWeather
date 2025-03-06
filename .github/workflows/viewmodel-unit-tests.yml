@@ -127,14 +127,37 @@ jobs:
         if: env.TEST_FILES != ''
         id: parse-coverage
         run: |
+          set -e
           COVERAGE_REPORT="app/build/reports/tests/testDebugUnitTest/index.html"
-          FILE_COVERAGE=$(grep -oP 'filename="\K[^"]+' $COVERAGE_REPORT)
-          TOTAL_COVERAGE=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@covered)' $COVERAGE_REPORT)
-          TOTAL_MISSED=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@missed)' $COVERAGE_REPORT)
+
+          if [[ ! -f "$COVERAGE_REPORT" ]]; then
+            echo "Coverage report not found: $COVERAGE_REPORT"
+            exit 1
+          fi
+
+          FILE_COVERAGE=$(grep -oP 'filename="\K[^"]+' "$COVERAGE_REPORT" || echo "Error extracting file coverage")
+          TOTAL_COVERAGE=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@covered)' "$COVERAGE_REPORT" || echo "Error extracting total coverage")
+          TOTAL_MISSED=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@missed)' "$COVERAGE_REPORT" || echo "Error extracting total missed")
+
+          if [[ -z "$TOTAL_COVERAGE" || -z "$TOTAL_MISSED" ]]; then
+            echo "Error: Coverage data is missing or incorrect"
+            exit 1
+          fi
+
           TOTAL=$(($TOTAL_COVERAGE + $TOTAL_MISSED))
           TOTAL_PERCENTAGE=$(echo "scale=2; $TOTAL_COVERAGE / $TOTAL * 100" | bc)
+
           echo "FILE_COVERAGE=$FILE_COVERAGE" >> $GITHUB_ENV
           echo "TOTAL_PERCENTAGE=$TOTAL_PERCENTAGE" >> $GITHUB_ENV
+        shell: /usr/bin/bash -e
+        env:
+          JAVA_HOME: /opt/hostedtoolcache/Java_JetBrains_jdk/17.0.14-1367.22/x64
+          JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_JetBrains_jdk/17.0.14-1367.22/x64
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          MODIFIED_FILES: app/src/main/java/com/hidesign/hiweather/presentation/WeatherViewModel.kt
+          TEST_FILES: app/src/test/java/com/hidesign/hiweather/network/WeatherViewModelTest.kt
+          MISSING_TEST_FILES: false
 
       - name: Post Coverage Comment
         if: env.TEST_FILES != ''
