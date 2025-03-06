@@ -50,19 +50,33 @@ jobs:
             let missingTestFiles = '';
             let testFiles = '';
 
-            async function fileExists(path) {
+            async function searchForTestFiles(directory, fileNamePattern) {
               try {
-                await github.rest.repos.getContent({
+                const response = await github.rest.repos.getContent({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  path: path
+                  path: directory
                 });
-                return true;
-              } catch (error) {
-                if (error.status === 404) {
-                  return false;
+
+                if (Array.isArray(response.data)) {
+                  for (const item of response.data) {
+                    if (item.type === 'dir') {
+                      const foundFile = await searchForTestFiles(item.path, fileNamePattern);
+                      if (foundFile) {
+                        return foundFile;
+                      }
+                    } else if (item.type === 'file' && fileNamePattern.test(item.path)) {
+                      console.log(`Found test file: ${item.path}`);
+                      return item.path;
+                    }
+                  }
+                } else {
+                  console.log(`No array returned for directory: ${directory}`);
                 }
-                throw error;
+                return null;
+              } catch (error) {
+                console.error(`Error searching directory ${directory}:`, error);
+                return null;
               }
             }
 
