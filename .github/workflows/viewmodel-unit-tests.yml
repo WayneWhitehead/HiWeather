@@ -19,7 +19,6 @@ jobs:
         with:
           distribution: 'jetbrains'
           java-version: '17'
-          cache: 'gradle'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -142,6 +141,7 @@ jobs:
 
           if [[ ! -f "$COVERAGE_REPORT" ]]; then
             echo "Coverage report not found: $COVERAGE_REPORT"
+            ls -l app/build/reports/tests/testDebugUnitTest/
             exit 1
           fi
 
