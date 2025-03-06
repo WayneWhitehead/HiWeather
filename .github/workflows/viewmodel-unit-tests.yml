@@ -50,49 +50,49 @@ jobs:
             let missingTestFiles = '';
             let testFiles = '';
 
-            async function searchForTestFile(fileName) {
-              try {
-                const response = await github.rest.repos.getContent({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  path: 'app/src/main/test',
-                  recursive: true
-                });
+            async function searchForTestFiles(fileName) {
+              const testFile1 = fileName.replace('ViewModel.kt', 'ViewModelTest.kt');
+              const testFile2 = fileName.replace('ViewModel.kt', 'ViewModelTests.kt');
 
-                const files = response.data;
+              async function findFile(path) {
+                try {
+                  const response = await github.rest.repos.getContent({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    path: path,
+                    recursive: true
+                  });
 
-                for (const file of files) {
-                  if (file.type === 'file' && (file.path.endsWith(fileName.replace('ViewModel.kt', 'ViewModelTest.kt')) || file.path.endsWith(fileName.replace('ViewModel.kt', 'ViewModelTests.kt')))) {
-                    return file.path;
+                  if (Array.isArray(response.data)) {
+                    for (const item of response.data) {
+                      if (item.type === 'file' && (item.path.endsWith(testFile1) || item.path.endsWith(testFile2))) {
+                        return item.path;
+                      }
+                    }
                   }
+                  return null;
+                } catch (error) {
+                  console.error(error);
+                  return null;
                 }
-
-                return null;
-              } catch (error) {
-                console.error(error);
-                return null;
               }
+
+              const foundTestFile1 = await findFile('app/src/main/test');
+              const foundTestFile2 = await findFile('app/src/test');
+
+              return foundTestFile1 || foundTestFile2;
             }
 
             (async () => {
               for (const file of modifiedFiles) {
                 const fileName = file.split('/').pop();
-                const testFile1 = await searchForTestFile(fileName.replace('ViewModel.kt', 'ViewModelTest.kt'));
-                const testFile2 = await searchForTestFile(fileName.replace('ViewModel.kt', 'ViewModelTests.kt'));
+                const foundTestFile = await searchForTestFiles(fileName);
 
-                console.log(`Checking for test file: ${testFile1}`);
-                console.log(`Checking for test file: ${testFile2}`);
-
-                if (!testFile1 && !testFile2) {
-                  missingTestFiles += `\n${testFile1}\n${testFile2}`;
-                  console.log(`Missing test files: ${testFile1} or ${testFile2}`);
+                if (!foundTestFile) {
+                  missingTestFiles += `\n${fileName.replace('ViewModel.kt', 'ViewModelTest.kt')}\n${fileName.replace('ViewModel.kt', 'ViewModelTests.kt')}`;
+                  console.log(`Missing test files: ${fileName.replace('ViewModel.kt', 'ViewModelTest.kt')} or ${fileName.replace('ViewModel.kt', 'ViewModelTests.kt')}`);
                 } else {
-                  if (testFile1) {
-                    testFiles += ` ${testFile1}`;
-                  }
-                  if (testFile2) {
-                    testFiles += ` ${testFile2}`;
-                  }
+                  testFiles += ` ${foundTestFile}`;
                 }
               }
 
