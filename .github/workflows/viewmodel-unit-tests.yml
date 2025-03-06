@@ -41,6 +41,7 @@ jobs:
         id: check-test-files
         run: |
           MISSING_TEST_FILES=""
+          TEST_FILES=""
           for file in ${{ env.MODIFIED_FILES }}; do
             TEST_FILE=${file/ViewModel.kt/ViewModelTest.kt}
             if [ ! -f $TEST_FILE ]; then
