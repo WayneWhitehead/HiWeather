@@ -53,7 +53,7 @@ jobs:
       - name: Fetch Modified ViewModel Files
         id: fetch-modified-viewmodels
         run: |
-          MODIFIED_FILES=$(jq -r '.[] | select(.filename | test(".*ViewModel\\.kt$")) | .filename' < ${{ github.event.pull_request.changed_files }})
+          MODIFIED_FILES=$(jq -r '.[] | select(.filename | test(".*ViewModel\\.kt$")) | .filename' <<< "${{ github.event.pull_request.changed_files }}")
           echo "Modified ViewModel files found:"
           for file in $MODIFIED_FILES; do
             echo "$file"
