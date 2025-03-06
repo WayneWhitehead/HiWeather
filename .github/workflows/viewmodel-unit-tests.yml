@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v3.4.3
@@ -25,19 +27,12 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
+          java-version: '17'
           distribution: 'adopt'
-          java-version: 17
-          java-package: jdk
-          architecture: x64
-          check-latest: false
-          server-id: github
-          server-username: ${{ secrets.GITHUB_ACTOR }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
-          overwrite-settings: true
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
 
       - name: Create local.properties
         run: |
@@ -46,14 +41,10 @@ jobs:
           echo "PLACES_KEY=${{ secrets.PLACES_KEY }}" >> local.properties
           echo "OPENWEATHER_KEY=${{ secrets.OPENWEATHER_KEY }}" >> local.properties
 
-      - name: Fetch Modified ViewModel Files
-        id: fetch-modified-viewmodels
+      - name: Fetch modified ViewModel files
+        id: fetch-modified-viewmodel-files
         run: |
-          MODIFIED_FILES=$(jq -r '.files[] | select(.filename | test(".*ViewModel\\.kt$")) | .filename' <<< "${{ github.event.pull_request.changed_files }}")
-          echo "Modified ViewModel files found:"
-          for file in $MODIFIED_FILES; do
-            echo "$file"
-          done
+          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD | grep 'ViewModel\.kt$')
           echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
 
       - name: Check for Corresponding Test Files
