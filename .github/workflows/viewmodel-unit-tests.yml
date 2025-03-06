@@ -42,9 +42,6 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const { context, github } = require('@actions/github');
-            const core = require('@actions/core');
-
             const modifiedFiles = process.env.MODIFIED_FILES.split('\n').filter(Boolean);
             let missingTestFiles = '';
             let testFiles = '';
@@ -128,4 +125,4 @@ jobs:
             COVERAGE=$(grep -oP "name=\"$FILE_NAME\".*?covered=\".*?\" pct=\"\K\d+" $COVERAGE_FILE)
             COVERAGE_REPORT="$COVERAGE_REPORT\n$FILE_NAME: $COVERAGE%"
           done
-          echo "COVERAGE_REPORT=$ ▋
+          echo "COVERAGE_REPORT=$COVERAGE_REPORT" >> $GITHUB_ENV
