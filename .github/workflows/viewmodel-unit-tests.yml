@@ -145,20 +145,17 @@ jobs:
             exit 1
           fi
 
-          FILE_COVERAGE=$(grep -oP 'filename="\K[^"]+' "$COVERAGE_REPORT" || echo "Error extracting file coverage")
-          TOTAL_COVERAGE=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@covered)' "$COVERAGE_REPORT" || echo "Error extracting total coverage")
-          TOTAL_MISSED=$(grep -oP 'string(//counter[@type="INSTRUCTION"]/@missed)' "$COVERAGE_REPORT" || echo "Error extracting total missed")
+          TESTS=$(grep -oP '(?<=<div class="counter">)\d+(?=</div>\n<p>tests</p>)' "$COVERAGE_REPORT")
+          FAILURES=$(grep -oP '(?<=<div class="counter">)\d+(?=</div>\n<p>failures</p>)' "$COVERAGE_REPORT")
+          IGNORED=$(grep -oP '(?<=<div class="counter">)\d+(?=</div>\n<p>ignored</p>)' "$COVERAGE_REPORT")
+          DURATION=$(grep -oP '(?<=<div class="counter">)[\d.]+s(?=</div>\n<p>duration</p>)' "$COVERAGE_REPORT")
+          SUCCESS_RATE=$(grep -oP '(?<=<div class="percent">)\d+%(?=</div>\n<p>successful</p>)' "$COVERAGE_REPORT")
 
-          if [[ -z "$TOTAL_COVERAGE" || -z "$TOTAL_MISSED" ]]; then
-            echo "Error: Coverage data is missing or incorrect"
-            exit 1
-          fi
-
-          TOTAL=$(($TOTAL_COVERAGE + $TOTAL_MISSED))
-          TOTAL_PERCENTAGE=$(echo "scale=2; $TOTAL_COVERAGE / $TOTAL * 100" | bc)
-
-          echo "FILE_COVERAGE=$FILE_COVERAGE" >> $GITHUB_ENV
-          echo "TOTAL_PERCENTAGE=$TOTAL_PERCENTAGE" >> $GITHUB_ENV
+          echo "TESTS=$TESTS" >> $GITHUB_ENV
+          echo "FAILURES=$FAILURES" >> $GITHUB_ENV
+          echo "IGNORED=$IGNORED" >> $GITHUB_ENV
+          echo "DURATION=$DURATION" >> $GITHUB_ENV
+          echo "SUCCESS_RATE=$SUCCESS_RATE" >> $GITHUB_ENV
         shell: /usr/bin/bash -e {0}
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_JetBrains_jdk/17.0.14-1367.22/x64
@@ -174,13 +171,22 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const fileCoverage = process.env.FILE_COVERAGE.split('\n').filter(Boolean);
-            const totalCoverage = process.env.TOTAL_PERCENTAGE;
-            let commentBody = '## Test Coverage Report\n\n';
-            fileCoverage.forEach(file => {
-              commentBody += `- ${file}: ${file.coverage}%\n`;
-            });
-            commentBody += `\n**Total Coverage**: ${totalCoverage}%\n`;
+            const tests = process.env.TESTS;
+            const failures = process.env.FAILURES;
+            const ignored = process.env.IGNORED;
+            const duration = process.env.DURATION;
+            const successRate = process.env.SUCCESS_RATE;
+
+            const commentBody = `
+            ## Test Coverage Report
+
+            - **Tests**: ${tests}
+            - **Failures**: ${failures}
+            - **Ignored**: ${ignored}
+            - **Duration**: ${duration}
+            - **Success Rate**: ${successRate}
+            `;
+
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
