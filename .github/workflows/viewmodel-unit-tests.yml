@@ -50,7 +50,7 @@ jobs:
             let missingTestFiles = '';
             let testFiles = '';
 
-            async function searchForTestFiles(directory, fileNamePattern) {
+            async function searchForTestFiles(directory, fileNamePattern1, fileNamePattern2) {
               try {
                 const response = await github.rest.repos.getContent({
                   owner: context.repo.owner,
@@ -61,13 +61,19 @@ jobs:
                 if (Array.isArray(response.data)) {
                   for (const item of response.data) {
                     if (item.type === 'dir') {
-                      const foundFile = await searchForTestFiles(item.path, fileNamePattern);
+                      const foundFile = await searchForTestFiles(item.path, fileNamePattern1, fileNamePattern2);
                       if (foundFile) {
                         return foundFile;
                       }
-                    } else if (item.type === 'file' && fileNamePattern.test(item.path)) {
-                      console.log(`Found test file: ${item.path}`);
-                      return item.path;
+                    } else if (item.type === 'file') {
+                      if (fileNamePattern1.test(item.path)) {
+                        console.log(`Found test file: ${item.path}`);
+                        return item.path;
+                      }
+                      if (fileNamePattern2.test(item.path)) {
+                        console.log(`Found test file: ${item.path}`);
+                        return item.path;
+                      }
                     }
                   }
                 } else {
@@ -87,19 +93,13 @@ jobs:
 
                 console.log(`Searching for test files: ${fileNamePattern1} or ${fileNamePattern2}`);
 
-                const testFile1 = await searchForTestFiles('app/src/test/java', fileNamePattern1);
-                const testFile2 = await searchForTestFiles('app/src/test/java', fileNamePattern2);
+                const testFile = await searchForTestFiles('app/src/main/test/java', fileNamePattern1, fileNamePattern2);
 
-                if (!testFile1 && !testFile2) {
+                if (!testFile) {
                   missingTestFiles += `\n${file.replace('ViewModel.kt', 'ViewModelTest.kt')}\n${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`;
                   console.log(`Missing test files: ${file.replace('ViewModel.kt', 'ViewModelTest.kt')} or ${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`);
                 } else {
-                  if (testFile1) {
-                    testFiles += ` ${testFile1}`;
-                  }
-                  if (testFile2) {
-                    testFiles += ` ${testFile2}`;
-                  }
+                  testFiles += ` ${testFile}`;
                 }
               }
 
