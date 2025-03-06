@@ -159,7 +159,7 @@ jobs:
 
           echo "FILE_COVERAGE=$FILE_COVERAGE" >> $GITHUB_ENV
           echo "TOTAL_PERCENTAGE=$TOTAL_PERCENTAGE" >> $GITHUB_ENV
-        shell: /usr/bin/bash -e
+        shell: /usr/bin/bash -e {0}
         env:
           JAVA_HOME: /opt/hostedtoolcache/Java_JetBrains_jdk/17.0.14-1367.22/x64
           JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_JetBrains_jdk/17.0.14-1367.22/x64
