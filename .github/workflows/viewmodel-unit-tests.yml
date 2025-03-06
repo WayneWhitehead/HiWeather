@@ -26,10 +26,11 @@ jobs:
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
-          with:
-            distribution: 'jetbrains'
-            java-version: '17'
-            cache: 'gradle'
+        with:
+          distribution: 'jetbrains'
+          java-version: '17'
+          cache: 'gradle'
+
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -80,7 +81,7 @@ jobs:
             })
 
       - name: Run Unit Tests
-        if: success()
+        if: env.TEST_FILES != ''
         run: |
           for file in ${{ env.TEST_FILES }}; do
             TEST_CLASS=$(basename $file .kt)
