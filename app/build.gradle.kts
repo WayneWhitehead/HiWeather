@@ -39,6 +39,7 @@ android {
             }
         }
         getByName("debug") {
+            enableUnitTestCoverage = true
             versionNameSuffix = ".debug"
             signingConfig = signingConfigs.getByName("release")
             isDebuggable = true
