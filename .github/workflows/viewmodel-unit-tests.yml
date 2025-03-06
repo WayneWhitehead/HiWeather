@@ -38,8 +38,10 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
         with:
-          api-level: 35
-          build-tools: 35.0.0
+          components: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
 
       - name: Create local.properties
         run: |
@@ -51,7 +53,7 @@ jobs:
       - name: Fetch Modified ViewModel Files
         id: fetch-modified-viewmodels
         run: |
-          MODIFIED_FILES=$(jq -r '.[] | select(.filename | test(".*ViewModel\\.kt$")) | .filename' < ${{ github.event.pull_request.changes }})
+          MODIFIED_FILES=$(jq -r '.[] | select(.filename | test(".*ViewModel\\.kt$")) | .filename' < ${{ github.event.pull_request.changed_files }})
           echo "Modified ViewModel files found:"
           for file in $MODIFIED_FILES; do
             echo "$file"
