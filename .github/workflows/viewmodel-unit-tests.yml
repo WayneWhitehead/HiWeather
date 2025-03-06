@@ -118,23 +118,38 @@ jobs:
               }
             })();
 
-      - name: Run Unit Tests
-        if: env.TEST_FILES != ''
-        run: |
-          for file in ${{ env.TEST_FILES }}; do
-            TEST_CLASS=$(basename $file .kt)
-            TEST_PATH=$(dirname $file | sed 's|app/src/test/java/||' | tr '/' '.')
-            ./gradlew :app:testDebugUnitTest --tests "$TEST_PATH.$TEST_CLASS"
-          done
-
       - name: Generate Coverage Report
         if: env.TEST_FILES != ''
-        run: ./gradlew testDebugUnitTestCoverage
+        run: ./gradlew createDebugUnitTestCoverageReport
 
-      - name: Verify Coverage
+      - name: Parse Coverage Report
         if: env.TEST_FILES != ''
-        id: verify-coverage
+        id: parse-coverage
         run: |
-          COVERAGE_FILE=build/reports/jacoco/test/jacocoTestReport.xml
-          COVERAGE_REPORT=""
-          for file in $(find . -name '*ViewModel.kt')
+          COVERAGE_REPORT="app/build/reports/coverage/debug/report.xml"
+          FILE_COVERAGE=$(xmllint --xpath '//class' $COVERAGE_REPORT | grep -oP 'filename="\K[^"]+')
+          TOTAL_COVERAGE=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@covered)' $COVERAGE_REPORT)
+          TOTAL_MISSED=$(xmllint --xpath 'string(//counter[@type="INSTRUCTION"]/@missed)' $COVERAGE_REPORT)
+          TOTAL=$(($TOTAL_COVERAGE + $TOTAL_MISSED))
+          TOTAL_PERCENTAGE=$(echo "scale=2; $TOTAL_COVERAGE / $TOTAL * 100" | bc)
+          echo "FILE_COVERAGE=$FILE_COVERAGE" >> $GITHUB_ENV
+          echo "TOTAL_PERCENTAGE=$TOTAL_PERCENTAGE" >> $GITHUB_ENV
+
+      - name: Post Coverage Comment
+        if: env.TEST_FILES != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const fileCoverage = process.env.FILE_COVERAGE.split('\n').filter(Boolean);
+            const totalCoverage = process.env.TOTAL_PERCENTAGE;
+            let commentBody = '## Test Coverage Report\n\n';
+            fileCoverage.forEach(file => {
+              commentBody += `- ${file}: ${file.coverage}%\n`;
+            });
+            commentBody += `\n**Total Coverage**: ${totalCoverage}%\n`;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: commentBody
+            });
