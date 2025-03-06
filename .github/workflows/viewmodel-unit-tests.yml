@@ -123,7 +123,8 @@ jobs:
         run: |
           for file in ${{ env.TEST_FILES }}; do
             TEST_CLASS=$(basename $file .kt)
-            ./gradlew :app:testDebugUnitTest --tests "$TEST_CLASS"
+            TEST_PATH=$(dirname $file | sed 's|app/src/test/java/||' | tr '/' '.')
+            ./gradlew :app:testDebugUnitTest --tests "$TEST_PATH.$TEST_CLASS"
           done
 
       - name: Generate Coverage Report

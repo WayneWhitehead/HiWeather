@@ -27,7 +27,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
     }
 
-    val fileTree = fileTree("${buildDir}/jacoco/testDebugUnitTest.exec") {
+    val fileTree = fileTree(layout.buildDirectory.dir("jacoco/testDebugUnitTest.exec")) {
         setIncludes(listOf("**/*.exec"))
     }
 
