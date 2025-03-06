@@ -10,12 +10,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
       - name: Cache Gradle dependencies
-        uses: actions/cache@v3.4.3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -25,11 +25,11 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'adopt'
-          cache: gradle
+        uses: actions/setup-java@v4
+          with:
+            distribution: 'jetbrains'
+            java-version: '17'
+            cache: 'gradle'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -80,7 +80,7 @@ jobs:
             })
 
       - name: Run Unit Tests
-        if: success()
+        if: env.TEST_FILES != ''
         run: |
           for file in ${{ env.TEST_FILES }}; do
             TEST_CLASS=$(basename $file .kt)
