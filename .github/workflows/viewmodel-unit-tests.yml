@@ -60,7 +60,6 @@ jobs:
             TEST_CLASS=$(basename $file .kt)
             ./gradlew :app:testDebugUnitTest --tests "$TEST_CLASS"
           done
-        continue-on-error: true
 
       - name: Generate Coverage Report
         run: ./gradlew jacocoTestReport
