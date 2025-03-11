@@ -135,6 +135,10 @@ jobs:
         run: ./gradlew createDebugUnitTestCoverageReport
         continue-on-error: true
 
+      - name: Log Coverage Report Content
+        if: env.TEST_FILES != ''
+        run: cat app/build/reports/tests/testDebugUnitTest/index.html
+
       - name: Read Coverage and Post Comment
         if: env.TEST_FILES != ''
         run: |
