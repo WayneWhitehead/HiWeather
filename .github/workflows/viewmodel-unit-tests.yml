@@ -142,12 +142,18 @@ jobs:
       - name: Read Coverage and Post Comment
         if: env.TEST_FILES != ''
         run: |
-          # Extract coverage information from the HTML report
-          COVERAGE=$(grep -oP '(?<=<span class="number">)[0-9.]+(?=</span>)' app/build/reports/tests/testDebugUnitTest/index.html | head -n 1)
-          echo "Coverage: $COVERAGE%"
+          # Extract test results from the HTML report
+          TOTAL_TESTS=$(grep -oP '(?<=<div class="counter">)[0-9]+' app/build/reports/tests/testDebugUnitTest/index.html | head -n 1)
+          TOTAL_FAILURES=$(grep -oP '(?<=<div class="counter">)[0-9]+' app/build/reports/tests/testDebugUnitTest/index.html | sed -n '2p')
+          SUCCESS_RATE=$(grep -oP '(?<=<div class="percent">)[0-9]+%' app/build/reports/tests/testDebugUnitTest/index.html | head -n 1)
+          
+          echo "Total tests: $TOTAL_TESTS"
+          echo "Total failures: $TOTAL_FAILURES"
+          echo "Success rate: $SUCCESS_RATE"
           
           # Create a JSON payload for the GitHub comment
-          COMMENT_PAYLOAD=$(jq -n --arg body "Coverage Report: $COVERAGE%" '{body: $body}')
+          COMMENT_BODY="Test Results Summary:\n\n- Total tests: $TOTAL_TESTS\n- Total failures: $TOTAL_FAILURES\n- Success rate: $SUCCESS_RATE"
+          COMMENT_PAYLOAD=$(jq -n --arg body "$COMMENT_BODY" '{body: $body}')
           
           # Post the comment on the PR
           curl -X POST \
