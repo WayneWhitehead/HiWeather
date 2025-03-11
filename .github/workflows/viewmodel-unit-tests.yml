@@ -139,5 +139,5 @@ jobs:
         uses: pooi/coverage-comment@1.0.3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          xml-test-report-path: "app/build/reports/tests/testDebugUnitTest/index.html"
+          xml-test-report-path: ${SOURCE_PATH}app/build/reports/coverage/test/debug/report.xml
         continue-on-error: true
