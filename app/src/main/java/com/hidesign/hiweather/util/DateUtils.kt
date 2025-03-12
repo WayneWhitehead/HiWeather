@@ -44,8 +44,7 @@ object DateUtils {
                 "4" -> { "Thursday" }
                 "5" -> { "Friday" }
                 "6" -> { "Saturday" }
-                "7" -> { "Sunday" }
-                else -> { "Unknown" }
+                else -> { "Sunday" }
             }
         } catch (e: Exception) {
             "Unknown"

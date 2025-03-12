@@ -32,7 +32,7 @@ object WeatherUtil {
             in 12..33 -> "NNE"
             in 34..55 -> "NE"
             in 56..77 -> "ENE"
-            in 78..101 -> "E"
+            in 78..100 -> "E"
             in 101..122 -> "ESE"
             in 123..144 -> "SE"
             in 145..166 -> "SSE"
