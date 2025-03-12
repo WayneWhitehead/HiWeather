@@ -147,6 +147,14 @@ jobs:
             if (fs.existsSync(path)) {
               const report = fs.readFileSync(path, 'utf8');
               let missingTests = '';
+              let instructionCoverage = 0;
+              let lineCoverage = 0;
+              let methodCoverage = 0;
+              let classCoverage = 0;
+              let totalInstructions = 0;
+              let totalLines = 0;
+              let totalMethods = 0;
+              let totalClasses = 0;
 
               testFiles.forEach(file => {
                 const className = file.split('/').pop().replace('.kt', '');
@@ -154,6 +162,44 @@ jobs:
                 if (!regex.test(report)) {
                   missingTests += `\n${className}`;
                 }
+              });
+
+              const instructionMatch = report.match(/<counter type="INSTRUCTION" missed="(\d+)" covered="(\d+)"\/>/);
+              const lineMatch = report.match(/<counter type="LINE" missed="(\d+)" covered="(\d+)"\/>/);
+              const methodMatch = report.match(/<counter type="METHOD" missed="(\d+)" covered="(\d+)"\/>/);
+              const classMatch = report.match(/<counter type="CLASS" missed="(\d+)" covered="(\d+)"\/>/);
+
+              if (instructionMatch) {
+                totalInstructions = parseInt(instructionMatch[1]) + parseInt(instructionMatch[2]);
+                instructionCoverage = (parseInt(instructionMatch[2]) / totalInstructions) * 100;
+              }
+              if (lineMatch) {
+                totalLines = parseInt(lineMatch[1]) + parseInt(lineMatch[2]);
+                lineCoverage = (parseInt(lineMatch[2]) / totalLines) * 100;
+              }
+              if (methodMatch) {
+                totalMethods = parseInt(methodMatch[1]) + parseInt(methodMatch[2]);
+                methodCoverage = (parseInt(methodMatch[2]) / totalMethods) * 100;
+              }
+              if (classMatch) {
+                totalClasses = parseInt(classMatch[1]) + parseInt(classMatch[2]);
+                classCoverage = (parseInt(classMatch[2]) / totalClasses) * 100;
+              }
+
+              const coverageReport = `
+                Total Test Coverage:
+                Type\tCoverage
+                INSTRUCTION\t${instructionCoverage.toFixed(2)}% (${instructionMatch[2]}/${totalInstructions})
+                LINE\t${lineCoverage.toFixed(2)}% (${lineMatch[2]}/${totalLines})
+                METHOD\t${methodCoverage.toFixed(2)}% (${methodMatch[2]}/${totalMethods})
+                CLASS\t${classCoverage.toFixed(2)}% (${classMatch[2]}/${totalClasses})
+              `;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: coverageReport
               });
 
               if (missingTests.trim()) {
