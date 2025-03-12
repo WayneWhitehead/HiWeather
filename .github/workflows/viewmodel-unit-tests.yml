@@ -150,12 +150,12 @@ jobs:
                 const lineRegex = /<td class="ctr2">(\d+)%<\/td>/g;
                 const methodRegex = /<td class="ctr2">(\d+)%<\/td>/g;
 
-                const lineMatch = lineRegex.exec(report);
-                const methodMatch = methodRegex.exec(report);
+                const lineMatches = [...report.matchAll(lineRegex)];
+                const methodMatches = [...report.matchAll(methodRegex)];
 
-                if (lineMatch && methodMatch) {
-                  const lineCoverage = parseInt(lineMatch[1]);
-                  const methodCoverage = parseInt(methodMatch[1]);
+                if (lineMatches.length > 0 && methodMatches.length > 0) {
+                  const lineCoverage = parseInt(lineMatches[0][1]);
+                  const methodCoverage = parseInt(methodMatches[1][1]);
 
                   return {
                     lineCoverage: lineCoverage.toFixed(2),
