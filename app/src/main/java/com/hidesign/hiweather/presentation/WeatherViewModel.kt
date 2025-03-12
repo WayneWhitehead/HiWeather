@@ -10,7 +10,6 @@ import com.hidesign.hiweather.domain.usecase.GetAirPollutionUseCase
 import com.hidesign.hiweather.domain.usecase.GetOneCallUseCase
 import com.hidesign.hiweather.util.LocationUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +22,6 @@ import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
-    @Named("io") private val io: CoroutineContext,
     @Named("main") private val main: CoroutineContext,
     private val getOneCallUseCase: GetOneCallUseCase,
     private val getAirPollutionUseCase: GetAirPollutionUseCase,

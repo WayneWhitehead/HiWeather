@@ -41,7 +41,12 @@ class WeatherViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = WeatherViewModel(testDispatcher, testDispatcher, getOneCallUseCase, getAirPollutionUseCase, locationUtil)
+        viewModel = WeatherViewModel(
+            testDispatcher,
+            getOneCallUseCase,
+            getAirPollutionUseCase,
+            locationUtil
+        )
     }
 
     @After
@@ -127,6 +132,43 @@ class WeatherViewModelTest {
         coEvery { locationUtil.getLocation() } returns address
         coEvery { getOneCallUseCase(address) } returns flowOf(Result.success(oneCallResponse))
         coEvery { getAirPollutionUseCase(address) } returns flowOf(Result.failure(Exception()))
+
+        viewModel.fetchWeather()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.state.first { it.errorType != null }
+        coVerify(exactly = 1) { locationUtil.getLocation() }
+        coVerify(exactly = 1) { getOneCallUseCase(address) }
+        coVerify(exactly = 1) { getAirPollutionUseCase(address) }
+        assertEquals(ErrorType.WEATHER_ERROR, state.errorType)
+    }
+
+    @Test
+    fun fetchWeather_withNullOneCallResponse_showsWeatherError() = runTest(testDispatcher) {
+        val address = mockk<Address>()
+
+        coEvery { locationUtil.getLocation() } returns address
+        coEvery { getOneCallUseCase(address) } returns flowOf(Result.success(null))
+        coEvery { getAirPollutionUseCase(address) } returns flowOf(Result.success(mockk()))
+
+        viewModel.fetchWeather()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val state = viewModel.state.first { it.errorType != null }
+        coVerify(exactly = 1) { locationUtil.getLocation() }
+        coVerify(exactly = 1) { getOneCallUseCase(address) }
+        coVerify(exactly = 1) { getAirPollutionUseCase(address) }
+        assertEquals(ErrorType.WEATHER_ERROR, state.errorType)
+    }
+
+    @Test
+    fun fetchWeather_withNullAirPollutionResponse_showsWeatherError() = runTest(testDispatcher) {
+        val address = mockk<Address>()
+        val oneCallResponse = mockk<OneCallResponse>()
+
+        coEvery { locationUtil.getLocation() } returns address
+        coEvery { getOneCallUseCase(address) } returns flowOf(Result.success(oneCallResponse))
+        coEvery { getAirPollutionUseCase(address) } returns flowOf(Result.success(null))
 
         viewModel.fetchWeather()
         testDispatcher.scheduler.advanceUntilIdle()
