@@ -141,36 +141,53 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const path = 'app/build/reports/coverage/test/debug/report.xml';
+            const path = require('path');
             const testFiles = process.env.TEST_FILES.split(' ').filter(Boolean);
 
-            if (fs.existsSync(path)) {
-              const report = fs.readFileSync(path, 'utf8');
+            async function getCoverageDetails(filePath) {
+              if (fs.existsSync(filePath)) {
+                const report = fs.readFileSync(filePath, 'utf8');
+                const lineRegex = /<counter type="LINE" missed="(\d+)" covered="(\d+)"\/>/;
+                const methodRegex = /<counter type="METHOD" missed="(\d+)" covered="(\d+)"\/>/;
+
+                const lineMatch = lineRegex.exec(report);
+                const methodMatch = methodRegex.exec(report);
+
+                if (lineMatch && methodMatch) {
+                  const totalLines = parseInt(lineMatch[1]) + parseInt(lineMatch[2]);
+                  const lineCoverage = (parseInt(lineMatch[2]) / totalLines) * 100;
+                  const totalMethods = parseInt(methodMatch[1]) + parseInt(methodMatch[2]);
+                  const methodCoverage = (parseInt(methodMatch[2]) / totalMethods) * 100;
+
+                  return {
+                    lineCoverage: lineCoverage.toFixed(2),
+                    methodCoverage: methodCoverage.toFixed(2),
+                    totalLines,
+                    coveredLines: lineMatch[2],
+                    totalMethods,
+                    coveredMethods: methodMatch[2]
+                  };
+                }
+              }
+              return null;
+            }
+
+            (async () => {
               let coverageDetails = 'Total Test Coverage:\nType\tCoverage\n';
               let missingTests = '';
 
-              testFiles.forEach(file => {
+              for (const file of testFiles) {
                 const className = file.split('/').pop().replace('.kt', '');
-                const classRegex = new RegExp(`<class name="${className}"`, 'g');
-                const lineRegex = new RegExp(`<counter type="LINE" missed="(\\d+)" covered="(\\d+)"\\/>`, 'g');
-                const methodRegex = new RegExp(`<counter type="METHOD" missed="(\\d+)" covered="(\\d+)"\\/>`, 'g');
+                const coverageFilePath = path.join('app/build/reports/coverage/test/debug/com/hidesign/hiweather/presentation', `${className}.html`);
 
-                if (classRegex.test(report)) {
-                  const lineMatch = lineRegex.exec(report);
-                  const methodMatch = methodRegex.exec(report);
+                const coverage = await getCoverageDetails(coverageFilePath);
 
-                  if (lineMatch && methodMatch) {
-                    const totalLines = parseInt(lineMatch[1]) + parseInt(lineMatch[2]);
-                    const lineCoverage = (parseInt(lineMatch[2]) / totalLines) * 100;
-                    const totalMethods = parseInt(methodMatch[1]) + parseInt(methodMatch[2]);
-                    const methodCoverage = (parseInt(methodMatch[2]) / totalMethods) * 100;
-
-                    coverageDetails += `${className}\nLINE\t${lineCoverage.toFixed(2)}% (${lineMatch[2]}/${totalLines})\nMETHOD\t${methodCoverage.toFixed(2)}% (${methodMatch[2]}/${totalMethods})\n`;
-                  }
+                if (coverage) {
+                  coverageDetails += `${className}\nLINE\t${coverage.lineCoverage}% (${coverage.coveredLines}/${coverage.totalLines})\nMETHOD\t${coverage.methodCoverage}% (${coverage.coveredMethods}/${coverage.totalMethods})\n`;
                 } else {
                   missingTests += `\n${className}`;
                 }
-              });
+              }
 
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
@@ -183,11 +200,3 @@ jobs:
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  body: `Error: Missing test coverage for the following classes:${missingTests}`
-                });
-              }
-            } else {
-              console.error(`Coverage report not found at path: ${path}`);
-            }
-        continue-on-error: true
