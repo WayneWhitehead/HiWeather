@@ -139,26 +139,9 @@ jobs:
         if: env.TEST_FILES != ''
         run: cat app/build/reports/tests/testDebugUnitTest/index.html
 
-      - name: Read Coverage and Post Comment
-        if: env.TEST_FILES != ''
-        run: |
-          # Extract test results from the HTML report
-          TOTAL_TESTS=$(grep -oP '(?<=<div class="counter">)[0-9]+' app/build/reports/tests/testDebugUnitTest/index.html | head -n 1)
-          TOTAL_FAILURES=$(grep -oP '(?<=<div class="counter">)[0-9]+' app/build/reports/tests/testDebugUnitTest/index.html | sed -n '2p')
-          SUCCESS_RATE=$(grep -oP '(?<=<div class="percent">)[0-9]+%' app/build/reports/tests/testDebugUnitTest/index.html | head -n 1)
-          
-          echo "Total tests: $TOTAL_TESTS"
-          echo "Total failures: $TOTAL_FAILURES"
-          echo "Success rate: $SUCCESS_RATE"
-          
-          # Create a JSON payload for the GitHub comment
-          COMMENT_BODY="Test Results Summary:\n\n- Total tests: $TOTAL_TESTS\n- Total failures: $TOTAL_FAILURES\n- Success rate: $SUCCESS_RATE"
-          COMMENT_PAYLOAD=$(jq -n --arg body "$COMMENT_BODY" '{body: $body}')
-          
-          # Post the comment on the PR
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-            -d "$COMMENT_PAYLOAD"
+      - name: Publish Unit Test Results
+        uses: pooi/coverage-comment@1.0.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          xml-test-report-path: "app/build/reports/coverage/test/debug/report.xml"
         continue-on-error: true
