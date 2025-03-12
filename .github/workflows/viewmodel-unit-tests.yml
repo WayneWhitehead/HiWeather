@@ -145,23 +145,33 @@ jobs:
             const testFiles = process.env.TEST_FILES.split(' ').filter(Boolean);
 
             async function getCoverageDetails(filePath) {
+              console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
+                console.log(`File read successfully: ${filePath}`);
                 const lineRegex = /<td class="ctr2">(\d+)%<\/td>/g;
                 const methodRegex = /<td class="ctr2">(\d+)%<\/td>/g;
 
                 const lineMatches = [...report.matchAll(lineRegex)];
                 const methodMatches = [...report.matchAll(methodRegex)];
 
-                if (lineMatches.length > 0 && methodMatches.length > 0) {
+                console.log(`Line matches: ${lineMatches.length}, Method matches: ${methodMatches.length}`);
+
+                if (lineMatches.length > 0 && methodMatches.length > 1) {
                   const lineCoverage = parseInt(lineMatches[0][1]);
                   const methodCoverage = parseInt(methodMatches[1][1]);
+
+                  console.log(`Line coverage: ${lineCoverage}%, Method coverage: ${methodCoverage}%`);
 
                   return {
                     lineCoverage: lineCoverage.toFixed(2),
                     methodCoverage: methodCoverage.toFixed(2)
                   };
+                } else {
+                  console.log(`No valid matches found in file: ${filePath}`);
                 }
+              } else {
+                console.log(`File does not exist: ${filePath}`);
               }
               return null;
             }
@@ -174,6 +184,8 @@ jobs:
                 const className = file.split('/').pop().replace('.kt', '');
                 const coverageFilePath = path.join('app/build/reports/coverage/test/debug/com/hidesign/hiweather/presentation', `${className}.html`);
 
+                console.log(`Processing class: ${className}`);
+
                 const coverage = await getCoverageDetails(coverageFilePath);
 
                 if (coverage) {
@@ -183,12 +195,17 @@ jobs:
                 }
               }
 
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: coverageDetails
-              });
+              console.log(`Coverage details: ${coverageDetails}`);
+              console.log(`Missing tests: ${missingTests}`);
+
+              if (coverageDetails.trim() !== 'Total Test Coverage:\nType\tCoverage\n') {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: coverageDetails
+                });
+              }
 
               if (missingTests.trim()) {
                 await github.rest.issues.createComment({
