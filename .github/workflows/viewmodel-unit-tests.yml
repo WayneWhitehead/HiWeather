@@ -171,9 +171,9 @@ jobs:
 
                 console.log(`Line matches: ${lineMatches.length}, Method matches: ${methodMatches.length}`);
 
-                if (lineMatches.length > 0 && methodMatches.length > 1) {
+                if (lineMatches.length > 0 && methodMatches.length > 0) {
                   const lineCoverage = parseInt(lineMatches[0][1]);
-                  const methodCoverage = parseInt(methodMatches[1][1]);
+                  const methodCoverage = parseInt(methodMatches[0][1]);
 
                   console.log(`Line coverage: ${lineCoverage}%, Method coverage: ${methodCoverage}%`);
 
