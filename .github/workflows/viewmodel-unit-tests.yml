@@ -144,6 +144,20 @@ jobs:
             const path = require('path');
             const testFiles = process.env.TEST_FILES.split(' ').filter(Boolean);
 
+            async function findCoverageFile(baseDir, className) {
+              const files = fs.readdirSync(baseDir, { withFileTypes: true });
+              for (const file of files) {
+                const filePath = path.join(baseDir, file.name);
+                if (file.isDirectory()) {
+                  const result = await findCoverageFile(filePath, className);
+                  if (result) return result;
+                } else if (file.isFile() && file.name === `${className}.html`) {
+                  return filePath;
+                }
+              }
+              return null;
+            }
+
             async function getCoverageDetails(filePath) {
               console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
@@ -182,7 +196,7 @@ jobs:
 
               for (const file of testFiles) {
                 const className = file.split('/').pop().replace('Test.kt', '').replace('Tests.kt', '').replace('.kt', '');
-                const coverageFilePath = path.join('app/build/reports/coverage/test/debug/com/hidesign/hiweather/presentation', `${className}.html`);
+                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
 
                 console.log(`Processing class: ${className}`);
 
