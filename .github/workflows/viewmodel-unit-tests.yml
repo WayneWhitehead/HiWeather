@@ -147,25 +147,19 @@ jobs:
             async function getCoverageDetails(filePath) {
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const lineRegex = /<counter type="LINE" missed="(\d+)" covered="(\d+)"\/>/;
-                const methodRegex = /<counter type="METHOD" missed="(\d+)" covered="(\d+)"\/>/;
+                const lineRegex = /<td class="ctr2">(\d+)%<\/td>/g;
+                const methodRegex = /<td class="ctr2">(\d+)%<\/td>/g;
 
                 const lineMatch = lineRegex.exec(report);
                 const methodMatch = methodRegex.exec(report);
 
                 if (lineMatch && methodMatch) {
-                  const totalLines = parseInt(lineMatch[1]) + parseInt(lineMatch[2]);
-                  const lineCoverage = (parseInt(lineMatch[2]) / totalLines) * 100;
-                  const totalMethods = parseInt(methodMatch[1]) + parseInt(methodMatch[2]);
-                  const methodCoverage = (parseInt(methodMatch[2]) / totalMethods) * 100;
+                  const lineCoverage = parseInt(lineMatch[1]);
+                  const methodCoverage = parseInt(methodMatch[1]);
 
                   return {
                     lineCoverage: lineCoverage.toFixed(2),
-                    methodCoverage: methodCoverage.toFixed(2),
-                    totalLines,
-                    coveredLines: lineMatch[2],
-                    totalMethods,
-                    coveredMethods: methodMatch[2]
+                    methodCoverage: methodCoverage.toFixed(2)
                   };
                 }
               }
@@ -183,7 +177,7 @@ jobs:
                 const coverage = await getCoverageDetails(coverageFilePath);
 
                 if (coverage) {
-                  coverageDetails += `${className}\nLINE\t${coverage.lineCoverage}% (${coverage.coveredLines}/${coverage.totalLines})\nMETHOD\t${coverage.methodCoverage}% (${coverage.coveredMethods}/${coverage.totalMethods})\n`;
+                  coverageDetails += `${className}\nLINE\t${coverage.lineCoverage}%\nMETHOD\t${coverage.methodCoverage}%\n`;
                 } else {
                   missingTests += `\n${className}`;
                 }
@@ -200,3 +194,8 @@ jobs:
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: `Error: Missing test coverage for the following classes:${missingTests}`
+                });
+              }
+            })();
