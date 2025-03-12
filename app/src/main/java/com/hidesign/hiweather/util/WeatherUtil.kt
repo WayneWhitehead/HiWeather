@@ -3,9 +3,9 @@ package com.hidesign.hiweather.util
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.data.model.FeelsLike
-import com.hidesign.hiweather.data.model.Temp
-import com.hidesign.hiweather.data.model.Components
+import com.hidesign.hiweather.data.model.OneCallResponse.FeelsLike
+import com.hidesign.hiweather.data.model.OneCallResponse.Temp
+import com.hidesign.hiweather.data.model.AirPollutionResponse.Components
 import kotlin.math.roundToInt
 
 object WeatherUtil {

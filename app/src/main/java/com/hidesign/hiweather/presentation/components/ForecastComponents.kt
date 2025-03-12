@@ -32,8 +32,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.data.model.Daily
-import com.hidesign.hiweather.data.model.Hourly
+import com.hidesign.hiweather.data.model.OneCallResponse.Daily
+import com.hidesign.hiweather.data.model.OneCallResponse.Hourly
 import com.hidesign.hiweather.presentation.ForecastImageLabel
 import com.hidesign.hiweather.presentation.LoadPicture
 import com.hidesign.hiweather.presentation.MainActivity.Companion.FORECAST_SHEET

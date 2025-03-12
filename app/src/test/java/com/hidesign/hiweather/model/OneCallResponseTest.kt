@@ -1,10 +1,23 @@
 package com.hidesign.hiweather.model
 
-import com.hidesign.hiweather.data.model.*
-import org.junit.Assert
+import android.net.Uri
+import com.google.gson.Gson
+import com.hidesign.hiweather.data.model.OneCallResponse
+import com.hidesign.hiweather.data.model.OneCallResponse.*
+import io.mockk.every
+import io.mockk.mockkStatic
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Before
 import org.junit.Test
 
 class OneCallResponseTest {
+
+    @Before
+    fun setUp() {
+        mockkStatic(Uri::class)
+        every { Uri.encode(any()) } answers { firstArg() }
+    }
 
     @Test
     fun constructor_one_call_response_success() {
@@ -19,7 +32,7 @@ class OneCallResponseTest {
             alerts = listOf()
         )
 
-        Assert.assertNotNull(oneCallResponse)
+        assertNotNull(oneCallResponse)
     }
 
     @Test
@@ -42,7 +55,7 @@ class OneCallResponseTest {
             windSpeed = 5.0
         )
 
-        Assert.assertNotNull(current)
+        assertNotNull(current)
     }
 
     @Test
@@ -54,7 +67,7 @@ class OneCallResponseTest {
             main = "Clouds"
         )
 
-        Assert.assertNotNull(weather)
+        assertNotNull(weather)
     }
 
     @Test
@@ -71,7 +84,7 @@ class OneCallResponseTest {
             summary = "Cloudy with a 30% chance of rain."
         )
 
-        Assert.assertNotNull(daily)
+        assertNotNull(daily)
     }
 
     @Test
@@ -82,7 +95,7 @@ class OneCallResponseTest {
             visibility = 10000,
         )
 
-        Assert.assertNotNull(hourly)
+        assertNotNull(hourly)
     }
 
     @Test
@@ -95,6 +108,30 @@ class OneCallResponseTest {
             description = "A tornado warning has been issued for the following counties:..."
         )
 
-        Assert.assertNotNull(alerts)
+        assertNotNull(alerts)
+    }
+
+    @Test
+    fun testCurrentToJson() {
+        val current = Current()
+        val json = current.toJson()
+        val expectedJson = Uri.encode(Gson().toJson(current))
+        assertEquals(expectedJson, json)
+    }
+
+    @Test
+    fun testDailyToJson() {
+        val daily = Daily()
+        val json = daily.toJson()
+        val expectedJson = Uri.encode(Gson().toJson(daily))
+        assertEquals(expectedJson, json)
+    }
+
+    @Test
+    fun testHourlyToJson() {
+        val hourly = Hourly(0.0, 0.0, 0)
+        val json = hourly.toJson()
+        val expectedJson = Uri.encode(Gson().toJson(hourly))
+        assertEquals(expectedJson, json)
     }
 }

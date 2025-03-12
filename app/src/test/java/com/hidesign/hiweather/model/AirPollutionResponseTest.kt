@@ -1,50 +1,71 @@
 package com.hidesign.hiweather.model
 
-import com.hidesign.hiweather.data.model.*
-import org.junit.Assert
+import android.net.Uri
+import com.google.gson.Gson
+import com.hidesign.hiweather.data.model.AirPollutionResponse
+import com.hidesign.hiweather.data.model.AirPollutionResponse.*
+import io.mockk.every
+import io.mockk.mockkStatic
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Before
 import org.junit.Test
 
 class AirPollutionResponseTest {
+
+    @Before
+    fun setUp() {
+        mockkStatic(Uri::class)
+        every { Uri.encode(any()) } answers { firstArg() }
+    }
 
     @Test
     fun constructor_air_pollution_response_success() {
         val airPollutionResponse = AirPollutionResponse(
             coord = Coord(lat = 12.3456, lon = 78.9012),
-            list = listOf(DefaultAir(components = Components(co = 1.2, nh3 = 3.4, no = 5.6, no2 = 7.8, o3 = 9.0, pm10 = 11.2, pm25 = 13.4, so2 = 15.6), dt = 1661564800, main = Main(aqi = 100)))
+            list = listOf(DefaultAir(components = Components(), dt = 1661564800, main = Main(aqi = 100)))
         )
 
-        Assert.assertNotNull(airPollutionResponse)
+        assertNotNull(airPollutionResponse)
     }
 
     @Test
     fun constructor_default_air_success() {
         val defaultAir = DefaultAir(
-            components = Components(co = 1.2, nh3 = 3.4, no = 5.6, no2 = 7.8, o3 = 9.0, pm10 = 11.2, pm25 = 13.4, so2 = 15.6),
+            components = Components(),
             dt = 1661564800,
             main = Main(aqi = 100)
         )
 
-        Assert.assertNotNull(defaultAir)
+        assertNotNull(defaultAir)
     }
 
     @Test
     fun constructor_main_success() {
         val main = Main(aqi = 100)
 
-        Assert.assertNotNull(main)
+        assertNotNull(main)
     }
 
     @Test
     fun constructor_coord_success() {
         val coord = Coord(lat = 12.3456, lon = 78.9012)
 
-        Assert.assertNotNull(coord)
+        assertNotNull(coord)
     }
 
     @Test
     fun constructor_components_success() {
-        val components = Components(co = 1.2, nh3 = 3.4, no = 5.6, no2 = 7.8, o3 = 9.0, pm10 = 11.2, pm25 = 13.4, so2 = 15.6)
+        val components = Components()
 
-        Assert.assertNotNull(components)
+        assertNotNull(components)
+    }
+
+    @Test
+    fun testComponentsToJson() {
+        val components = Components()
+        val json = components.toJson()
+        val expectedJson = Uri.encode(Gson().toJson(components))
+        assertEquals(expectedJson, json)
     }
 }
