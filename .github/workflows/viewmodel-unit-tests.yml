@@ -135,13 +135,36 @@ jobs:
         run: ./gradlew createDebugUnitTestCoverageReport
         continue-on-error: true
 
-      - name: Log Coverage Report Content
+      - name: Custom Script to Read Coverage Report
         if: env.TEST_FILES != ''
-        run: cat app/build/reports/tests/testDebugUnitTest/index.html
-
-      - name: Publish Unit Test Results
-        uses: pooi/coverage-comment@1.0.3
+        uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          xml-test-report-path: "app/build/reports/coverage/test/debug/report.xml"
+          script: |
+            const fs = require('fs');
+            const path = 'app/build/reports/coverage/test/debug/report.xml';
+            const testFiles = process.env.TEST_FILES.split(' ').filter(Boolean);
+
+            if (fs.existsSync(path)) {
+              const report = fs.readFileSync(path, 'utf8');
+              let missingTests = '';
+
+              testFiles.forEach(file => {
+                const className = file.split('/').pop().replace('.kt', '');
+                const regex = new RegExp(`<class name="${className}"`, 'g');
+                if (!regex.test(report)) {
+                  missingTests += `\n${className}`;
+                }
+              });
+
+              if (missingTests.trim()) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.payload.pull_request.number,
+                  body: `Error: Missing test coverage for the following classes:${missingTests}`
+                });
+              }
+            } else {
+              console.error(`Coverage report not found at path: ${path}`);
+            }
         continue-on-error: true
