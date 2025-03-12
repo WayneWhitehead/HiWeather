@@ -181,7 +181,7 @@ jobs:
               let missingTests = '';
 
               for (const file of testFiles) {
-                const className = file.split('/').pop().replace('.kt', '');
+                const className = file.split('/').pop().replace('Test.kt', '').replace('Tests.kt', '').replace('.kt', '');
                 const coverageFilePath = path.join('app/build/reports/coverage/test/debug/com/hidesign/hiweather/presentation', `${className}.html`);
 
                 console.log(`Processing class: ${className}`);
