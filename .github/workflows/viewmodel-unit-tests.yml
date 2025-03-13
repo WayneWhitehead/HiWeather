@@ -197,18 +197,28 @@ jobs:
               console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)%<\/td><\/tr><\/tfoot>/;
-                const matches = report.match(totalRegex);
             
-                if (matches) {
-                  const instructionsCoverage = parseInt(matches[3]);
-                  const branchesCoverage = parseInt(matches[6]);
-                  const missedComplexity = parseInt(matches[7]);
-                  const totalComplexity = parseInt(matches[8]);
-                  const missedLines = parseInt(matches[9]);
-                  const totalLines = parseInt(matches[10]);
-                  const missedMethods = parseInt(matches[11]);
-                  const totalMethods = parseInt(matches[12]);
+                const instructionsRegex = /<tfoot>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>/;
+                const branchesRegex = /<tfoot>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>/;
+                const complexityRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
+                const linesRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
+                const methodsRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>/;
+            
+                const instructionsMatch = report.match(instructionsRegex);
+                const branchesMatch = report.match(branchesRegex);
+                const complexityMatch = report.match(complexityRegex);
+                const linesMatch = report.match(linesRegex);
+                const methodsMatch = report.match(methodsRegex);
+            
+                if (instructionsMatch && branchesMatch && complexityMatch && linesMatch && methodsMatch) {
+                  const instructionsCoverage = parseInt(instructionsMatch[3]);
+                  const branchesCoverage = parseInt(branchesMatch[6]);
+                  const missedComplexity = parseInt(complexityMatch[1]);
+                  const totalComplexity = parseInt(complexityMatch[2]);
+                  const missedLines = parseInt(linesMatch[1]);
+                  const totalLines = parseInt(linesMatch[2]);
+                  const missedMethods = parseInt(methodsMatch[1]);
+                  const totalMethods = parseInt(methodsMatch[2]);
             
                   const complexityCoverage = ((totalComplexity - missedComplexity) / totalComplexity * 100).toFixed(2);
                   const linesCoverage = ((totalLines - missedLines) / totalLines * 100).toFixed(2);
