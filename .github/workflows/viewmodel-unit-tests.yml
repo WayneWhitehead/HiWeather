@@ -142,14 +142,15 @@ jobs:
         run: ./gradlew createDebugUnitTestCoverageReport
         continue-on-error: true
 
-      - name: Custom Script to Read Coverage Report
-        if: env.TEST_FILES != ''
+      - name: Search for Coverage Reports
+        id: search-coverage-reports
         uses: actions/github-script@v5
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
             const testFiles = process.env.TEST_FILES.split(' ').filter(Boolean);
+            let coverageFiles = '';
 
             async function findCoverageFile(baseDir, className) {
               const files = fs.readdirSync(baseDir, { withFileTypes: true });
@@ -164,6 +165,27 @@ jobs:
               }
               return null;
             }
+
+            (async () => {
+              for (const file of testFiles) {
+                const className = file.split('/').pop().replace('Test.kt', '').replace('Tests.kt', '').replace('.kt', '');
+                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
+                if (coverageFilePath) {
+                  coverageFiles += ` ${coverageFilePath}`;
+                }
+              }
+              core.exportVariable('COVERAGE_FILES', coverageFiles);
+            })();
+
+      - name: Read and Format Coverage Reports
+        id: read-format-coverage-reports
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const fs = require('fs');
+            const coverageFiles = process.env.COVERAGE_FILES.split(' ').filter(Boolean);
+            let coverageDetails = '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
+            let missingTests = '';
 
             async function getCoverageDetails(filePath) {
               console.log(`Checking file: ${filePath}`);
@@ -198,42 +220,44 @@ jobs:
             }
 
             (async () => {
-              let coverageDetails = '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
-              let missingTests = '';
-
-              for (const file of testFiles) {
-                const className = file.split('/').pop().replace('Test.kt', '').replace('Tests.kt', '').replace('.kt', '');
-                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
-
-                console.log(`Processing class: ${className}`);
-
-                const coverage = await getCoverageDetails(coverageFilePath);
-
+              for (const filePath of coverageFiles) {
+                const className = filePath.split('/').pop().replace('.html', '');
+                const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
                   coverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% |\n`;
                 } else {
                   missingTests += `\n${className}`;
                 }
               }
-
-              console.log(`Coverage details: ${coverageDetails}`);
-              console.log(`Missing tests: ${missingTests}`);
-
-              if (coverageDetails.trim() !== '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  body: coverageDetails
-                });
-              }
-
-              if (missingTests.trim()) {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  body: `**Error:** Missing test coverage for the following classes:${missingTests}`
-                });
-              }
+              core.exportVariable('COVERAGE_DETAILS', coverageDetails);
+              core.exportVariable('MISSING_TESTS', missingTests);
             })();
+
+      - name: Post Coverage Report Comment
+        if: env.COVERAGE_DETAILS != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const github = require('@actions/github');
+            const context = github.context;
+
+            const coverageDetails = process.env.COVERAGE_DETAILS;
+            const missingTests = process.env.MISSING_TESTS;
+
+            if (coverageDetails.trim() !== '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: coverageDetails
+              });
+            }
+
+            if (missingTests.trim()) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `**Error:** Missing test coverage for the following classes:${missingTests}`
+              });
+            }
