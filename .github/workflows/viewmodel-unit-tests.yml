@@ -95,7 +95,7 @@ jobs:
               }
             })();
 
-      - name: Post Error Comment if Missing
+      - name: Post Missing ViewModel Tests
         if: env.MISSING_TEST_FILES == 'true'
         uses: actions/github-script@v5
         with:
@@ -238,9 +238,6 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const github = require('@actions/github');
-            const context = github.context;
-
             const coverageDetails = process.env.COVERAGE_DETAILS;
             const missingTests = process.env.MISSING_TESTS;
 
