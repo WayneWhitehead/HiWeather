@@ -190,27 +190,16 @@ jobs:
             async function getCoverageDetails(filePath) {
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const lineRegex = /<td class="ctr2">(\d+)%<\/td>/g;
-                const methodRegex = /<td class="ctr2">(\d+)%<\/td>/g;
-                const branchRegex = /<td class="ctr2">(\d+)%<\/td>/g;
-                const complexityRegex = /<td class="ctr2">(\d+)<\/td>/g;
+                const totalRegex = /Total\s+(\d+)\s+of\s+(\d+)\s+(\d+)%\s+(\d+)\s+of\s+(\d+)\s+(\d+)%/;
+                const matches = report.match(totalRegex);
 
-                const lineMatches = [...report.matchAll(lineRegex)];
-                const methodMatches = [...report.matchAll(methodRegex)];
-                const branchMatches = [...report.matchAll(branchRegex)];
-                const complexityMatches = [...report.matchAll(complexityRegex)];
-
-                if (lineMatches.length > 0 && methodMatches.length > 0 && branchMatches.length > 0 && complexityMatches.length > 0) {
-                  const lineCoverage = parseInt(lineMatches[0][1]);
-                  const methodCoverage = parseInt(methodMatches[0][1]);
-                  const branchCoverage = parseInt(branchMatches[0][1]);
-                  const complexity = parseInt(complexityMatches[0][1]);
+                if (matches) {
+                  const lineCoverage = parseInt(matches[3]);
+                  const branchCoverage = parseInt(matches[6]);
 
                   return {
                     lineCoverage: lineCoverage.toFixed(2),
-                    methodCoverage: methodCoverage.toFixed(2),
-                    branchCoverage: branchCoverage.toFixed(2),
-                    complexity: complexity.toFixed(2)
+                    branchCoverage: branchCoverage.toFixed(2)
                   };
                 } 
               }
@@ -222,7 +211,7 @@ jobs:
                 const className = filePath.split('/').pop().replace('.html', '');
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  viewModelCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% | ${coverage.branchCoverage}% | ${coverage.complexity} |\n`;
+                  viewModelCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | N/A | ${coverage.branchCoverage}% | N/A |\n`;
                   if (parseFloat(coverage.lineCoverage) < 90) {
                     lowCoverageViewModels += `\n${className}`;
                   }
@@ -233,7 +222,7 @@ jobs:
                 const className = filePath.split('/').pop().replace('.html', '');
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  otherCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% | ${coverage.branchCoverage}% | ${coverage.complexity} |\n`;
+                  otherCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | N/A | ${coverage.branchCoverage}% | N/A |\n`;
                 }
               }
 
