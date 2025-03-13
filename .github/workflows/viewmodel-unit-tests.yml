@@ -31,7 +31,7 @@ jobs:
           done
           echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
 
-      - name: Check for Corresponding Test Files and Post Error Comment if Missing
+      - name: Check for Corresponding Test Files
         id: check-test-files
         uses: actions/github-script@v5
         with:
@@ -97,16 +97,23 @@ jobs:
 
               if (missingTestFiles.trim()) {
                 core.exportVariable('MISSING_TEST_FILES', 'true');
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  body: `Error: Missing test files for modified ViewModel files:${missingTestFiles}`
-                });
               } else {
                 core.exportVariable('MISSING_TEST_FILES', 'false');
               }
             })();
+
+      - name: Post Error Comment if Missing
+        if: env.MISSING_TEST_FILES == 'true'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const missingTestFiles = process.env.MISSING_TEST_FILES;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `Error: Missing test files for modified ViewModel files:${missingTestFiles}`
+            });
 
       - name: Cache Gradle build cache
         if: env.TEST_FILES != ''
