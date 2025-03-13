@@ -22,14 +22,14 @@ jobs:
           for file in $MODIFIED_FILES; do
             echo $file
           done
-          echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
+          echo "MODIFIED_FILES=$(echo $MODIFIED_FILES | tr '\n' ' ')" >> $GITHUB_ENV
 
           VIEWMODEL_FILES=$(echo "$MODIFIED_FILES" | grep 'ViewModel\.kt$')
           echo "ViewModel files found:"
           for file in $VIEWMODEL_FILES; do
             echo $file
           done
-          echo "VIEWMODEL_FILES=$VIEWMODEL_FILES" >> $GITHUB_ENV
+          echo "VIEWMODEL_FILES=$(echo $VIEWMODEL_FILES | tr '\n' ' ')" >> $GITHUB_ENV
 
       - name: Check for Corresponding Test Files
         id: check-test-files
