@@ -194,37 +194,23 @@ jobs:
             let lowCoverageViewModels = '';
 
             async function getCoverageDetails(filePath) {
+              const fs = require('fs');
+              const util = require('util');
+              const readFile = util.promisify(fs.readFile);
+            
               console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
-                const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)%<\/td><\/tr><\/tfoot>/;
-                const matches = report.match(totalRegex);
-            
-                if (matches) {
-                  const instructionsCoverage = parseInt(matches[3]);
-                  const branchesCoverage = parseInt(matches[6]);
-                  const missedComplexity = parseInt(matches[7]);
-                  const totalComplexity = parseInt(matches[8]);
-                  const missedLines = parseInt(matches[9]);
-                  const totalLines = parseInt(matches[10]);
-                  const missedMethods = parseInt(matches[11]);
-                  const totalMethods = parseInt(matches[12]);
-            
-                  const complexityCoverage = ((totalComplexity - missedComplexity) / totalComplexity * 100).toFixed(2);
-                  const linesCoverage = ((totalLines - missedLines) / totalLines * 100).toFixed(2);
-                  const methodsCoverage = ((totalMethods - missedMethods) / totalMethods * 100).toFixed(2);
-            
-                  console.log(`Instructions coverage: ${instructionsCoverage}%, Branches coverage: ${branchesCoverage}%, Complexity coverage: ${complexityCoverage}%, Lines coverage: ${linesCoverage}%, Methods coverage: ${methodsCoverage}%`);
-            
-                  return {
-                    instructionsCoverage: instructionsCoverage.toFixed(2),
-                    branchesCoverage: branchesCoverage.toFixed(2),
-                    complexityCoverage: complexityCoverage,
-                    linesCoverage: linesCoverage,
-                    methodsCoverage: methodsCoverage
-                  };
-                } else {
-                  console.log(`No valid matches found in file: ${filePath}`);
+                try {
+                  const data = await readFile(filePath, 'utf8');
+                  const regex = /<tfoot>[\s\S]*?<td class="headerCovTableEntry">([\d.]+)%<\/td>[\s\S]*?<\/tfoot>/;
+                  const match = data.match(regex);
+                  if (match && match[1]) {
+                    return parseFloat(match[1]);
+                  } else {
+                    console.log(`No valid matches found in file: ${filePath}`);
+                  }
+                } catch (error) {
+                  console.error(`Error reading file: ${filePath}`, error);
                 }
               } else {
                 console.log(`File does not exist: ${filePath}`);
