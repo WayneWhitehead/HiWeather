@@ -155,6 +155,7 @@ jobs:
             (async () => {
               for (const file of viewModelFiles) {
                 const className = file.split('/').pop().replace('.kt', '');
+                console.log(`Searching coverage for ViewModel class: ${className}`);
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
                   viewModelCoverageFiles += ` ${coverageFilePath}`;
@@ -163,6 +164,7 @@ jobs:
 
               for (const file of otherFiles) {
                 const className = file.split('/').pop().replace('.kt', '');
+                console.log(`Searching coverage for other class: ${className}`);
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
                   otherCoverageFiles += ` ${coverageFilePath}`;
@@ -188,6 +190,7 @@ jobs:
             let lowCoverageViewModels = '';
 
             async function getCoverageDetails(filePath) {
+              console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
                 const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td>/;
@@ -197,11 +200,17 @@ jobs:
                   const instructionsCoverage = parseInt(matches[3]);
                   const branchesCoverage = parseInt(matches[6]);
 
+                  console.log(`Instructions coverage: ${instructionsCoverage}%, Branches coverage: ${branchesCoverage}%`);
+
                   return {
                     instructionsCoverage: instructionsCoverage.toFixed(2),
                     branchesCoverage: branchesCoverage.toFixed(2)
                   };
+                } else {
+                  console.log(`No valid matches found in file: ${filePath}`);
                 }
+              } else {
+                console.log(`File does not exist: ${filePath}`);
               }
               return null;
             }
@@ -209,6 +218,7 @@ jobs:
             (async () => {
               for (const filePath of viewModelCoverageFiles) {
                 const className = filePath.split('/').pop().replace('.html', '');
+                console.log(`Processing ViewModel coverage for class: ${className}`);
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
                   viewModelCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | N/A | N/A | N/A |\n`;
@@ -220,6 +230,7 @@ jobs:
 
               for (const filePath of otherCoverageFiles) {
                 const className = filePath.split('/').pop().replace('.html', '');
+                console.log(`Processing other coverage for class: ${className}`);
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
                   otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | N/A | N/A | N/A |\n`;
@@ -230,6 +241,7 @@ jobs:
               core.exportVariable('OTHER_COVERAGE_DETAILS', otherCoverageDetails);
               core.exportVariable('LOW_COVERAGE_VIEW_MODELS', lowCoverageViewModels);
             })();
+
       - name: Post Coverage Report Comment
         if: env.VIEWMODEL_COVERAGE_DETAILS != '' || env.OTHER_COVERAGE_DETAILS != ''
         uses: actions/github-script@v5
