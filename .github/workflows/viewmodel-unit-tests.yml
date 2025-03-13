@@ -199,7 +199,7 @@ jobs:
                 const report = fs.readFileSync(filePath, 'utf8');
             
                 const instructionsRegex = /<tfoot>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>/;
-                const branchesRegex = /<tfoot>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>/;
+                const branchesRegex = /<tfoot>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+|N\/A)%<\/td>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+|N\/A)%<\/td>/;
                 const complexityRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
                 const linesRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
                 const methodsRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
@@ -218,7 +218,7 @@ jobs:
             
                 if (instructionsMatch && branchesMatch && complexityMatch && linesMatch && methodsMatch) {
                   const instructionsCoverage = parseInt(instructionsMatch[3]);
-                  const branchesCoverage = parseInt(branchesMatch[6]);
+                  const branchesCoverage = branchesMatch[6] === 'N/A' ? 'N/A' : parseInt(branchesMatch[6]);
                   const missedComplexity = parseInt(complexityMatch[1]);
                   const totalComplexity = parseInt(complexityMatch[2]);
                   const missedLines = parseInt(linesMatch[1]);
@@ -234,7 +234,7 @@ jobs:
             
                   return {
                     instructionsCoverage: instructionsCoverage.toFixed(2),
-                    branchesCoverage: branchesCoverage.toFixed(2),
+                    branchesCoverage: branchesCoverage === 'N/A' ? branchesCoverage : branchesCoverage.toFixed(2),
                     complexityCoverage: complexityCoverage,
                     linesCoverage: linesCoverage,
                     methodsCoverage: methodsCoverage
