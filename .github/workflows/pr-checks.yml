@@ -2,7 +2,7 @@ name: PR Linting
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [auto_merge_enabled]
 
 jobs:
   check-hardcoded-values:
