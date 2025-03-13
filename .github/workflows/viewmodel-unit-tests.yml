@@ -157,7 +157,7 @@ jobs:
                 const className = file.split('/').pop().replace('.kt', '');
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
-                  console.log(`Found coverage file for class: ${className}`);
+                  console.log(`Found coverage file in path: ${coverageFilePath}`);
                   viewModelCoverageFiles += ` ${coverageFilePath}`;
                 } else {
                   console.log(`No coverage file found for class: ${className}`);
@@ -168,7 +168,7 @@ jobs:
                 const className = file.split('/').pop().replace('.kt', '');
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
-                  console.log(`Found coverage file for class: ${className}`);
+                  console.log(`Found coverage file in path: ${coverageFilePath}`);
                   otherCoverageFiles += ` ${coverageFilePath}`;
                 } else {
                   console.log(`No coverage file found for class: ${className}`);
