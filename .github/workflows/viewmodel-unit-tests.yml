@@ -29,7 +29,7 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const modifiedFiles = process.env.VIEWMODEL_FILES.split('\n').filter(Boolean);
+            const viewModelFiles = process.env.VIEWMODEL_FILES ? process.env.VIEWMODEL_FILES.split(' ').filter(Boolean) : [];
             let missingTestFiles = '';
             let testFiles = '';
 
@@ -64,7 +64,7 @@ jobs:
             }
 
             (async () => {
-              for (const file of modifiedFiles) {
+              for (const file of viewModelFiles) {
                 const fileNamePattern = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTest.kt') + '$');
 
                 console.log(`Searching for test files: ${fileNamePattern}`);
