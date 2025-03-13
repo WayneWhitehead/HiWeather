@@ -165,7 +165,7 @@ jobs:
 
             (async () => {
               for (const file of viewModelFiles) {
-                const className = file.split('/').pop().replace('ViewModel.kt', '');
+                const className = file.split('/').pop().replace('.kt', '');
                 console.log(`Searching coverage for ViewModel class: ${className}`);
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
@@ -191,7 +191,6 @@ jobs:
               core.exportVariable('VIEWMODEL_COVERAGE_FILES', viewModelCoverageFiles);
               core.exportVariable('OTHER_COVERAGE_FILES', otherCoverageFiles);
             })();
-
       - name: Read and Format Coverage Reports
         id: read-format-coverage-reports
         uses: actions/github-script@v5
