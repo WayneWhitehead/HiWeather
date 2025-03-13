@@ -143,6 +143,9 @@ jobs:
             const viewModelFiles = modifiedFiles.filter(file => file.endsWith('ViewModel.kt'));
             const otherFiles = modifiedFiles.filter(file => !file.endsWith('ViewModel.kt'));
 
+            console.log("Modified ViewModel files:", viewModelFiles);
+            console.log("Other modified files:", otherFiles);
+
             let viewModelCoverageFiles = '';
             let otherCoverageFiles = '';
 
@@ -163,17 +166,25 @@ jobs:
             (async () => {
               for (const file of viewModelFiles) {
                 const className = file.split('/').pop().replace('ViewModel.kt', '');
+                console.log(`Searching coverage for ViewModel class: ${className}`);
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
                   viewModelCoverageFiles += ` ${coverageFilePath}`;
+                  console.log(`Found coverage file for ViewModel: ${coverageFilePath}`);
+                } else {
+                  console.log(`No coverage file found for ViewModel: ${className}`);
                 }
               }
 
               for (const file of otherFiles) {
                 const className = file.split('/').pop().replace('.kt', '');
+                console.log(`Searching coverage for other class: ${className}`);
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
                   otherCoverageFiles += ` ${coverageFilePath}`;
+                  console.log(`Found coverage file for other class: ${coverageFilePath}`);
+                } else {
+                  console.log(`No coverage file found for other class: ${className}`);
                 }
               }
 
@@ -191,8 +202,8 @@ jobs:
             const viewModelCoverageFiles = process.env.VIEWMODEL_COVERAGE_FILES.split(' ').filter(Boolean);
             const otherCoverageFiles = process.env.OTHER_COVERAGE_FILES.split(' ').filter(Boolean);
 
-            let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
-            let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
+            let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n';
+            let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n';
 
             async function getCoverageDetails(filePath) {
               console.log(`Checking file: ${filePath}`);
@@ -201,21 +212,29 @@ jobs:
                 console.log(`File read successfully: ${filePath}`);
                 const lineRegex = /<td class="ctr2">(\d+)%<\/td>/g;
                 const methodRegex = /<td class="ctr2">(\d+)%<\/td>/g;
+                const branchRegex = /<td class="ctr2">(\d+)%<\/td>/g;
+                const complexityRegex = /<td class="ctr2">(\d+)<\/td>/g;
 
                 const lineMatches = [...report.matchAll(lineRegex)];
                 const methodMatches = [...report.matchAll(methodRegex)];
+                const branchMatches = [...report.matchAll(branchRegex)];
+                const complexityMatches = [...report.matchAll(complexityRegex)];
 
-                console.log(`Line matches: ${lineMatches.length}, Method matches: ${methodMatches.length}`);
+                console.log(`Line matches: ${lineMatches.length}, Method matches: ${methodMatches.length}, Branch matches: ${branchMatches.length}, Complexity matches: ${complexityMatches.length}`);
 
-                if (lineMatches.length > 0 && methodMatches.length > 0) {
+                if (lineMatches.length > 0 && methodMatches.length > 0 && branchMatches.length > 0 && complexityMatches.length > 0) {
                   const lineCoverage = parseInt(lineMatches[0][1]);
                   const methodCoverage = parseInt(methodMatches[0][1]);
+                  const branchCoverage = parseInt(branchMatches[0][1]);
+                  const complexity = parseInt(complexityMatches[0][1]);
 
-                  console.log(`Line coverage: ${lineCoverage}%, Method coverage: ${methodCoverage}%`);
+                  console.log(`Line coverage: ${lineCoverage}%, Method coverage: ${methodCoverage}%, Branch coverage: ${branchCoverage}%, Complexity: ${complexity}`);
 
                   return {
                     lineCoverage: lineCoverage.toFixed(2),
-                    methodCoverage: methodCoverage.toFixed(2)
+                    methodCoverage: methodCoverage.toFixed(2),
+                    branchCoverage: branchCoverage.toFixed(2),
+                    complexity: complexity.toFixed(2)
                   };
                 } else {
                   console.log(`No valid matches found in file: ${filePath}`);
@@ -231,7 +250,7 @@ jobs:
                 const className = filePath.split('/').pop().replace('.html', '');
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  viewModelCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% |\n`;
+                  viewModelCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% | ${coverage.branchCoverage}% | ${coverage.complexity} |\n`;
                 }
               }
 
@@ -239,7 +258,7 @@ jobs:
                 const className = filePath.split('/').pop().replace('.html', '');
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  otherCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% |\n`;
+                  otherCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% | ${coverage.branchCoverage}% | ${coverage.complexity} |\n`;
                 }
               }
 
@@ -255,20 +274,21 @@ jobs:
             const viewModelCoverageDetails = process.env.VIEWMODEL_COVERAGE_DETAILS;
             const otherCoverageDetails = process.env.OTHER_COVERAGE_DETAILS;
 
-            if (viewModelCoverageDetails.trim() !== '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
-                body: viewModelCoverageDetails
-              });
+            let commentBody = '';
+
+            if (viewModelCoverageDetails.trim() !== '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n') {
+              commentBody += viewModelCoverageDetails + '\n';
             }
 
-            if (otherCoverageDetails.trim() !== '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
+            if (otherCoverageDetails.trim() !== '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n') {
+              commentBody += otherCoverageDetails;
+            }
+
+            if (commentBody) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: otherCoverageDetails
+                body: commentBody
               });
             }
