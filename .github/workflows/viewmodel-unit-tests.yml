@@ -171,8 +171,8 @@ jobs:
                 }
               }
 
-              core.exportVariable('VIEWMODEL_COVERAGE_FILES', viewModelCoverageFiles);
-              core.exportVariable('OTHER_COVERAGE_FILES', otherCoverageFiles);
+              core.setOutput('viewmodel_coverage_files', viewModelCoverageFiles.trim());
+              core.setOutput('other_coverage_files', otherCoverageFiles.trim());
             })();
 
       - name: Read and Format Coverage Reports
@@ -195,7 +195,7 @@ jobs:
                 const report = fs.readFileSync(filePath, 'utf8');
                 const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
                 const matches = report.match(totalRegex);
-            
+
                 if (matches) {
                   const instructionsCoverage = parseInt(matches[3]);
                   const branchesCoverage = parseInt(matches[6]);
@@ -205,13 +205,13 @@ jobs:
                   const totalLines = parseInt(matches[10]);
                   const missedMethods = parseInt(matches[11]);
                   const totalMethods = parseInt(matches[12]);
-                  
+
                   const complexityCoverage = ((totalComplexity - missedComplexity) / totalComplexity * 100).toFixed(2);
                   const linesCoverage = ((totalLines - missedLines) / totalLines * 100).toFixed(2);
                   const methodsCoverage = ((totalMethods - missedMethods) / totalMethods * 100).toFixed(2);
 
                 console.log(`Instructions coverage: ${instructionsCoverage}%, Branches coverage: ${branchesCoverage}%, Complexity coverage: ${complexityCoverage}%, Lines coverage: ${linesCoverage}%, Methods coverage: ${methodsCoverage}%`);
-                
+
                   return {
                     instructionsCoverage: instructionsCoverage.toFixed(2),
                     branchesCoverage: branchesCoverage.toFixed(2),
