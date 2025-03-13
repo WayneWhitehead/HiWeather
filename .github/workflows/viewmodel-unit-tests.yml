@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Create local.properties
+      - name: Set up Environment
         run: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           echo "ADMOB_APP_KEY=${{ secrets.ADMOB_APP_KEY }}" >> local.properties
@@ -25,13 +25,9 @@ jobs:
         id: fetch-modified-viewmodel-files
         run: |
           MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD | grep 'ViewModel\.kt$')
-          echo "Modified ViewModel files found:"
-          for file in $MODIFIED_FILES; do
-            echo $file
-          done
           echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
 
-      - name: Check for Corresponding Test Files and Post Error Comment if Missing
+      - name: Check for Corresponding Test Files
         id: check-test-files
         uses: actions/github-script@v5
         with:
@@ -40,73 +36,32 @@ jobs:
             let missingTestFiles = '';
             let testFiles = '';
 
-            async function searchForTestFiles(directory, fileNamePattern1, fileNamePattern2) {
-              try {
-                const response = await github.rest.repos.getContent({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  path: directory
-                });
+            for (const file of modifiedFiles) {
+              const testFile1 = file.replace('ViewModel.kt', 'ViewModelTest.kt');
+              const testFile2 = file.replace('ViewModel.kt', 'ViewModelTests.kt');
+              const testFilePath1 = `app/src/test/java/${testFile1}`;
+              const testFilePath2 = `app/src/test/java/${testFile2}`;
 
-                if (Array.isArray(response.data)) {
-                  for (const item of response.data) {
-                    if (item.type === 'dir') {
-                      const foundFile = await searchForTestFiles(item.path, fileNamePattern1, fileNamePattern2);
-                      if (foundFile) {
-                        return foundFile;
-                      }
-                    } else if (item.type === 'file') {
-                      if (fileNamePattern1.test(item.path)) {
-                        console.log(`Found test file: ${item.path}`);
-                        return item.path;
-                      }
-                      if (fileNamePattern2.test(item.path)) {
-                        console.log(`Found test file: ${item.path}`);
-                        return item.path;
-                      }
-                    }
-                  }
-                } else {
-                  console.log(`No array returned for directory: ${directory}`);
-                }
-                return null;
-              } catch (error) {
-                console.error(`Error searching directory ${directory}:`, error);
-                return null;
+              if (!fs.existsSync(testFilePath1) && !fs.existsSync(testFilePath2)) {
+                missingTestFiles += `\n${testFile1}\n${testFile2}`;
+              } else {
+                testFiles += ` ${testFilePath1} ${testFilePath2}`;
               }
             }
 
-            (async () => {
-              for (const file of modifiedFiles) {
-                const fileNamePattern1 = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTest.kt') + '$');
-                const fileNamePattern2 = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTests.kt') + '$');
+            core.exportVariable('TEST_FILES', testFiles.trim());
 
-                console.log(`Searching for test files: ${fileNamePattern1} or ${fileNamePattern2}`);
-
-                const testFile = await searchForTestFiles('app/src/test/java', fileNamePattern1, fileNamePattern2);
-
-                if (!testFile) {
-                  missingTestFiles += `\n${file.replace('ViewModel.kt', 'ViewModelTest.kt')}\n${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`;
-                  console.log(`Missing test files: ${file.replace('ViewModel.kt', 'ViewModelTest.kt')} or ${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`);
-                } else {
-                  testFiles += ` ${testFile}`;
-                }
-              }
-
-              core.exportVariable('TEST_FILES', testFiles);
-
-              if (missingTestFiles.trim()) {
-                core.exportVariable('MISSING_TEST_FILES', 'true');
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  body: `Error: Missing test files for modified ViewModel files:${missingTestFiles}`
-                });
-              } else {
-                core.exportVariable('MISSING_TEST_FILES', 'false');
-              }
-            })();
+            if (missingTestFiles.trim()) {
+              core.exportVariable('MISSING_TEST_FILES', 'true');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `Error: Missing test files for modified ViewModel files:${missingTestFiles}`
+              });
+            } else {
+              core.exportVariable('MISSING_TEST_FILES', 'false');
+            }
 
       - name: Cache Gradle build cache
         if: env.TEST_FILES != ''
@@ -135,7 +90,7 @@ jobs:
         run: ./gradlew createDebugUnitTestCoverageReport
         continue-on-error: true
 
-      - name: Custom Script to Read Coverage Report
+      - name: Post Coverage Report
         if: env.TEST_FILES != ''
         uses: actions/github-script@v5
         with:
@@ -143,90 +98,38 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const testFiles = process.env.TEST_FILES.split(' ').filter(Boolean);
+            let coverageDetails = '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
+            let missingTests = '';
 
-            async function findCoverageFile(baseDir, className) {
-              const files = fs.readdirSync(baseDir, { withFileTypes: true });
-              for (const file of files) {
-                const filePath = path.join(baseDir, file.name);
-                if (file.isDirectory()) {
-                  const result = await findCoverageFile(filePath, className);
-                  if (result) return result;
-                } else if (file.isFile() && file.name === `${className}.html`) {
-                  return filePath;
-                }
-              }
-              return null;
-            }
+            for (const file of testFiles) {
+              const className = path.basename(file).replace('Test.kt', '').replace('Tests.kt', '').replace('.kt', '');
+              const coverageFilePath = path.join('app/build/reports/coverage/test/debug', `${className}.html`);
 
-            async function getCoverageDetails(filePath) {
-              console.log(`Checking file: ${filePath}`);
-              if (fs.existsSync(filePath)) {
-                const report = fs.readFileSync(filePath, 'utf8');
-                console.log(`File read successfully: ${filePath}`);
-                const lineRegex = /<td class="ctr2">(\d+)%<\/td>/g;
-                const methodRegex = /<td class="ctr2">(\d+)%<\/td>/g;
+              if (fs.existsSync(coverageFilePath)) {
+                const report = fs.readFileSync(coverageFilePath, 'utf8');
+                const lineCoverage = report.match(/<td class="ctr2">(\d+)%<\/td>/)[1];
+                const methodCoverage = report.match(/<td class="ctr2">(\d+)%<\/td>/)[1];
 
-                const lineMatches = [...report.matchAll(lineRegex)];
-                const methodMatches = [...report.matchAll(methodRegex)];
-
-                console.log(`Line matches: ${lineMatches.length}, Method matches: ${methodMatches.length}`);
-
-                if (lineMatches.length > 0 && methodMatches.length > 0) {
-                  const lineCoverage = parseInt(lineMatches[0][1]);
-                  const methodCoverage = parseInt(methodMatches[0][1]);
-
-                  console.log(`Line coverage: ${lineCoverage}%, Method coverage: ${methodCoverage}%`);
-
-                  return {
-                    lineCoverage: lineCoverage.toFixed(2),
-                    methodCoverage: methodCoverage.toFixed(2)
-                  };
-                } else {
-                  console.log(`No valid matches found in file: ${filePath}`);
-                }
+                coverageDetails += `| ${className} | ${lineCoverage}% | ${methodCoverage}% |\n`;
               } else {
-                console.log(`File does not exist: ${filePath}`);
+                missingTests += `\n${className}`;
               }
-              return null;
             }
 
-            (async () => {
-              let coverageDetails = '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
-              let missingTests = '';
+            if (coverageDetails.trim() !== '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: coverageDetails
+              });
+            }
 
-              for (const file of testFiles) {
-                const className = file.split('/').pop().replace('Test.kt', '').replace('Tests.kt', '').replace('.kt', '');
-                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
-
-                console.log(`Processing class: ${className}`);
-
-                const coverage = await getCoverageDetails(coverageFilePath);
-
-                if (coverage) {
-                  coverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% |\n`;
-                } else {
-                  missingTests += `\n${className}`;
-                }
-              }
-
-              console.log(`Coverage details: ${coverageDetails}`);
-              console.log(`Missing tests: ${missingTests}`);
-
-              if (coverageDetails.trim() !== '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  body: coverageDetails
-                });
-              }
-
-              if (missingTests.trim()) {
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: context.payload.pull_request.number,
-                  body: `**Error:** Missing test coverage for the following classes:${missingTests}`
-                });
-              }
-            })();
+            if (missingTests.trim()) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: `**Error:** Missing test coverage for the following classes:${missingTests}`
+              });
+            }
