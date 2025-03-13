@@ -190,7 +190,7 @@ jobs:
             async function getCoverageDetails(filePath) {
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /Total\s+(\d+)\s+of\s+(\d+)\s+(\d+)%\s+(\d+)\s+of\s+(\d+)\s+(\d+)%/;
+                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td>/;
                 const matches = report.match(totalRegex);
 
                 if (matches) {
