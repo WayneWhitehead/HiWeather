@@ -193,18 +193,23 @@ jobs:
               console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td>/;
+                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
                 const matches = report.match(totalRegex);
-
+            
                 if (matches) {
                   const instructionsCoverage = parseInt(matches[3]);
                   const branchesCoverage = parseInt(matches[6]);
+                  const complexity = parseInt(matches[7]);
+                  const lines = parseInt(matches[9]);
+                  const methods = parseInt(matches[11]);
 
-                  console.log(`Instructions coverage: ${instructionsCoverage}%, Branches coverage: ${branchesCoverage}%`);
-
+                  console.log(`Instructions coverage: ${instructionsCoverage}%, Branches coverage: ${branchesCoverage}%, Complexity: ${complexity}, Lines: ${lines}, Methods: ${methods}`);
                   return {
                     instructionsCoverage: instructionsCoverage.toFixed(2),
-                    branchesCoverage: branchesCoverage.toFixed(2)
+                    branchesCoverage: branchesCoverage.toFixed(2),
+                    complexity: complexity,
+                    lines: lines,
+                    methods: methods
                   };
                 } else {
                   console.log(`No valid matches found in file: ${filePath}`);
@@ -221,7 +226,7 @@ jobs:
                 console.log(`Processing ViewModel coverage for class: ${className}`);
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  viewModelCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | N/A | N/A | N/A |\n`;
+                  viewModelCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | ${coverage.complexity} | ${coverage.lines} | ${coverage.methods} |\n`;
                   if (parseFloat(coverage.instructionsCoverage) < 90) {
                     lowCoverageViewModels += `\n${className}`;
                   }
@@ -233,7 +238,7 @@ jobs:
                 console.log(`Processing other coverage for class: ${className}`);
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | N/A | N/A | N/A |\n`;
+                  otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | ${coverage.complexity} | ${coverage.lines} | ${coverage.methods} |\n`;
                 }
               }
 
