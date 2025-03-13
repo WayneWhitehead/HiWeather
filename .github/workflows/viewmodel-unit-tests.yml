@@ -201,8 +201,8 @@ jobs:
                 const instructionsRegex = /<tfoot>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)%<\/td>/;
                 const branchesRegex = /<tfoot>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+|N\/A)%<\/td>[\s\S]*?<td class="bar">(\d+) of (\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+|N\/A)%<\/td>/;
                 const complexityRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
-                const linesRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
-                const methodsRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
+                const linesRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
+                const methodsRegex = /<tfoot>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>[\s\S]*?<td class="ctr1">(\d+)<\/td>[\s\S]*?<td class="ctr2">(\d+)<\/td>/;
             
                 const instructionsMatch = report.match(instructionsRegex);
                 const branchesMatch = report.match(branchesRegex);
