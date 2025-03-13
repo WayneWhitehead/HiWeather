@@ -197,7 +197,7 @@ jobs:
               console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td>(?:<td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(n\/a|\d+)%<\/td>)?<td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
+                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(n\/a|\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(n\/a|\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
                 const matches = report.match(totalRegex);
             
                 if (matches) {
