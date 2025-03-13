@@ -185,6 +185,7 @@ jobs:
 
             let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n';
             let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n';
+            let lowCoverageViewModels = '';
 
             async function getCoverageDetails(filePath) {
               if (fs.existsSync(filePath)) {
@@ -222,6 +223,9 @@ jobs:
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
                   viewModelCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% | ${coverage.branchCoverage}% | ${coverage.complexity} |\n`;
+                  if (parseFloat(coverage.lineCoverage) < 90) {
+                    lowCoverageViewModels += `\n${className}`;
+                  }
                 }
               }
 
@@ -235,6 +239,7 @@ jobs:
 
               core.exportVariable('VIEWMODEL_COVERAGE_DETAILS', viewModelCoverageDetails);
               core.exportVariable('OTHER_COVERAGE_DETAILS', otherCoverageDetails);
+              core.exportVariable('LOW_COVERAGE_VIEW_MODELS', lowCoverageViewModels);
             })();
 
       - name: Post Coverage Report Comment
@@ -244,6 +249,7 @@ jobs:
           script: |
             const viewModelCoverageDetails = process.env.VIEWMODEL_COVERAGE_DETAILS;
             const otherCoverageDetails = process.env.OTHER_COVERAGE_DETAILS;
+            const lowCoverageViewModels = process.env.LOW_COVERAGE_VIEW_MODELS;
 
             let commentBody = '';
 
@@ -253,6 +259,10 @@ jobs:
 
             if (otherCoverageDetails.trim() !== '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n') {
               commentBody += otherCoverageDetails;
+            }
+
+            if (lowCoverageViewModels.trim()) {
+              commentBody += `**Error:** The following ViewModel classes have less than 90% test coverage:${lowCoverageViewModels}`;
             }
 
             if (commentBody) {
