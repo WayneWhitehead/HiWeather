@@ -14,26 +14,21 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Fetch modified ViewModel files
-        id: fetch-modified-viewmodel-files
-        run: |
-          MODIFIED_FILES=$(git diff --name-only HEAD^ HEAD | grep 'ViewModel\.kt$')
-          echo "Modified ViewModel files found:"
-          for file in $MODIFIED_FILES; do
-            echo $file
-          done
-          echo "MODIFIED_FILES=$MODIFIED_FILES" >> $GITHUB_ENV
-
-      - name: Check for Corresponding Test Files
-        id: check-test-files
+      - name: Check for View Model test files
+        id: fetch-and-check-viewmodel-files
         uses: actions/github-script@v5
         with:
           script: |
-            const modifiedFiles = process.env.MODIFIED_FILES.split('\n').filter(Boolean);
+            const execSync = require('child_process').execSync;
+            const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD | grep "ViewModel\\.kt$"').toString().trim().split('\n').filter(Boolean);
+
+            console.log("Modified ViewModel files found:");
+            modifiedFiles.forEach(file => console.log(file));
+
             let missingTestFiles = '';
             let testFiles = '';
 
-            async function searchForTestFiles(directory, fileNamePattern1, fileNamePattern2) {
+            async function searchForTestFiles(directory, fileNamePattern) {
               try {
                 const response = await github.rest.repos.getContent({
                   owner: context.repo.owner,
@@ -44,19 +39,13 @@ jobs:
                 if (Array.isArray(response.data)) {
                   for (const item of response.data) {
                     if (item.type === 'dir') {
-                      const foundFile = await searchForTestFiles(item.path, fileNamePattern1, fileNamePattern2);
+                      const foundFile = await searchForTestFiles(item.path, fileNamePattern);
                       if (foundFile) {
                         return foundFile;
                       }
-                    } else if (item.type === 'file') {
-                      if (fileNamePattern1.test(item.path)) {
-                        console.log(`Found test file: ${item.path}`);
-                        return item.path;
-                      }
-                      if (fileNamePattern2.test(item.path)) {
-                        console.log(`Found test file: ${item.path}`);
-                        return item.path;
-                      }
+                    } else if (item.type === 'file' && fileNamePattern.test(item.path)) {
+                      console.log(`Found test file: ${item.path}`);
+                      return item.path;
                     }
                   }
                 } else {
@@ -71,16 +60,15 @@ jobs:
 
             (async () => {
               for (const file of modifiedFiles) {
-                const fileNamePattern1 = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTest.kt') + '$');
-                const fileNamePattern2 = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTests.kt') + '$');
+                const fileNamePattern = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTest.kt') + '$');
 
-                console.log(`Searching for test files: ${fileNamePattern1} or ${fileNamePattern2}`);
+                console.log(`Searching for test files: ${fileNamePattern}`);
 
-                const testFile = await searchForTestFiles('app/src/test/java', fileNamePattern1, fileNamePattern2);
+                const testFile = await searchForTestFiles('app/src/test/java', fileNamePattern);
 
                 if (!testFile) {
-                  missingTestFiles += `\n${file.replace('ViewModel.kt', 'ViewModelTest.kt')}\n${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`;
-                  console.log(`Missing test files: ${file.replace('ViewModel.kt', 'ViewModelTest.kt')} or ${file.replace('ViewModel.kt', 'ViewModelTests.kt')}`);
+                  missingTestFiles += `\n${file.replace('ViewModel.kt', 'ViewModelTest.kt')}`;
+                  console.log(`Missing test file: ${file.replace('ViewModel.kt', 'ViewModelTest.kt')}`);
                 } else {
                   testFiles += ` ${testFile}`;
                 }
