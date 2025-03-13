@@ -183,8 +183,8 @@ jobs:
             const viewModelCoverageFiles = process.env.VIEWMODEL_COVERAGE_FILES.split(' ').filter(Boolean);
             const otherCoverageFiles = process.env.OTHER_COVERAGE_FILES.split(' ').filter(Boolean);
 
-            let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n';
-            let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n';
+            let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
+            let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
             let lowCoverageViewModels = '';
 
             async function getCoverageDetails(filePath) {
@@ -194,14 +194,14 @@ jobs:
                 const matches = report.match(totalRegex);
 
                 if (matches) {
-                  const lineCoverage = parseInt(matches[3]);
-                  const branchCoverage = parseInt(matches[6]);
+                  const instructionsCoverage = parseInt(matches[3]);
+                  const branchesCoverage = parseInt(matches[6]);
 
                   return {
-                    lineCoverage: lineCoverage.toFixed(2),
-                    branchCoverage: branchCoverage.toFixed(2)
+                    instructionsCoverage: instructionsCoverage.toFixed(2),
+                    branchesCoverage: branchesCoverage.toFixed(2)
                   };
-                } 
+                }
               }
               return null;
             }
@@ -211,8 +211,8 @@ jobs:
                 const className = filePath.split('/').pop().replace('.html', '');
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  viewModelCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | N/A | ${coverage.branchCoverage}% | N/A |\n`;
-                  if (parseFloat(coverage.lineCoverage) < 90) {
+                  viewModelCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | N/A | N/A | N/A |\n`;
+                  if (parseFloat(coverage.instructionsCoverage) < 90) {
                     lowCoverageViewModels += `\n${className}`;
                   }
                 }
@@ -222,7 +222,7 @@ jobs:
                 const className = filePath.split('/').pop().replace('.html', '');
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  otherCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | N/A | ${coverage.branchCoverage}% | N/A |\n`;
+                  otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | N/A | N/A | N/A |\n`;
                 }
               }
 
@@ -230,7 +230,6 @@ jobs:
               core.exportVariable('OTHER_COVERAGE_DETAILS', otherCoverageDetails);
               core.exportVariable('LOW_COVERAGE_VIEW_MODELS', lowCoverageViewModels);
             })();
-
       - name: Post Coverage Report Comment
         if: env.VIEWMODEL_COVERAGE_DETAILS != '' || env.OTHER_COVERAGE_DETAILS != ''
         uses: actions/github-script@v5
