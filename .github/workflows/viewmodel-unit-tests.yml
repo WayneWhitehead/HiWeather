@@ -137,7 +137,6 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            const core = require('@actions/core');
             const execSync = require('child_process').execSync;
 
             const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD').toString().trim().split('\n').filter(Boolean);
