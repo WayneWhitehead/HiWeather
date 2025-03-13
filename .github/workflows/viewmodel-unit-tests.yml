@@ -22,9 +22,6 @@ jobs:
             const execSync = require('child_process').execSync;
             const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD | grep "ViewModel\\.kt$"').toString().trim().split('\n').filter(Boolean);
 
-            console.log("Modified ViewModel files found:");
-            modifiedFiles.forEach(file => console.log(file));
-
             let missingTestFiles = '';
             let testFiles = '';
 
@@ -44,12 +41,9 @@ jobs:
                         return foundFile;
                       }
                     } else if (item.type === 'file' && fileNamePattern.test(item.path)) {
-                      console.log(`Found test file: ${item.path}`);
                       return item.path;
                     }
                   }
-                } else {
-                  console.log(`No array returned for directory: ${directory}`);
                 }
                 return null;
               } catch (error) {
@@ -61,14 +55,10 @@ jobs:
             (async () => {
               for (const file of modifiedFiles) {
                 const fileNamePattern = new RegExp(file.split('/').pop().replace('ViewModel.kt', 'ViewModelTest.kt') + '$');
-
-                console.log(`Searching for test files: ${fileNamePattern}`);
-
                 const testFile = await searchForTestFiles('app/src/test/java', fileNamePattern);
 
                 if (!testFile) {
                   missingTestFiles += `\n${file.replace('ViewModel.kt', 'ViewModelTest.kt')}`;
-                  console.log(`Missing test file: ${file.replace('ViewModel.kt', 'ViewModelTest.kt')}`);
                 } else {
                   testFiles += ` ${testFile}`;
                 }
@@ -140,13 +130,10 @@ jobs:
             const execSync = require('child_process').execSync;
 
             const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD').toString().trim().split('\n')
-              .filter(file => file && !file.endsWith('.yml') && !file.endsWith('.xml') && !file.endsWith('Test.kt'));
+              .filter(file => file && !file.endsWith('.yml') && !file.endsWith('.xml') && !file.endsWith('Test.kt') && !file.endsWith('.toml') && !file.endsWith('.properties'));
 
             const viewModelFiles = modifiedFiles.filter(file => file.endsWith('ViewModel.kt'));
             const otherFiles = modifiedFiles.filter(file => !file.endsWith('ViewModel.kt'));
-
-            console.log("Modified ViewModel files:", viewModelFiles);
-            console.log("Other modified files:", otherFiles);
 
             let viewModelCoverageFiles = '';
             let otherCoverageFiles = '';
@@ -168,25 +155,17 @@ jobs:
             (async () => {
               for (const file of viewModelFiles) {
                 const className = file.split('/').pop().replace('.kt', '');
-                console.log(`Searching coverage for ViewModel class: ${className}`);
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
                   viewModelCoverageFiles += ` ${coverageFilePath}`;
-                  console.log(`Found coverage file for ViewModel: ${coverageFilePath}`);
-                } else {
-                  console.log(`No coverage file found for ViewModel: ${className}`);
                 }
               }
 
               for (const file of otherFiles) {
                 const className = file.split('/').pop().replace('.kt', '');
-                console.log(`Searching coverage for other class: ${className}`);
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
                   otherCoverageFiles += ` ${coverageFilePath}`;
-                  console.log(`Found coverage file for other class: ${coverageFilePath}`);
-                } else {
-                  console.log(`No coverage file found for other class: ${className}`);
                 }
               }
 
@@ -208,10 +187,8 @@ jobs:
             let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage | Branch Coverage | Complexity |\n|-------|---------------|-----------------|-----------------|------------|\n';
 
             async function getCoverageDetails(filePath) {
-              console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                console.log(`File read successfully: ${filePath}`);
                 const lineRegex = /<td class="ctr2">(\d+)%<\/td>/g;
                 const methodRegex = /<td class="ctr2">(\d+)%<\/td>/g;
                 const branchRegex = /<td class="ctr2">(\d+)%<\/td>/g;
@@ -222,15 +199,11 @@ jobs:
                 const branchMatches = [...report.matchAll(branchRegex)];
                 const complexityMatches = [...report.matchAll(complexityRegex)];
 
-                console.log(`Line matches: ${lineMatches.length}, Method matches: ${methodMatches.length}, Branch matches: ${branchMatches.length}, Complexity matches: ${complexityMatches.length}`);
-
                 if (lineMatches.length > 0 && methodMatches.length > 0 && branchMatches.length > 0 && complexityMatches.length > 0) {
                   const lineCoverage = parseInt(lineMatches[0][1]);
                   const methodCoverage = parseInt(methodMatches[0][1]);
                   const branchCoverage = parseInt(branchMatches[0][1]);
                   const complexity = parseInt(complexityMatches[0][1]);
-
-                  console.log(`Line coverage: ${lineCoverage}%, Method coverage: ${methodCoverage}%, Branch coverage: ${branchCoverage}%, Complexity: ${complexity}`);
 
                   return {
                     lineCoverage: lineCoverage.toFixed(2),
@@ -238,11 +211,7 @@ jobs:
                     branchCoverage: branchCoverage.toFixed(2),
                     complexity: complexity.toFixed(2)
                   };
-                } else {
-                  console.log(`No valid matches found in file: ${filePath}`);
-                }
-              } else {
-                console.log(`File does not exist: ${filePath}`);
+                } 
               }
               return null;
             }
