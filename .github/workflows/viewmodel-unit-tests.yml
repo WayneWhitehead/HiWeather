@@ -185,21 +185,21 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-
+      
             const viewModelCoverageFiles = process.env.VIEWMODEL_COVERAGE_FILES.split(' ').filter(Boolean);
             const otherCoverageFiles = process.env.OTHER_COVERAGE_FILES.split(' ').filter(Boolean);
-
+      
             let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
             let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
             let lowCoverageViewModels = '';
-
+      
             async function getCoverageDetails(filePath) {
               console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+|n\/a)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
+                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(n\/a|\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
                 const matches = report.match(totalRegex);
-            
+      
                 if (matches) {
                   const instructionsCoverage = parseInt(matches[3]);
                   const branchesCoverage = matches[6] === 'n/a' ? 'n/a' : parseInt(matches[6]);
@@ -209,13 +209,13 @@ jobs:
                   const totalLines = parseInt(matches[10]);
                   const missedMethods = parseInt(matches[11]);
                   const totalMethods = parseInt(matches[12]);
-                  
+      
                   const complexityCoverage = ((totalComplexity - missedComplexity) / totalComplexity * 100).toFixed(2);
                   const linesCoverage = ((totalLines - missedLines) / totalLines * 100).toFixed(2);
                   const methodsCoverage = ((totalMethods - missedMethods) / totalMethods * 100).toFixed(2);
-
+      
                   console.log(`Instructions coverage: ${instructionsCoverage}%, Branches coverage: ${branchesCoverage}%, Complexity coverage: ${complexityCoverage}%, Lines coverage: ${linesCoverage}%, Methods coverage: ${methodsCoverage}%`);
-
+      
                   return {
                     instructionsCoverage: instructionsCoverage.toFixed(2),
                     branchesCoverage: branchesCoverage === 'n/a' ? branchesCoverage : branchesCoverage.toFixed(2),
@@ -231,7 +231,7 @@ jobs:
               }
               return null;
             }
-
+      
             (async () => {
               for (const filePath of viewModelCoverageFiles) {
                 const className = filePath.split('/').pop().replace('.html', '');
@@ -244,7 +244,7 @@ jobs:
                   }
                 }
               }
-
+      
               for (const filePath of otherCoverageFiles) {
                 const className = filePath.split('/').pop().replace('.html', '');
                 console.log(`Processing other coverage for class: ${className}`);
@@ -253,7 +253,7 @@ jobs:
                   otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | ${coverage.complexityCoverage}% | ${coverage.linesCoverage}% | ${coverage.methodsCoverage}% |\n`;
                 }
               }
-
+      
               core.exportVariable('VIEWMODEL_COVERAGE_DETAILS', viewModelCoverageDetails);
               core.exportVariable('OTHER_COVERAGE_DETAILS', otherCoverageDetails);
               core.exportVariable('LOW_COVERAGE_VIEW_MODELS', lowCoverageViewModels);
