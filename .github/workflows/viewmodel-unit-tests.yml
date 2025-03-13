@@ -139,7 +139,9 @@ jobs:
             const path = require('path');
             const execSync = require('child_process').execSync;
 
-            const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD').toString().trim().split('\n').filter(Boolean);
+            const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD').toString().trim().split('\n')
+              .filter(file => file && !file.endsWith('.yml') && !file.endsWith('.xml') && !file.endsWith('Test.kt'));
+
             const viewModelFiles = modifiedFiles.filter(file => file.endsWith('ViewModel.kt'));
             const otherFiles = modifiedFiles.filter(file => !file.endsWith('ViewModel.kt'));
 
@@ -191,6 +193,7 @@ jobs:
               core.exportVariable('VIEWMODEL_COVERAGE_FILES', viewModelCoverageFiles);
               core.exportVariable('OTHER_COVERAGE_FILES', otherCoverageFiles);
             })();
+
       - name: Read and Format Coverage Reports
         id: read-format-coverage-reports
         uses: actions/github-script@v5
