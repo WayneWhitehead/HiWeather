@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Check for View Model test files
+      - name: Check for ViewModel Test Files
         id: fetch-and-check-viewmodel-files
         uses: actions/github-script@v5
         with:
@@ -137,8 +137,15 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            const testFiles = process.env.TEST_FILES.split(' ').filter(Boolean);
-            let coverageFiles = '';
+            const core = require('@actions/core');
+            const execSync = require('child_process').execSync;
+
+            const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD').toString().trim().split('\n').filter(Boolean);
+            const viewModelFiles = modifiedFiles.filter(file => file.endsWith('ViewModel.kt'));
+            const otherFiles = modifiedFiles.filter(file => !file.endsWith('ViewModel.kt'));
+
+            let viewModelCoverageFiles = '';
+            let otherCoverageFiles = '';
 
             async function findCoverageFile(baseDir, className) {
               const files = fs.readdirSync(baseDir, { withFileTypes: true });
@@ -155,14 +162,24 @@ jobs:
             }
 
             (async () => {
-              for (const file of testFiles) {
-                const className = file.split('/').pop().replace('Test.kt', '').replace('Tests.kt', '').replace('.kt', '');
+              for (const file of viewModelFiles) {
+                const className = file.split('/').pop().replace('ViewModel.kt', '');
                 const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
                 if (coverageFilePath) {
-                  coverageFiles += ` ${coverageFilePath}`;
+                  viewModelCoverageFiles += ` ${coverageFilePath}`;
                 }
               }
-              core.exportVariable('COVERAGE_FILES', coverageFiles);
+
+              for (const file of otherFiles) {
+                const className = file.split('/').pop().replace('.kt', '');
+                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
+                if (coverageFilePath) {
+                  otherCoverageFiles += ` ${coverageFilePath}`;
+                }
+              }
+
+              core.exportVariable('VIEWMODEL_COVERAGE_FILES', viewModelCoverageFiles);
+              core.exportVariable('OTHER_COVERAGE_FILES', otherCoverageFiles);
             })();
 
       - name: Read and Format Coverage Reports
@@ -171,9 +188,13 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const coverageFiles = process.env.COVERAGE_FILES.split(' ').filter(Boolean);
-            let coverageDetails = '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
-            let missingTests = '';
+            const core = require('@actions/core');
+
+            const viewModelCoverageFiles = process.env.VIEWMODEL_COVERAGE_FILES.split(' ').filter(Boolean);
+            const otherCoverageFiles = process.env.OTHER_COVERAGE_FILES.split(' ').filter(Boolean);
+
+            let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
+            let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n';
 
             async function getCoverageDetails(filePath) {
               console.log(`Checking file: ${filePath}`);
@@ -208,41 +229,48 @@ jobs:
             }
 
             (async () => {
-              for (const filePath of coverageFiles) {
+              for (const filePath of viewModelCoverageFiles) {
                 const className = filePath.split('/').pop().replace('.html', '');
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  coverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% |\n`;
-                } else {
-                  missingTests += `\n${className}`;
+                  viewModelCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% |\n`;
                 }
               }
-              core.exportVariable('COVERAGE_DETAILS', coverageDetails);
-              core.exportVariable('MISSING_TESTS', missingTests);
+
+              for (const filePath of otherCoverageFiles) {
+                const className = filePath.split('/').pop().replace('.html', '');
+                const coverage = await getCoverageDetails(filePath);
+                if (coverage) {
+                  otherCoverageDetails += `| ${className} | ${coverage.lineCoverage}% | ${coverage.methodCoverage}% |\n`;
+                }
+              }
+
+              core.exportVariable('VIEWMODEL_COVERAGE_DETAILS', viewModelCoverageDetails);
+              core.exportVariable('OTHER_COVERAGE_DETAILS', otherCoverageDetails);
             })();
 
       - name: Post Coverage Report Comment
-        if: env.COVERAGE_DETAILS != ''
+        if: env.VIEWMODEL_COVERAGE_DETAILS != '' || env.OTHER_COVERAGE_DETAILS != ''
         uses: actions/github-script@v5
         with:
           script: |
-            const coverageDetails = process.env.COVERAGE_DETAILS;
-            const missingTests = process.env.MISSING_TESTS;
+            const viewModelCoverageDetails = process.env.VIEWMODEL_COVERAGE_DETAILS;
+            const otherCoverageDetails = process.env.OTHER_COVERAGE_DETAILS;
 
-            if (coverageDetails.trim() !== '### Total Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
+            if (viewModelCoverageDetails.trim() !== '### ViewModel Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: coverageDetails
+                body: viewModelCoverageDetails
               });
             }
 
-            if (missingTests.trim()) {
+            if (otherCoverageDetails.trim() !== '### Other Test Coverage:\n\n| Class | Line Coverage | Method Coverage |\n|-------|---------------|-----------------|\n') {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.payload.pull_request.number,
-                body: `**Error:** Missing test coverage for the following classes:${missingTests}`
+                body: otherCoverageDetails
               });
             }
