@@ -192,31 +192,30 @@ jobs:
             let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
             let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
             let lowCoverageViewModels = '';
-      
+            
             async function getCoverageDetails(filePath) {
               console.log(`Checking file: ${filePath}`);
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(n\/a|\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
+                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">([^<]+)<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">([^<]+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
                 const matches = report.match(totalRegex);
-                console.log(matches);
-            
+  
                 if (matches) {
                   const instructionsCoverage = matches[3];
                   const branchesCoverage = matches[6];
                   const complexityCoverage = ((matches[8] - matches[7]) / matches[8] * 100).toFixed(2);
                   const linesCoverage = ((matches[10] - matches[9]) / matches[10] * 100).toFixed(2);
                   const methodsCoverage = ((matches[12] - matches[11]) / matches[12] * 100).toFixed(2);
-                
+  
                   const result = {
                     class: filePath.split('/').pop().replace('.html', ''),
-                    instructions: `${instructionsCoverage}%`,
+                    instructions: instructionsCoverage,
                     branches: branchesCoverage,
                     complexity: `${complexityCoverage}%`,
                     lines: `${linesCoverage}%`,
                     methods: `${methodsCoverage}%`
                   };
-                
+                  
                   console.log(result);
                   return result;
                 } else {
