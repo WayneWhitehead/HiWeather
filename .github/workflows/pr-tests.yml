@@ -5,14 +5,12 @@ on:
     types: [synchronize, opened, reopened]
 
 jobs:
-  viewmodel-tests:
+  coverage-reports:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
       - name: Check for ViewModel Test Files
         id: fetch-and-check-viewmodel-files
@@ -202,9 +200,9 @@ jobs:
                 if (matches) {
                   const instructionsCoverage = matches[3];
                   const branchesCoverage = matches[6];
-                  const complexityCoverage = ((matches[8] - matches[7]) / matches[8] * 100).toFixed(2);
-                  const linesCoverage = ((matches[10] - matches[9]) / matches[10] * 100).toFixed(2);
-                  const methodsCoverage = ((matches[12] - matches[11]) / matches[12] * 100).toFixed(2);
+                  const complexityCoverage = ((matches[8] - matches[7]) / matches[8] * 100).toFixed(0);
+                  const linesCoverage = ((matches[10] - matches[9]) / matches[10] * 100).toFixed(0);
+                  const methodsCoverage = ((matches[12] - matches[11]) / matches[12] * 100).toFixed(0);
 
                   return {
                     instructionsCoverage: instructionsCoverage,
