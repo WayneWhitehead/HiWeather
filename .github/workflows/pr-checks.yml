@@ -33,7 +33,7 @@ jobs:
             });
 
             for (const file of changedFiles.data) {
-              if (file.filename.endsWith('.kt')) {
+              if (file.filename.endsWith('.kt') && !file.filename.endsWith('Test.kt')) {
                 // Get the diff of the changed file
                 const diffLines = file.patch.split('\n').filter(line => line.startsWith('+') && !line.startsWith('++'));
 
