@@ -97,28 +97,36 @@ jobs:
             const branchName = context.payload.pull_request.head.ref;
             const baseBranchName = context.payload.pull_request.base.ref;
             const prNumber = context.payload.pull_request.number;
-            const prTitle = context.payload.pull_request.title;
-
+            let prTitle = context.payload.pull_request.title;
+  
             let newTitle = prTitle;
             let label = '';
-
+  
             if (branchName.startsWith('feature/')) {
-              newTitle = `✨ ${prTitle}`;
+              if (!prTitle.startsWith('✨')) {
+                newTitle = `✨ ${prTitle}`;
+              }
               label = 'Feature';
             } else if (branchName.startsWith('fixes/')) {
-              newTitle = `🐞 ${prTitle}`;
+              if (!prTitle.startsWith('🐞')) {
+                newTitle = `🐞 ${prTitle}`;
+              }
               label = 'Bugfix';
             } else if (branchName.startsWith('hotfix/')) {
-              newTitle = `🚑 ${prTitle}`;
+              if (!prTitle.startsWith('🚑')) {
+                newTitle = `🚑 ${prTitle}`;
+              }
               label = 'Hotfix';
             } else if (branchName.startsWith('refactor/')) {
-              newTitle = `🔧 ${prTitle}`;
+              if (!prTitle.startsWith('🔧')) {
+                newTitle = `🔧 ${prTitle}`;
+              }
               label = 'Refactor';
             } else if (branchName.startsWith('release/')) {
               newTitle = `${branchName} ➡️ ${baseBranchName}`;
               label = 'Release';
             }
-
+  
             if (newTitle !== prTitle) {
               await github.rest.pulls.update({
                 owner: context.repo.owner,
@@ -127,7 +135,7 @@ jobs:
                 title: newTitle
               });
             }
-
+  
             if (label) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
@@ -142,9 +150,9 @@ jobs:
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
-               await github.rest.pulls.requestReviewers({
-                 owner: context.repo.owner,
-                 repo: context.repo.repo,
-                 pull_number: prNumber,
-                 reviewers: ['copilot']
-               });
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              reviewers: ['Copilot']
+            });
