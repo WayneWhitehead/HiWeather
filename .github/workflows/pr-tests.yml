@@ -185,41 +185,33 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-      
+
             const viewModelCoverageFiles = process.env.VIEWMODEL_COVERAGE_FILES.split(' ').filter(Boolean);
             const otherCoverageFiles = process.env.OTHER_COVERAGE_FILES.split(' ').filter(Boolean);
-      
+
             let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
             let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
             let lowCoverageViewModels = '';
-      
+
             async function getCoverageDetails(filePath) {
               if (fs.existsSync(filePath)) {
                 const report = fs.readFileSync(filePath, 'utf8');
-                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(n\/a|\d+)%<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">(n\/a|\d+)%<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
+                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">([^<]+)<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">([^<]+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
                 const matches = report.match(totalRegex);
-                console.log(matches);
-            
+
                 if (matches) {
-                  const instructionsCoverage = parseInt(matches[3]);
-                  const branchesCoverage = matches[6] === 'n/a' ? 'n/a' : parseInt(matches[6]);
-                  const missedComplexity = parseInt(matches[7]);
-                  const totalComplexity = parseInt(matches[8]);
-                  const missedLines = parseInt(matches[9]);
-                  const totalLines = parseInt(matches[10]);
-                  const missedMethods = parseInt(matches[11]);
-                  const totalMethods = parseInt(matches[12]);
-      
-                  const complexityCoverage = ((totalComplexity - missedComplexity) / totalComplexity * 100).toFixed(0)%;
-                  const linesCoverage = ((totalLines - missedLines) / totalLines * 100).toFixed(0)%;
-                  const methodsCoverage = ((totalMethods - missedMethods) / totalMethods * 100).toFixed(0)%;
-      
+                  const instructionsCoverage = matches[3];
+                  const branchesCoverage = matches[6];
+                  const complexityCoverage = ((matches[8] - matches[7]) / matches[8] * 100).toFixed(2);
+                  const linesCoverage = ((matches[10] - matches[9]) / matches[10] * 100).toFixed(2);
+                  const methodsCoverage = ((matches[12] - matches[11]) / matches[12] * 100).toFixed(2);
+
                   return {
-                    instructionsCoverage: instructionsCoverage.toFixed(0),
-                    branchesCoverage: branchesCoverage === 'n/a' ? branchesCoverage : branchesCoverage.toFixed(0),
-                    complexityCoverage: complexityCoverage,
-                    linesCoverage: linesCoverage,
-                    methodsCoverage: methodsCoverage
+                    instructionsCoverage: instructionsCoverage,
+                    branchesCoverage: branchesCoverage,
+                    complexityCoverage: `${complexityCoverage}%`,
+                    linesCoverage: `${linesCoverage}%`,
+                    methodsCoverage: `${methodsCoverage}%`
                   };
                 } else {
                   console.log(`No valid matches found in file: ${filePath}`);
@@ -227,7 +219,7 @@ jobs:
               }
               return null;
             }
-      
+
             (async () => {
               for (const filePath of viewModelCoverageFiles) {
                 const className = filePath.split('/').pop().replace('.html', '');
@@ -240,7 +232,7 @@ jobs:
                   }
                 }
               }
-      
+
               for (const filePath of otherCoverageFiles) {
                 const className = filePath.split('/').pop().replace('.html', '');
                 console.log(`Processing other coverage for class: ${className}`);
@@ -249,7 +241,7 @@ jobs:
                   otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage} | ${coverage.branchesCoverage} | ${coverage.complexityCoverage} | ${coverage.linesCoverage} | ${coverage.methodsCoverage} |\n`;
                 }
               }
-      
+
               core.exportVariable('VIEWMODEL_COVERAGE_DETAILS', viewModelCoverageDetails);
               core.exportVariable('OTHER_COVERAGE_DETAILS', otherCoverageDetails);
               core.exportVariable('LOW_COVERAGE_VIEW_MODELS', lowCoverageViewModels);
