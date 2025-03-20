@@ -170,8 +170,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: prNumber,
-                reviewers: [],
-                team_reviewers: ['copilot-pull-request-reviewer']
+                reviewers: ['github-copilot']
               });
             } else if (copilotReview && copilotReview.state !== 'APPROVED') {
               await github.rest.pulls.createReview({
