@@ -150,9 +150,34 @@ jobs:
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
-            await github.rest.pulls.requestReviewers({
+            const reviewers = await github.rest.pulls.listRequestedReviewers({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: prNumber,
-              reviewers: ['copilot-pull-request-reviewer']
+              pull_number: prNumber
             });
+
+            const reviews = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            const copilotReviewer = reviewers.data.users.find(user => user.login === 'copilot-pull-request-reviewer');
+            const copilotReview = reviews.data.find(review => review.user.login === 'copilot-pull-request-reviewer');
+
+            if (!copilotReviewer) {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                reviewers: [],
+                team_reviewers: ['copilot-pull-request-reviewer']
+              });
+            } else if (copilotReview && copilotReview.state !== 'APPROVED') {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                event: 'REQUEST_CHANGES'
+              });
+            }
