@@ -136,3 +136,15 @@ jobs:
                 labels: [label]
               });
             }
+
+      - name: Request Review from Copilot
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+               await github.rest.pulls.requestReviewers({
+                 owner: context.repo.owner,
+                 repo: context.repo.repo,
+                 pull_number: prNumber,
+                 reviewers: ['copilot']
+               });
