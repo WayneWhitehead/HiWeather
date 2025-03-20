@@ -18,7 +18,6 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-
             // Get the list of changed files
             const changedFiles = await github.rest.pulls.listFiles({
               owner: context.repo.owner,
@@ -49,15 +48,15 @@ jobs:
                   } else if (line.startsWith('+')) {
                     lineNumber++;
                     if (line.match(/"[^"]*"|[0-9]+\.dp/) && !line.includes('const val') && !line.includes('@SerializedName')) {
-                      const message = `Hardcoded value found: ${line.trim()}`;
+                      const message = `Hardcoded string found on line ${lineNumber}`;
 
                       console.log(`File: ${file.filename}`);
                       console.log(`Line Number: ${lineNumber}`);
                       console.log(`Message: ${message}`);
 
-                      // Check if there's already a comment from github-actions[bot] on this line
-                      const existingComment = existingComments.data.find(comment => 
-                        comment.path === file.filename && comment.line === lineNumber && comment.user.login === 'github-actions[bot]'
+                      // Check if there's already an unresolved comment from github-actions[bot] on this line
+                      const existingComment = existingComments.data.find(comment =>
+                        comment.path === file.filename && comment.line === lineNumber && comment.user.login === 'github-actions[bot]' && comment.position !== null
                       );
 
                       if (!existingComment) {
@@ -73,7 +72,7 @@ jobs:
                           side: 'RIGHT'
                         });
                       } else {
-                        console.log(`Comment already exists from github-actions[bot] on ${file.filename} at line ${lineNumber}`);
+                        console.log(`Unresolved comment already exists from github-actions[bot] on ${file.filename} at line ${lineNumber}`);
                       }
                     }
                   } else if (!line.startsWith('-')) {
@@ -82,8 +81,6 @@ jobs:
                 }
               }
             }
-            
-  
 
   update-pr-details:
     runs-on: ubuntu-latest
@@ -109,7 +106,6 @@ jobs:
               newTitle = `✨ ${prTitle}`;
               label = 'Feature';
             } else if (branchName.startsWith('fixes/')) {
-#             TODO update branch
               newTitle = `🐞 ${prTitle}`;
               label = 'Bugfix';
             } else if (branchName.startsWith('hotfix/')) {
