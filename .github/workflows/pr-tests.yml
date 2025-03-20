@@ -1,4 +1,4 @@
-name: ViewModel Unit Tests
+name: PR Tests
 
 on:
   pull_request:
@@ -210,13 +210,13 @@ jobs:
                   const missedMethods = parseInt(matches[11]);
                   const totalMethods = parseInt(matches[12]);
       
-                  const complexityCoverage = ((totalComplexity - missedComplexity) / totalComplexity * 100).toFixed(2);
-                  const linesCoverage = ((totalLines - missedLines) / totalLines * 100).toFixed(2);
-                  const methodsCoverage = ((totalMethods - missedMethods) / totalMethods * 100).toFixed(2);
+                  const complexityCoverage = ((totalComplexity - missedComplexity) / totalComplexity * 100).toFixed(0)%;
+                  const linesCoverage = ((totalLines - missedLines) / totalLines * 100).toFixed(0)%;
+                  const methodsCoverage = ((totalMethods - missedMethods) / totalMethods * 100).toFixed(0)%;
       
                   return {
-                    instructionsCoverage: instructionsCoverage.toFixed(2),
-                    branchesCoverage: branchesCoverage === 'n/a' ? branchesCoverage : branchesCoverage.toFixed(2),
+                    instructionsCoverage: instructionsCoverage.toFixed(0),
+                    branchesCoverage: branchesCoverage === 'n/a' ? branchesCoverage : branchesCoverage.toFixed(0),
                     complexityCoverage: complexityCoverage,
                     linesCoverage: linesCoverage,
                     methodsCoverage: methodsCoverage
@@ -234,7 +234,7 @@ jobs:
                 console.log(`Processing ViewModel coverage for class: ${className}`);
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  viewModelCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | ${coverage.complexityCoverage}% | ${coverage.linesCoverage}% | ${coverage.methodsCoverage}% |\n`;
+                  viewModelCoverageDetails += `| ${className} | ${coverage.instructionsCoverage} | ${coverage.branchesCoverage} | ${coverage.complexityCoverage} | ${coverage.linesCoverage} | ${coverage.methodsCoverage} |\n`;
                   if (parseFloat(coverage.instructionsCoverage) < 90) {
                     lowCoverageViewModels += `\n${className}`;
                   }
@@ -246,7 +246,7 @@ jobs:
                 console.log(`Processing other coverage for class: ${className}`);
                 const coverage = await getCoverageDetails(filePath);
                 if (coverage) {
-                  otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage}% | ${coverage.branchesCoverage}% | ${coverage.complexityCoverage}% | ${coverage.linesCoverage}% | ${coverage.methodsCoverage}% |\n`;
+                  otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage} | ${coverage.branchesCoverage} | ${coverage.complexityCoverage} | ${coverage.linesCoverage} | ${coverage.methodsCoverage} |\n`;
                 }
               }
       
