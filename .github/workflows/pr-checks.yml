@@ -142,29 +142,3 @@ jobs:
                 }
               }
             }
-
-  generate-summary:
-    runs-on: ubuntu-latest
-    needs: check-hardcoded-values
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Generate Summary and Post Comment
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
-            const copilotSummary = await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'copilot-summary.yml',
-              ref: context.payload.pull_request.head.ref
-            });
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: copilotSummary.data
-            });
