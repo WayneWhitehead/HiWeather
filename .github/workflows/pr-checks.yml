@@ -154,5 +154,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber,
-              reviewers: ['Copilot']
+              reviewers: ['copilot-pull-request-reviewer']
             });
