@@ -108,7 +108,8 @@ jobs:
             if (branchName.startsWith('feature/')) {
               newTitle = `✨ ${prTitle}`;
               label = 'Feature';
-            } else if (branchName.startsWith('bugfix/')) {
+            } else if (branchName.startsWith('fixes/')) {
+#             TODO update branch
               newTitle = `🐞 ${prTitle}`;
               label = 'Bugfix';
             } else if (branchName.startsWith('hotfix/')) {
