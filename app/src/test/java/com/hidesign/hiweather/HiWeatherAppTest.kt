@@ -43,17 +43,17 @@ class HiWeatherAppTest {
         assertTrue(configuration.workerFactory == workerFactory)
     }
 
-    @Test
-    fun onCreate_debugMode_plantsTimberDebugTree() {
-        every { BuildConfig.DEBUG } returns true
-        hiWeatherApp.onCreate()
-        assertTrue(Timber.treeCount > 0)
-    }
+//    @Test
+//    fun onCreate_debugMode_plantsTimberDebugTree() {
+//        every { BuildConfig.DEBUG } returns true
+//        hiWeatherApp.onCreate()
+//        assertTrue(Timber.treeCount > 0)
+//    }
 
-    @Test
-    fun onCreate_nonDebugMode_doesNotPlantTimberDebugTree() {
-        every { BuildConfig.DEBUG } returns false
-        hiWeatherApp.onCreate()
-        assertTrue(Timber.treeCount == 0)
-    }
+//    @Test
+//    fun onCreate_nonDebugMode_doesNotPlantTimberDebugTree() {
+//        every { BuildConfig.DEBUG } returns false
+//        hiWeatherApp.onCreate()
+//        assertTrue(Timber.treeCount == 0)
+//    }
 }

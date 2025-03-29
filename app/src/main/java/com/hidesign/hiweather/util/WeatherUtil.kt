@@ -3,9 +3,9 @@ package com.hidesign.hiweather.util
 import android.content.Context
 import androidx.core.content.ContextCompat
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.data.model.FeelsLike
-import com.hidesign.hiweather.data.model.Temp
-import com.hidesign.hiweather.data.model.Components
+import com.hidesign.hiweather.data.model.OneCallResponse.FeelsLike
+import com.hidesign.hiweather.data.model.OneCallResponse.Temp
+import com.hidesign.hiweather.data.model.AirPollutionResponse.Components
 import kotlin.math.roundToInt
 
 object WeatherUtil {
@@ -32,7 +32,7 @@ object WeatherUtil {
             in 12..33 -> "NNE"
             in 34..55 -> "NE"
             in 56..77 -> "ENE"
-            in 78..101 -> "E"
+            in 78..100 -> "E"
             in 101..122 -> "ESE"
             in 123..144 -> "SE"
             in 145..166 -> "SSE"

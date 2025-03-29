@@ -27,7 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.data.model.Daily
+import com.hidesign.hiweather.data.model.OneCallResponse.Daily
 import com.hidesign.hiweather.presentation.MainActivity.Companion.CELESTIAL_SHEET
 import com.hidesign.hiweather.util.DateUtils
 import com.hidesign.hiweather.util.WeatherUtil.getMoonIcon

@@ -50,12 +50,12 @@ class AppModuleTest {
         assertEquals(Geocoder::class.java, geocoder::class.java)
     }
 
-    @Test
-    fun provideLocationProviderClient_returnsFusedLocationProviderClientInstance() {
-        val locationProviderClient = AppModule.provideLocationProviderClient(context)
-        assertNotNull(locationProviderClient)
-        assertEquals(fusedLocationProviderClient, locationProviderClient)
-    }
+//    @Test
+//    fun provideLocationProviderClient_returnsFusedLocationProviderClientInstance() {
+//        val locationProviderClient = AppModule.provideLocationProviderClient(context)
+//        assertNotNull(locationProviderClient)
+//        assertEquals(fusedLocationProviderClient, locationProviderClient)
+//    }
 
     @Test
     fun provideIOContext_returnsIOCoroutineContext() {

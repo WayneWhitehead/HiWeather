@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.hidesign.hiweather.data.model.Daily
+import com.hidesign.hiweather.data.model.OneCallResponse.Daily
 import com.hidesign.hiweather.presentation.AdViewComposable
 import com.hidesign.hiweather.presentation.components.LunarCard
 import com.hidesign.hiweather.presentation.components.SolarCard

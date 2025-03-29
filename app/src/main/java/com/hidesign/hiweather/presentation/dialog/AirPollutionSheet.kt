@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.data.model.Components
+import com.hidesign.hiweather.data.model.AirPollutionResponse.Components
 import com.hidesign.hiweather.databinding.AirPollutionDialogBinding
 import com.hidesign.hiweather.presentation.AdViewComposable
 import com.hidesign.hiweather.util.AdUtil

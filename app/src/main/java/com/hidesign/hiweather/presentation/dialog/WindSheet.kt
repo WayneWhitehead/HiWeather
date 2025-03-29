@@ -33,7 +33,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.hidesign.hiweather.data.model.Current
+import com.hidesign.hiweather.data.model.OneCallResponse.Current
 import com.hidesign.hiweather.presentation.CompassViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

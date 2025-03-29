@@ -1,0 +1,329 @@
+name: PR Tests
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened]
+
+jobs:
+  coverage-reports:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for ViewModel and UseCase Test Files
+        id: fetch-and-check-viewmodel-files
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const execSync = require('child_process').execSync;
+            const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD | grep -E "(ViewModel|UseCase)\\.kt$"').toString().trim().split('\n').filter(Boolean);
+
+            let missingTestFiles = '';
+            let testFiles = '';
+
+            // Function to search for test files in the specified directory
+            async function searchForTestFiles(directory, fileNamePattern) {
+              try {
+                const response = await github.rest.repos.getContent({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path: directory
+                });
+
+                if (Array.isArray(response.data)) {
+                  for (const item of response.data) {
+                    if (item.type === 'dir') {
+                      const foundFile = await searchForTestFiles(item.path, fileNamePattern);
+                      if (foundFile) {
+                        return foundFile;
+                      }
+                    } else if (item.type === 'file' && fileNamePattern.test(item.path)) {
+                      return item.path;
+                    }
+                  }
+                }
+                return null;
+              } catch (error) {
+                console.error(`Error searching directory ${directory}:`, error);
+                return null;
+              }
+            }
+
+            // Main function to check for missing test files
+            (async () => {
+              for (const file of modifiedFiles) {
+                const fileNamePattern = new RegExp(file.split('/').pop().replace(/(ViewModel|UseCase)\.kt$/, '$1Test.kt') + '$');
+                const testFile = await searchForTestFiles('app/src/test/java', fileNamePattern);
+
+                if (!testFile) {
+                  missingTestFiles += `\n${file.replace(/(ViewModel|UseCase)\.kt$/, '$1Test.kt')}`;
+                } else {
+                  testFiles += ` ${testFile}`;
+                }
+              }
+
+              core.exportVariable('TEST_FILES', testFiles);
+
+              if (missingTestFiles.trim()) {
+                core.exportVariable('MISSING_TEST_FILES', 'true');
+              } else {
+                core.exportVariable('MISSING_TEST_FILES', 'false');
+              }
+            })();
+
+      - name: Post Missing ViewModel and UseCase Tests
+        if: env.MISSING_TEST_FILES == 'true'
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const missingTestFiles = process.env.MISSING_TEST_FILES;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `Error: Missing test files for modified ViewModel or UseCase files:${missingTestFiles}`
+            });
+
+      - name: Cache Gradle build cache
+        if: env.TEST_FILES != ''
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/gradle/libs.versions.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Create local.properties
+        if: env.TEST_FILES != ''
+        run: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          echo "ADMOB_APP_KEY=${{ secrets.ADMOB_APP_KEY }}" >> local.properties
+          echo "PLACES_KEY=${{ secrets.PLACES_KEY }}" >> local.properties
+          echo "OPENWEATHER_KEY=${{ secrets.OPENWEATHER_KEY }}" >> local.properties
+
+      - name: Set up JDK 17
+        if: env.TEST_FILES != ''
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'jetbrains'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        if: env.TEST_FILES != ''
+        uses: android-actions/setup-android@v3
+
+      - name: Generate Coverage Report
+        if: env.TEST_FILES != ''
+        run: ./gradlew createDebugUnitTestCoverageReport
+        continue-on-error: true
+
+      - name: Search for Coverage Reports
+        if: env.TEST_FILES != ''
+        id: search-coverage-reports
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const execSync = require('child_process').execSync;
+
+            const modifiedFiles = execSync('git diff --name-only HEAD^ HEAD').toString().trim().split('\n')
+              .filter(file => file && !file.endsWith('.yml') && !file.endsWith('.xml') && !file.endsWith('Test.kt') && !file.endsWith('.toml') && !file.endsWith('.properties'));
+
+            const viewModelFiles = modifiedFiles.filter(file => file.endsWith('ViewModel.kt'));
+            const useCaseFiles = modifiedFiles.filter(file => file.endsWith('UseCase.kt'));
+            const otherFiles = modifiedFiles.filter(file => !file.endsWith('ViewModel.kt') && !file.endsWith('UseCase.kt'));
+
+            let viewModelCoverageFiles = '';
+            let useCaseCoverageFiles = '';
+            let otherCoverageFiles = '';
+
+            // Function to find coverage file for a given class
+            async function findCoverageFile(baseDir, className) {
+              const files = fs.readdirSync(baseDir, { withFileTypes: true });
+              for (const file of files) {
+                const filePath = path.join(baseDir, file.name);
+                if (file.isDirectory()) {
+                  const result = await findCoverageFile(filePath, className);
+                  if (result) return result;
+                } else if (file.isFile() && file.name === `${className}.html`) {
+                  return filePath;
+                }
+              }
+              return null;
+            }
+
+            // Main function to search for coverage files
+            (async () => {
+              for (const file of viewModelFiles) {
+                const className = file.split('/').pop().replace('.kt', '');
+                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
+                if (coverageFilePath) {
+                  console.log(`Found coverage file in path: ${coverageFilePath}`);
+                  viewModelCoverageFiles += ` ${coverageFilePath}`;
+                } else {
+                  console.log(`No coverage file found for class: ${className}`);
+                }
+              }
+
+              for (const file of useCaseFiles) {
+                const className = file.split('/').pop().replace('.kt', '');
+                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
+                if (coverageFilePath) {
+                  console.log(`Found coverage file in path: ${coverageFilePath}`);
+                  useCaseCoverageFiles += ` ${coverageFilePath}`;
+                } else {
+                  console.log(`No coverage file found for class: ${className}`);
+                }
+              }
+
+              for (const file of otherFiles) {
+                const className = file.split('/').pop().replace('.kt', '');
+                const coverageFilePath = await findCoverageFile('app/build/reports/coverage/test/debug', className);
+                if (coverageFilePath) {
+                  console.log(`Found coverage file in path: ${coverageFilePath}`);
+                  otherCoverageFiles += ` ${coverageFilePath}`;
+                } else {
+                  console.log(`No coverage file found for class: ${className}`);
+                }
+              }
+
+              core.exportVariable('VIEWMODEL_COVERAGE_FILES', viewModelCoverageFiles);
+              core.exportVariable('USECASE_COVERAGE_FILES', useCaseCoverageFiles);
+              core.exportVariable('OTHER_COVERAGE_FILES', otherCoverageFiles);
+            })();
+
+      - name: Read and Format Coverage Reports
+        id: read-format-coverage-reports
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const fs = require('fs');
+
+            const viewModelCoverageFiles = process.env.VIEWMODEL_COVERAGE_FILES.split(' ').filter(Boolean);
+            const useCaseCoverageFiles = process.env.USECASE_COVERAGE_FILES.split(' ').filter(Boolean);
+            const otherCoverageFiles = process.env.OTHER_COVERAGE_FILES.split(' ').filter(Boolean);
+
+            let viewModelCoverageDetails = '### ViewModel Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
+            let useCaseCoverageDetails = '### UseCase Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
+            let otherCoverageDetails = '### Other Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n';
+            let lowCoverageViewModels = '';
+            let lowCoverageUseCases = '';
+
+            // Function to get coverage details from a file
+            async function getCoverageDetails(filePath) {
+              if (fs.existsSync(filePath)) {
+                const report = fs.readFileSync(filePath, 'utf8');
+                const totalRegex = /<tfoot><tr><td>Total<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">([^<]+)<\/td><td class="bar">(\d+) of (\d+)<\/td><td class="ctr2">([^<]+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><td class="ctr1">(\d+)<\/td><td class="ctr2">(\d+)<\/td><\/tr><\/tfoot>/;
+                const matches = report.match(totalRegex);
+
+                if (matches) {
+                  const instructionsCoverage = matches[3];
+                  const branchesCoverage = matches[6];
+                  const complexityCoverage = ((matches[8] - matches[7]) / matches[8] * 100).toFixed(0);
+                  const linesCoverage = ((matches[10] - matches[9]) / matches[10] * 100).toFixed(0);
+                  const methodsCoverage = ((matches[12] - matches[11]) / matches[12] * 100).toFixed(0);
+
+                  return {
+                    instructionsCoverage: instructionsCoverage,
+                    branchesCoverage: branchesCoverage,
+                    complexityCoverage: `${complexityCoverage}%`,
+                    linesCoverage: `${linesCoverage}%`,
+                    methodsCoverage: `${methodsCoverage}%`
+                  };
+                } else {
+                  console.log(`No valid matches found in file: ${filePath}`);
+                }
+              }
+              return null;
+            }
+
+            // Main function to read and format coverage reports
+            (async () => {
+              for (const filePath of viewModelCoverageFiles) {
+                const className = filePath.split('/').pop().replace('.html', '');
+                console.log(`Processing ViewModel coverage for class: ${className}`);
+                const coverage = await getCoverageDetails(filePath);
+                if (coverage) {
+                  viewModelCoverageDetails += `| ${className} | ${coverage.instructionsCoverage} | ${coverage.branchesCoverage} | ${coverage.complexityCoverage} | ${coverage.linesCoverage} | ${coverage.methodsCoverage} |\n`;
+                  if (parseFloat(coverage.instructionsCoverage) < 90) {
+                    lowCoverageViewModels += `\n${className}`;
+                  }
+                }
+              }
+
+              for (const filePath of useCaseCoverageFiles) {
+                const className = filePath.split('/').pop().replace('.html', '');
+                console.log(`Processing UseCase coverage for class: ${className}`);
+                const coverage = await getCoverageDetails(filePath);
+                if (coverage) {
+                  useCaseCoverageDetails += `| ${className} | ${coverage.instructionsCoverage} | ${coverage.branchesCoverage} | ${coverage.complexityCoverage} | ${coverage.linesCoverage} | ${coverage.methodsCoverage} |\n`;
+                  if (parseFloat(coverage.instructionsCoverage) < 90) {
+                    lowCoverageUseCases += `\n${className}`;
+                  }
+                }
+              }
+
+              for (const filePath of otherCoverageFiles) {
+                const className = filePath.split('/').pop().replace('.html', '');
+                console.log(`Processing other coverage for class: ${className}`);
+                const coverage = await getCoverageDetails(filePath);
+                if (coverage) {
+                  otherCoverageDetails += `| ${className} | ${coverage.instructionsCoverage} | ${coverage.branchesCoverage} | ${coverage.complexityCoverage} | ${coverage.linesCoverage} | ${coverage.methodsCoverage} |\n`;
+                }
+              }
+
+              core.exportVariable('VIEWMODEL_COVERAGE_DETAILS', viewModelCoverageDetails);
+              core.exportVariable('USECASE_COVERAGE_DETAILS', useCaseCoverageDetails);
+              core.exportVariable('OTHER_COVERAGE_DETAILS', otherCoverageDetails);
+              core.exportVariable('LOW_COVERAGE_VIEW_MODELS', lowCoverageViewModels);
+              core.exportVariable('LOW_COVERAGE_USE_CASES', lowCoverageUseCases);
+            })();
+
+      - name: Post Coverage Report Comment
+        if: env.VIEWMODEL_COVERAGE_DETAILS != '' || env.USECASE_COVERAGE_DETAILS != '' || env.OTHER_COVERAGE_DETAILS != ''
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const viewModelCoverageDetails = process.env.VIEWMODEL_COVERAGE_DETAILS;
+            const useCaseCoverageDetails = process.env.USECASE_COVERAGE_DETAILS;
+            const otherCoverageDetails = process.env.OTHER_COVERAGE_DETAILS;
+            const lowCoverageViewModels = process.env.LOW_COVERAGE_VIEW_MODELS;
+            const lowCoverageUseCases = process.env.LOW_COVERAGE_USE_CASES;
+
+            let commentBody = '';
+
+            if (viewModelCoverageDetails.trim() !== '### ViewModel Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n') {
+              commentBody += viewModelCoverageDetails + '\n';
+            }
+
+            if (useCaseCoverageDetails.trim() !== '### UseCase Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n') {
+              commentBody += useCaseCoverageDetails + '\n';
+            }
+
+            if (otherCoverageDetails.trim() !== '### Other Test Coverage:\n\n| Class | Instructions | Branches | Complexity | Lines | Methods |\n|-------|--------------|----------|------------|-------|---------|\n') {
+              commentBody += otherCoverageDetails;
+            }
+
+            if (lowCoverageViewModels.trim()) {
+              commentBody += `**Error:** The following ViewModel classes have less than 90% test coverage:${lowCoverageViewModels}`;
+            }
+
+            if (lowCoverageUseCases.trim()) {
+              commentBody += `**Error:** The following UseCase classes have less than 90% test coverage:${lowCoverageUseCases}`;
+            }
+
+            if (commentBody) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: commentBody
+              });
+            }

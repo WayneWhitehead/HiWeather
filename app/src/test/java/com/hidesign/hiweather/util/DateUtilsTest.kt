@@ -37,16 +37,25 @@ class DateUtilsTest {
 
     @Test
     fun getDayOfWeekText_success() {
-        val timeInt = 1661651400L // 2023-08-05T00:00:00.000Z
         val timezone = "UTC"
+        val daysOfWeek = mapOf(
+            1661651400L to "Sunday",    // 2023-08-05T00:00:00.000Z
+            1661737800L to "Monday",    // 2023-08-06T00:00:00.000Z
+            1661824200L to "Tuesday",   // 2023-08-07T00:00:00.000Z
+            1661910600L to "Wednesday", // 2023-08-08T00:00:00.000Z
+            1661997000L to "Thursday",  // 2023-08-09T00:00:00.000Z
+            1662083400L to "Friday",    // 2023-08-10T00:00:00.000Z
+            1662169800L to "Saturday",  // 2023-08-11T00:00:00.000Z
+        )
 
-        val dayOfWeekText = DateUtils.getDayOfWeekText(DateUtils.DAILY_FORMAT, timeInt, timezone)
-
-        Assert.assertEquals("Sunday", dayOfWeekText)
+        for ((timeInt, expectedDay) in daysOfWeek) {
+            val dayOfWeekText = DateUtils.getDayOfWeekText(DateUtils.DAILY_FORMAT, timeInt, timezone)
+            Assert.assertEquals(expectedDay, dayOfWeekText)
+        }
     }
 
     @Test
-    fun getDayOfWeekText_invalidDay() {
+    fun getDayOfWeekText_invalidPattern() {
         val timeInt = 1661651400L // 2023-08-05T00:00:00.000Z
         val timezone = "UTC"
         val invalidPattern = "invalidPattern"

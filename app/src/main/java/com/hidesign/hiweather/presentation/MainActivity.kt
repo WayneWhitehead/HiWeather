@@ -87,11 +87,9 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.gson.Gson
 import com.hidesign.hiweather.BuildConfig
 import com.hidesign.hiweather.R
-import com.hidesign.hiweather.data.model.Components
-import com.hidesign.hiweather.data.model.Current
-import com.hidesign.hiweather.data.model.Daily
+import com.hidesign.hiweather.data.model.AirPollutionResponse.*
+import com.hidesign.hiweather.data.model.OneCallResponse.*
 import com.hidesign.hiweather.data.model.ErrorType
-import com.hidesign.hiweather.data.model.Hourly
 import com.hidesign.hiweather.data.model.OneCallResponse
 import com.hidesign.hiweather.presentation.MainActivity.Companion.ERROR_SCREEN
 import com.hidesign.hiweather.presentation.MainActivity.Companion.SETTINGS_DIALOG
